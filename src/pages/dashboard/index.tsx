@@ -197,6 +197,7 @@ export default function DashboardPage() {
 
   return (
     <div className="flex flex-col gap-4 p-4">
+      Hello World, welcome to the Dashboard!
       {/* Top summary KPI cards */}
       <div className="grid gap-4 md:grid-cols-4">
         <Card className="p-4">
