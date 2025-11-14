@@ -53,7 +53,7 @@ jobs:
           folder: dist
           bucket: ${{ secrets.S3_DEV_BUCKET }}/${{ github.ref_name }}
           bucket-region: ${{ secrets.S3_BUCKET_REGION }}
-          dist-id: ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }}
+          dist-id: ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID_MULTI }}
           invalidation: /
           delete-removed: ${{ github.ref_name }}/**
           no-cache: true
