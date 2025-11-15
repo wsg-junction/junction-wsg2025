@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import { Send } from 'lucide-react';
 import { toast } from 'sonner';
 import { productService } from '@/services/ProductService';
 import { generateGeminiRecipe } from '@/pages/gemini/gemini-functions';
@@ -34,7 +35,7 @@ function saveCachedMessages(ids: string[], msgs: Message[]) {
 }
 
 export default function SelectAlternativesDialogue({ selectedIds }: { selectedIds: string[] }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [cachedLoaded, setCachedLoaded] = useState(false);
@@ -49,6 +50,7 @@ export default function SelectAlternativesDialogue({ selectedIds }: { selectedId
     const cached = loadCachedMessages(selectedIds);
     if (cached && cached.length > 0) {
       setMessages(cached);
+      setCachedLoaded(true);
       return;
     }
 
@@ -60,10 +62,13 @@ export default function SelectAlternativesDialogue({ selectedIds }: { selectedId
         // seed a couple of assistant messages
         const seed: Message[] = [{ role: 'assistant', text: 'Looking at selected items...' }];
         setMessages(seed);
-        const recipe = await generateGeminiRecipe(names);
+        const langShort = i18n?.language?.split('-')[0];
+        const context = seed.map((m) => `${m.role}: ${m.text}`);
+        const recipe = await generateGeminiRecipe(names, context, langShort);
         const msgs: Message[] = [...seed, { role: 'assistant', text: recipe }];
         setMessages(msgs);
         saveCachedMessages(selectedIds, msgs);
+        setCachedLoaded(true);
       } catch {
         const errMsg: Message = { role: 'assistant', text: 'Error generating recipe.' };
         setMessages((prev) => {
@@ -75,7 +80,7 @@ export default function SelectAlternativesDialogue({ selectedIds }: { selectedId
         setLoading(false);
       }
     })();
-  }, [open, selectedIds]);
+  }, [open, selectedIds, i18n?.language]);
 
   function clearCacheForSelection(ids: string[]) {
     try {
@@ -177,19 +182,27 @@ export default function SelectAlternativesDialogue({ selectedIds }: { selectedId
               disabled={loading}
             />
             <Button
+              variant="ghost"
+              className="size-8 p-2"
+              aria-label={t('select_alternatives.dialog.send', 'Send')}
               disabled={loading}
               onClick={async () => {
                 if (!input.trim() || loading) return;
                 const userMsg: Message = { role: 'user', text: input.trim() };
-                setMessages((m) => [...m, userMsg]);
+                const currentMsgs = [...messages, userMsg];
+                setMessages(currentMsgs);
                 setInput('');
                 setLoading(true);
                 try {
-                  const reply = await generateGeminiRecipe(selectedIds.map((id) => productService.getProductById(id)?.name).filter(Boolean) as string[]);
+                  const names = selectedIds.map((id) => productService.getProductById(id)?.name).filter(Boolean) as string[];
+                  const langShort = i18n?.language?.split('-')[0];
+                  const context = currentMsgs.map((m) => `${m.role}: ${m.text}`);
+                  const reply = await generateGeminiRecipe(names, context, langShort);
                   const assistantMsg: Message = { role: 'assistant', text: reply };
                   setMessages((m) => {
                     const next = [...m, assistantMsg];
                     saveCachedMessages(selectedIds, next);
+                    setCachedLoaded(true);
                     return next;
                   });
                 } catch {
@@ -204,7 +217,7 @@ export default function SelectAlternativesDialogue({ selectedIds }: { selectedId
                 }
               }}
             >
-              {loading ? t('select_alternatives.dialog.loading_btn', 'Loading...') : t('select_alternatives.dialog.send', 'Send')}
+              <Send className="size-4" />
             </Button>
           </div>
         </div>
