@@ -182,8 +182,9 @@ export default function SelectAlternativesDialogue({ selectedIds }: { selectedId
               disabled={loading}
             />
             <Button
-              variant="ghost"
-              className="size-8 p-2"
+              variant={input.trim() && !loading ? 'default' : 'ghost'}
+              size="icon"
+              className="h-10 w-10 p-2 flex items-center justify-center"
               aria-label={t('select_alternatives.dialog.send', 'Send')}
               disabled={loading}
               onClick={async () => {
@@ -217,7 +218,7 @@ export default function SelectAlternativesDialogue({ selectedIds }: { selectedId
                 }
               }}
             >
-              <Send className="size-4" />
+              <Send className="size-6" />
             </Button>
           </div>
         </div>
