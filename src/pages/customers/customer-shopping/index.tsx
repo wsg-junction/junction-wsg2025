@@ -141,7 +141,7 @@ export default function CustomerShoppingPage() {
             <ShoppingCart />
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="-translate-x-3 w-full max-w-[90vw] min-w-auto md:max-w-[600px] min-w-[300px]">
+        <PopoverContent className="-translate-x-3 w-full max-w-[90vw] min-w-auto md:max-w-[600px] min-w-[300px] max-h-[80vh] overflow-y-auto">
           <b>Shopping Cart</b>
           <ShoppingCartList
             setCart={(cart) => {
