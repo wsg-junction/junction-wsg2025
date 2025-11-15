@@ -3,14 +3,19 @@ import App from "@/App.tsx";
 import DashboardPage from "@/pages/dashboard";
 import { ThemeProvider } from "@/components/core/theme-provider.tsx";
 import { NotFoundErrorPage } from "@/pages/error-pages/not-found.page.tsx";
-import AimoPickingDashboard from "./pages/aimo/picking-dashboard";
+import AimoPickingDashboardPage from "./pages/aimo/picking-dashboard";
 import AimoPickingDashboardConfirmPage from "./pages/aimo/picking-dashboard/confirm";
+import CustomerShoppingPage from '@/pages/customers/customer-shopping';
+import MapPage from './pages/dashboard/map';
+import AimoWarningsPage from "./pages/aimo/warnings";
 
 export const ROUTES = createBrowserRouter([
   {
-    path: "/",
+    path: '/',
     element: (
-      <ThemeProvider defaultTheme={"dark"} storageKey={"app-theme"}>
+      <ThemeProvider
+        defaultTheme={'system'}
+        storageKey={'app-theme'}>
         <App></App>
       </ThemeProvider>
     ),
@@ -20,36 +25,42 @@ export const ROUTES = createBrowserRouter([
         index: true,
         Component: DashboardPage,
       },
-    ],
-  },
-  {
-    path: "/aimo/dashboard",
-    element: (
-      <ThemeProvider defaultTheme={"dark"} storageKey={"app-theme"}>
-        <App></App>
-      </ThemeProvider>
-    ),
-    errorElement: <NotFoundErrorPage></NotFoundErrorPage>,
-    children: [
       {
-        index: true,
-        Component: AimoPickingDashboard,
+        path: 'customer',
+        children: [
+          {
+            index: true,
+            Component: CustomerShoppingPage,
+          },
+        ],
       },
-    ],
-  },
-  {
-    path: "/aimo/dashboard/confirm",
-    element: (
-      <ThemeProvider defaultTheme={"dark"} storageKey={"app-theme"}>
-        <App></App>
-      </ThemeProvider>
-    ),
-    errorElement: <NotFoundErrorPage></NotFoundErrorPage>,
-    children: [
       {
-        index: true,
-        Component: AimoPickingDashboardConfirmPage,
+        path: 'map',
+        element: <MapPage />,
       },
+      {
+        path: 'aimo',
+        children: [
+          {
+            path: 'dashboard',
+            children: [
+              {
+                index: true,
+                Component: AimoPickingDashboardPage,
+              },
+              {
+                path: 'confirm',
+                Component: AimoPickingDashboardConfirmPage,
+              }
+            ],
+          },
+          {
+            path: 'warnings',
+            index: true,
+            Component: AimoWarningsPage,
+          }
+        ]
+      }
     ],
   },
 ]);

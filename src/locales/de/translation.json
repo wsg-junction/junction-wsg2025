@@ -1,0 +1,16 @@
+{
+  "welcome": "Willkommen in unserer Anwendung!",
+  "all_products": "Alle Produkte",
+  "categories": "Kategorien",
+  "contact_us": "Kontakt",
+  "search": "Suche",
+  "add_to_cart": "In den Warenkorb",
+  "view_cart": "Warenkorb ansehen",
+  "checkout": "Zur Kasse",
+  "shop": "Einkaufen",
+  "about_us": "Über uns",
+  "terms_of_service": "Nutzungsbedingungen",
+  "privacy_policy": "Datenschutzerklärung",
+  "sign_out": "Abmelden",
+  "sign_in": "Anmelden"
+}

@@ -11,6 +11,7 @@ import {
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router";
+import { Header } from "../components/Header";
 
 export type PickEvent = {
 	quantity: number;
@@ -89,31 +90,35 @@ export default function AimoPickingDashboard() {
 	}
 
 	return (
-		<div className="flex flex-col gap-4">
-			<Table>
-				<TableHeader>
-					<TableRow>
-						<TableHead>Order ID</TableHead>
-						<TableHead>Product name</TableHead>
-						<TableHead>Ordered Quantity</TableHead>
-						<TableHead style={{ width: "45%" }}>Picked Quantity</TableHead>
-					</TableRow>
-				</TableHeader>
-				<TableBody>
-					{Object.values(orders).flatMap(order =>
-						Object.values(order.products).map(product =>
-							<PickingRow
-								order_id={order.id}
-								productName={product.name}
-								orderedQty={product.ordered_qty}
-								setPickEvent={(e) => onPickEvent(e, order.id, product.id)} />
-						)
-					)}
-				</TableBody>
+		<div className="p-8">
+			<Header />
+			<div className="flex flex-col gap-4">
+				<Table>
+					<TableHeader>
+						<TableRow>
+							<TableHead>Order ID</TableHead>
+							<TableHead>Product name</TableHead>
+							<TableHead>Ordered Quantity</TableHead>
+							<TableHead style={{ width: "45%" }}>Picked Quantity</TableHead>
+						</TableRow>
+					</TableHeader>
+					<TableBody>
+						{Object.values(orders).flatMap(order =>
+							Object.values(order.products).map(product =>
+								<PickingRow
+									order_id={order.id}
+									productName={product.name}
+									orderedQty={product.ordered_qty}
+									setPickEvent={(e) => onPickEvent(e, order.id, product.id)} />
+							)
+						)}
+					</TableBody>
 
-			</Table>
-			<Button className="w-32 self-end" disabled={isDisabled} onClick={() => navigate("/aimo/dashboard/confirm", { state: getOrdersToConfirm() })}>Submit</Button>
+				</Table>
+				<Button className="w-32 self-end" disabled={isDisabled} onClick={() => navigate("/aimo/dashboard/confirm", { state: getOrdersToConfirm() })}>Submit</Button>
+			</div>
 		</div>
+
 	);
 }
 
@@ -127,6 +132,7 @@ function PickingRow(
 		}
 ) {
 	const [error, setError] = useState<string | null>(null);
+	const [errorColor, setErrorColor] = useState<string>(null);
 	return (
 		<TableRow>
 			<TableCell>{order_id}</TableCell>
@@ -143,10 +149,12 @@ function PickingRow(
 								setError(
 									"Picked quantity is greater than ordered quantity.\nPlease select at most as many as ordered.",
 								);
+								setErrorColor("red");
 							} else if (value < orderedQty) {
 								setError(
 									"Picked quantity is less than ordered quantity",
 								);
+								setErrorColor("orange");
 							} else {
 								setError(null);
 							}
@@ -158,7 +166,7 @@ function PickingRow(
 						}}
 						onFocus={(event) => event.target.select()}
 					/>
-					<p style={{ color: "red" }}>
+					<p style={{ color: errorColor }}>
 						{error}
 					</p>
 				</div>
