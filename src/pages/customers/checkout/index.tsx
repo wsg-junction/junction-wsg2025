@@ -1,4 +1,4 @@
-import { Header } from '@/pages/customers/components/Header/Header.tsx';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert.tsx';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -7,28 +7,26 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb.tsx';
-import { useTranslation } from 'react-i18next';
-import { Progress } from '@/components/ui/progress.tsx';
-import { Input } from '@/components/ui/input.tsx';
 import { Button } from '@/components/ui/button.tsx';
-import { motion } from 'framer-motion';
-import { useEffect, useState } from 'react';
-import { ShoppingCartList, type CartItem } from '@/pages/customers/customer-shopping';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert.tsx';
-import { AlertTriangleIcon } from 'lucide-react';
-import { productService, type Product } from '@/services/ProductService';
-import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
-import { getToken } from 'firebase/messaging';
-import { messaging, vapidKey } from '@/lib/firebase';
+import { Input } from '@/components/ui/input.tsx';
+import { Label } from '@/components/ui/label';
+import { Progress } from '@/components/ui/progress.tsx';
 import { useProductName } from '@/hooks/use-product-name';
-import { useProductName } from '@/hooks/use-product-name.ts';
-import { useNavigate } from 'react-router';
-import { doc, setDoc } from 'firebase/firestore';
-import { firestore } from '@/lib/firebase';
-import { v4 } from "uuid";
+import { firestore, messaging, vapidKey } from '@/lib/firebase';
 import type { Item, Order } from '@/pages/aimo/picking-dashboard';
 import type { Warning } from '@/pages/aimo/warnings';
+import { Header } from '@/pages/customers/components/Header/Header.tsx';
+import { ShoppingCartList, type CartItem } from '@/pages/customers/customer-shopping';
+import { productService, type Product } from '@/services/ProductService';
+import { doc, setDoc } from 'firebase/firestore';
+import { getToken } from 'firebase/messaging';
+import { motion } from 'framer-motion';
+import { AlertTriangleIcon } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router';
+import { v4 } from "uuid";
 
 export const CheckoutPage = () => {
   const { t } = useTranslation();
@@ -82,40 +80,40 @@ export const CheckoutPage = () => {
   }
 
   const [pushNotificationToken, setPushNotificationToken] = useState<string | null>(() => {
-    const next = () => setStep((s) => {
-      if (s === maxSteps) {
-        const orderId = v4();
-        for (const item of cart) {
-          console.log(item);
-          for (const warning of item.warnings) {
-            warning.orderId = orderId;
-            warning.itemId = item.id;
-            const d = doc(firestore, "warnings", v4());
-            setDoc(d, warning);
-          }
-        }
-        const order = {
-          id: orderId,
-          products: cart.map(cartItemToItem),
-          pushNotificationToken: pushNotificationToken || undefined,
-        } satisfies Order;
-        const d = doc(firestore, "orders", orderId);
-        setDoc(d, order);
-        navigate('/customer');
-        return;
-      }
-      return Math.min(maxSteps, s + 1);
-    });
-    const prev = () => setStep((s) => Math.max(1, s - 1));
-
-    const progressValue = (step / maxSteps) * 100;
-
-    const [email, setEmail] = useState('');
-    const [telephone, setTelephone] = useState('');
-    const [name, setName] = useState('');
     const token = localStorage.getItem('pushNotificationToken');
     return token ? token : null;
   });
+  const next = () => setStep((s) => {
+    if (s === maxSteps) {
+      const orderId = v4();
+      for (const item of cart) {
+        console.log(item);
+        for (const warning of item.warnings) {
+          warning.orderId = orderId;
+          warning.itemId = item.id;
+          const d = doc(firestore, "warnings", v4());
+          setDoc(d, warning);
+        }
+      }
+      const order = {
+        id: orderId,
+        products: cart.map(cartItemToItem),
+        pushNotificationToken: pushNotificationToken || undefined,
+      } satisfies Order;
+      const d = doc(firestore, "orders", orderId);
+      setDoc(d, order);
+      navigate('/customer');
+      return;
+    }
+    return Math.min(maxSteps, s + 1);
+  });
+  const prev = () => setStep((s) => Math.max(1, s - 1));
+
+  const progressValue = (step / maxSteps) * 100;
+
+  const [email, setEmail] = useState('');
+  const [telephone, setTelephone] = useState('');
+  const [name, setName] = useState('');
 
 
   // --- fallback state: map from cartItemId -> fallbackProductId | null
@@ -167,10 +165,10 @@ export const CheckoutPage = () => {
 
     const existingItem = cart.find((item) => item.id === product.id);
     if (existingItem) {
-      setCart(cart.map((item) => (item.id === product.id ? { ...product, quantity } : item)));
+      setCart(cart.map((item) => (item.id === product.id ? { ...existingItem, quantity } : item)));
       return;
     }
-    setCart([...cart, { ...product, quantity }]);
+    setCart([...cart, { ...product, quantity, warnings: [] }]);
   };
 
   // set a fallback for a cart item (pass fallbackId as string or null)
