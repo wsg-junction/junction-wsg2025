@@ -3,6 +3,7 @@ import { useDebouncedCallback } from '@tanstack/react-pacer';
 import { Map, Marker, useMapsLibrary, type MapCameraChangedEvent } from '@vis.gl/react-google-maps';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Header } from '../customers/components/Header/Header';
 
 export default function MapPage() {
   const { t } = useTranslation();
@@ -45,52 +46,56 @@ export default function MapPage() {
   useEffect(() => loadPlaces(bounds, geometryLib, placesLib), [geometryLib, placesLib]);
 
   return (
-    <div className="flex flex-row">
-      {places && (
-        <div className="w-1/3 h-screen overflow-y-auto border-r">
-          <h2 className="text-xl font-bold p-4">{t('dashboard.placesFound', { count: places.length })}</h2>
-          <ul>
-            {places.map((place) => (
-              <li
-                key={place.id}
-                className="p-4 border-b">
-                <h3 className="text-lg font-semibold">{place.displayName}</h3>
-                <p>{place.formattedAddress}</p>
-                {place.googleMapsURI && (
-                  <a
-                    href={place.googleMapsURI}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-blue-500">
-                    View on Google Maps
-                  </a>
-                )}
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-      <Map
-        defaultBounds={bounds}
-        onCameraChanged={(ev: MapCameraChangedEvent) => {
-          console.log('camera changed:', ev.detail);
-          setBounds(ev.detail.bounds);
-          loadPlaces(ev.detail.bounds, geometryLib, placesLib);
-        }}
-        styles={[
-          {
-            featureType: 'poi',
-            stylers: [{ visibility: 'off' }],
-          },
-        ]}>
-        {places.map((place) => (
-          <Marker
-            key={place.id}
-            position={place.location!}
-            title={place.displayName}
-          />
-        ))}
-      </Map>
+    <div>
+      <Header></Header>
+
+      <div className="flex flex-row items-stretch">
+        {places && (
+          <div className="w-1/3 h-screen overflow-y-auto border-r">
+            <h2 className="text-xl font-bold p-4">{t('dashboard.placesFound', { count: places.length })}</h2>
+            <ul>
+              {places.map((place) => (
+                <li
+                  key={place.id}
+                  className="p-4 border-b">
+                  <h3 className="text-lg font-semibold">{place.displayName}</h3>
+                  <p>{place.formattedAddress}</p>
+                  {place.googleMapsURI && (
+                    <a
+                      href={place.googleMapsURI}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-500">
+                      View on Google Maps
+                    </a>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+        <Map
+          className="flex-1"
+          defaultBounds={bounds}
+          onCameraChanged={(ev: MapCameraChangedEvent) => {
+            setBounds(ev.detail.bounds);
+            loadPlaces(ev.detail.bounds, geometryLib, placesLib);
+          }}
+          styles={[
+            {
+              featureType: 'poi',
+              stylers: [{ visibility: 'off' }],
+            },
+          ]}>
+          {places.map((place) => (
+            <Marker
+              key={place.id}
+              position={place.location!}
+              title={place.displayName}
+            />
+          ))}
+        </Map>
+      </div>
     </div>
   );
 }
