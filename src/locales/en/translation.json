@@ -14,6 +14,7 @@
   "sign_out": "Sign Out",
   "sign_in": "Sign In",
   "change_language": "Change Language",
+<<<<<<< HEAD
   "order_id": "Order-ID",
   "product_name": "Product Name",
   "ordered_quantity": "Ordered Quantity",
@@ -23,3 +24,12 @@
   "error_quantity_greater": "The picked quantity is greater than the ordered quantity. Please select at most as many as ordered.",
   "error_quantity_smaller": "The picked quantity is smaller than the ordered quantity."
 }
+=======
+  "select_alternatives": {
+    "title": "Select Alternatives",
+    "alternative_products": "Alternative Products",
+    "alternative_recipes": "Alternative Recipes",
+    "supermarket": "Look for Supermarket"
+  }
+}
+>>>>>>> origin/main
