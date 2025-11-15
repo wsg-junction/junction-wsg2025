@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@genkit-ai/googleai": "^1.23.0",
+    "@google/genai": "^1.29.1",
     "@hookform/resolvers": "^5.2.2",
     "@radix-ui/react-accordion": "^1.2.12",
     "@radix-ui/react-alert-dialog": "^1.1.15",
@@ -48,6 +49,7 @@
     "date-fns": "^4.1.0",
     "embla-carousel-react": "^8.6.0",
     "firebase": "^12.6.0",
+    "framer-motion": "^12.23.24",
     "genkit": "^1.23.0",
     "i18next": "^25.6.2",
     "i18next-browser-languagedetector": "^8.2.0",

@@ -10,6 +10,7 @@ import { CheckoutPage } from '@/pages/customers/checkout';
 import SelectAlternativesPage from './pages/customers/customer-shopping/select-alternatives';
 import AimoWarningsPage from "./pages/aimo/warnings";
 import AimoHomePage from "./pages/aimo";
+import GeminiPage from "./pages/gemini/gemini";
 
 export const ROUTES = createBrowserRouter([
   {
@@ -26,6 +27,10 @@ export const ROUTES = createBrowserRouter([
       {
         index: true,
         Component: DashboardPage,
+      },
+      {
+        path: "gemini",
+        Component: GeminiPage,
       },
       {
         path: 'customer',

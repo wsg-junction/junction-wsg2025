@@ -2,6 +2,7 @@ import { APIProvider } from '@vis.gl/react-google-maps';
 import { Outlet } from 'react-router';
 
 export default function App() {
+
     return (
         <APIProvider apiKey={'AIzaSyAfKvZy0XgyZgdCXnFbQO-3pX_gpWdbGu4'}>
             <Outlet />
