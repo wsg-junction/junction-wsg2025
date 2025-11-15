@@ -1,10 +1,10 @@
 import { VapiClient } from '@vapi-ai/server-sdk';
+import { initializeApp } from 'firebase-admin/app';
 import { getMessaging } from 'firebase-admin/messaging';
 import { setGlobalOptions } from 'firebase-functions';
 import { onRequest } from 'firebase-functions/https';
-import { z } from 'zod';
 import { defineString } from 'firebase-functions/params';
-import { initializeApp } from 'firebase-admin/app';
+import { z } from 'zod';
 
 setGlobalOptions({ maxInstances: 10 });
 
@@ -22,9 +22,16 @@ const callSchema = z.object({
   mode: z.enum(['inbound', 'outbound']),
 });
 
+const voices = {
+  en: 'scOwDtmlUjD3prqpp97I',
+  fi: 'F9w7aaEjfT09qV89OdY8',
+  sv: '1k39YpzqXZn52BgyLyGO',
+  de: 'fzqS9sNPYJhLlhsfDm0l',
+} as const;
+
 const languageName = {
   en: 'english',
-  fi: 'finish',
+  fi: 'finnish',
   sv: 'swedish',
   de: 'german',
 } as const;
@@ -41,6 +48,11 @@ export const helloWorld = onRequest(async (req, res) => {
       customer: { number: data.phone_number },
       phoneNumberId: '915f242b-9027-4389-9a9b-9866b5e9ca2b',
       assistantOverrides: {
+        voice: {
+          provider: '11labs',
+          model: 'eleven_flash_v2_5',
+          voiceId: voices[data.language],
+        },
         transcriber: {
           provider: '11labs',
           language: data.language,
