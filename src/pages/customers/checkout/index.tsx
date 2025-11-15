@@ -212,7 +212,7 @@ export const CheckoutPage = () => {
                       className="p-3 border rounded">
                       <div className="flex justify-between items-center">
                         <div>
-                          <div className="font-medium">{item.name}</div>
+                          <div className="font-medium">{getTranslatedProductName(item)}</div>
                           <div className="text-sm text-muted-foreground">Qty: {item.quantity}</div>
                         </div>
                         <div className="flex items-center gap-2">
@@ -276,7 +276,7 @@ export const CheckoutPage = () => {
                         <div
                           key={item.id}
                           className="text-sm">
-                          {item.name}: {fb ? getProductName(fb) : 'No fallback selected'}
+                          {getTranslatedProductName(item)}: {fb ? getProductName(fb) : 'No fallback selected'}
                         </div>
                       );
                     })}

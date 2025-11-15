@@ -16,13 +16,14 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select.tsx';
 import { useNavigate } from 'react-router';
 import { productService, type Product } from '@/services/ProductService';
+import { useProductName } from '@/hooks/use-product-name.ts';
 
 export default function CustomerShoppingPage() {
   const { t } = useTranslation();
 
   const [page, setPage] = useState(0);
   const [products, setProducts] = useState<Product[]>([]);
-  const [_, setFetchedPages] = useState([]);
+  const [, setFetchedPages] = useState([]);
   const [isLoading, setIsLoading] = useState(false); // for initial load and page load
   const [totalProducts, setTotalProducts] = useState(0);
 
@@ -159,6 +160,7 @@ export default function CustomerShoppingPage() {
 export type CartItem = Product & {
   quantity: number;
 };
+
 interface ShoppingCartProps {
   cart: CartItem[];
   onUpdateItem: (product: Product, quantity: number) => void;
@@ -174,14 +176,15 @@ export const ShoppingCartList = ({
   onUpdateItem,
   setCart,
 }: ShoppingCartProps) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const getTranslatedProductName = useProductName(i18n);
   const navigate = useNavigate();
   const updateQuantity = (product: Product, quantity: number) => {
     onUpdateItem(product, quantity);
   };
   const totalPrice = (item: CartItem) => {
     const { price } = item;
-    return price.value ? price.value * item.quantity : 0;
+    return price ? price * item.quantity : 0;
   };
 
   console.log(cart);
@@ -189,15 +192,17 @@ export const ShoppingCartList = ({
   return (
     <div className={'space-y-4 mt-2'}>
       {cart.map((item, index) => {
-        const { name, price } = item;
-        const formattedPrice = price.value ? price.value.toFixed(2) : '0.00';
+        const { price } = item;
+        const formattedPrice = price ? price.toFixed(2) : '0.00';
 
         return (
           <div
             key={index}
             className="flex items-center justify-between border-t pt-2 gap-1  ">
             <div className="flex-1">
-              <p className="font-medium line-clamp-2 overflow-hidden text-ellipsis me-2">{name}</p>
+              <p className="font-medium line-clamp-2 overflow-hidden text-ellipsis me-2">
+                {getTranslatedProductName(item)}
+              </p>
               <p className="text-sm text-muted-foreground">
                 {formattedPrice}€<span className="text-sm text-muted-foreground font-light"> / pcs</span>
               </p>

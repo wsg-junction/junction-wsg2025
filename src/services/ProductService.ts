@@ -69,8 +69,9 @@ export class ProductService {
           resolve(
             products
               .filter((product) => {
-                const lowerName = product.name.toLocaleLowerCase();
-                return parts.every((part) => lowerName.includes(part));
+                return parts.every((part) =>
+                  product.names?.some((name) => name.value.toLocaleLowerCase().includes(part)),
+                );
               })
               .slice(0, 50),
           ),
