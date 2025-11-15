@@ -101,9 +101,7 @@ export default function AimoPickingDashboard() {
                 <PickingRow
                   order={order}
                   item={item}
-                  orderedQty={item.orderedQuantity}
                   setPickEvent={(e) => onPickEvent(e, order.id, item.id)}
-                  defaultPickedQuantity={item.pickEvent?.quantity}
                 />
               )),
             )}
@@ -123,27 +121,25 @@ export default function AimoPickingDashboard() {
 function PickingRow({
   order,
   item,
-  orderedQty,
   setPickEvent,
-  defaultPickedQuantity,
 }: {
   order: Order;
   item: Item;
-  orderedQty: number;
   setPickEvent: (event: PickEvent | null) => void;
-  defaultPickedQuantity?: number;
 }) {
   const getTranslatedProductName = useProductName();
 
-  const [error, setError] = useState<string | null>(calculateError(defaultPickedQuantity ?? orderedQty));
+  const [error, setError] = useState<string | null>(
+    calculateError(item.pickEvent?.quantity ?? item.orderedQuantity),
+  );
   const [errorColor, setErrorColor] = useState<string | undefined>(
-    calculateErrorColor(defaultPickedQuantity ?? orderedQty),
+    calculateErrorColor(item.pickEvent?.quantity ?? item.orderedQuantity),
   );
 
   function calculateError(value: number): string | null {
-    if (value > orderedQty) {
+    if (value > item.orderedQuantity) {
       return t('error_quantity_greater');
-    } else if (value < orderedQty) {
+    } else if (value < item.orderedQuantity) {
       return t('error_quantity_smaller');
     } else {
       return null;
@@ -151,9 +147,9 @@ function PickingRow({
   }
 
   function calculateErrorColor(value: number): string | undefined {
-    if (value > orderedQty) {
+    if (value > item.orderedQuantity) {
       return 'red';
-    } else if (value < orderedQty) {
+    } else if (value < item.orderedQuantity) {
       return 'orange';
     } else {
       return undefined;
@@ -164,13 +160,14 @@ function PickingRow({
     <TableRow>
       {item.id === order.products[0].id && <TableCell rowSpan={order.products.length}>{order.id}</TableCell>}
       <TableCell>{getTranslatedProductName(item)}</TableCell>
-      <TableCell>{orderedQty}</TableCell>
+      <TableCell>{item.orderedQuantity}</TableCell>
       <TableCell>
         <div className="flex flex-col gap-2">
           <Input
             type="number"
-            defaultValue={defaultPickedQuantity}
+            defaultValue={item.pickEvent?.quantity}
             placeholder={t('enter_quantity')}
+            max={item.orderedQuantity}
             onChange={(event) => {
               const value = event.target.valueAsNumber;
               setError(calculateError(value));
