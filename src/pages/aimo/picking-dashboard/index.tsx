@@ -8,7 +8,6 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
-import type { N } from "node_modules/react-router/dist/development/router-DIAPGK5f.d.mts";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router";
@@ -68,6 +67,7 @@ export default function AimoPickingDashboard() {
 	}
 
 	const isDisabled = useMemo(() => {
+		if (getOrdersToConfirm().length === 0) return true;
 		for (const order of Object.values(orders)) {
 			for (const product of Object.values(order.products)) {
 				if (product.pick_event == null) {
@@ -96,7 +96,7 @@ export default function AimoPickingDashboard() {
 						<TableHead>Order ID</TableHead>
 						<TableHead>Product name</TableHead>
 						<TableHead>Ordered Quantity</TableHead>
-						<TableHead style={{ width: "33%" }}>Picked Quantity</TableHead>
+						<TableHead style={{ width: "45%" }}>Picked Quantity</TableHead>
 					</TableRow>
 				</TableHeader>
 				<TableBody>
@@ -141,7 +141,7 @@ function PickingRow(
 							const value = event.target.valueAsNumber;
 							if (value > orderedQty) {
 								setError(
-									"Picked quantity is greater than ordered quantity",
+									"Picked quantity is greater than ordered quantity.\nPlease select at most as many as ordered.",
 								);
 							} else if (value < orderedQty) {
 								setError(
