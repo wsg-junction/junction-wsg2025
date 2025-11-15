@@ -1,8 +1,9 @@
-import { Card, CardContent, CardDescription, CardTitle } from '@/components/ui/card.tsx';
+import { Card, CardContent, CardTitle } from '@/components/ui/card.tsx';
 import { ShoppingCart, StarIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button.tsx';
-import { useTranslation } from 'react-i18next';
 import { productService } from '@/services/ProductService';
+import { useTranslation } from 'react-i18next';
+import { useProductName } from '@/hooks/use-product-name.ts';
 
 interface ProductCardProps {
     id: string;
@@ -18,30 +19,32 @@ export const ProductCard = ({
     currentQuantity,
 }: ProductCardProps) => {
     const { t } = useTranslation();
+  const getTranslatedProductName = useProductName(i18n);
 
     const product = productService.getProductById(id)!;
     return (
         <Card className={'p-0'}>
-            <CardContent className="p-3">
-                <div className="aspect-square rounded-md mb-2 flex justify-center items-center">
-                    <div className={'w-full h-full  p-10'}>
-                        {product.imageUrl ? (
-                            <img
-                                src={product.imageUrl}
-                                className={'w-full h-full object-contain'}
-                            />
-                        ) : (
-                            t('no_image')
-                        )}
-                    </div>
-                </div>
-                <CardTitle
-                    className="text-sm mb-1 line-clamp-2 h-10"
-                    style={{
-                        textOverflow: 'ellipsis',
-                    }}>
-                    {product.name}
-                </CardTitle>
+          <CardContent className="p-3">
+            <div className="aspect-square rounded-md mb-2 flex justify-center items-center">
+              <div className={'w-full h-full  p-10'}>
+                {product.image ? (
+                  <img
+                    src={product.image}
+                    alt={getTranslatedProductName(product) || product.names?.[0]?.value || 'Product image'}
+                    className={'w-full h-full object-contain'}
+                  />
+                ) : (
+                  'No Image'
+                )}
+              </div>
+            </div>
+            <CardTitle
+              className="text-sm mb-1 line-clamp-2 h-10"
+              style={{
+                textOverflow: 'ellipsis',
+              }}>
+              {getTranslatedProductName(product)}
+            </CardTitle>
                 <div className="flex items-center space-x-1 mb-2 ">
                     <div className="flex">
                         {Array(5)
@@ -81,35 +84,35 @@ export const ProductCard = ({
                         </Button>
                     )}
 
-                    {currentQuantity && currentQuantity > 0 ? (
-                        <div className="flex items-center space-x-2 gap-2">
-                            <Button
-                                onClick={() => {
-                                    if (onUpdateCartQuantity) {
-                                        onUpdateCartQuantity(currentQuantity - 1);
-                                    }
-                                }}
-                                variant="outline"
-                                size={'icon'}>
-                                -
-                            </Button>
-                            <span>{currentQuantity}</span>
-                            <Button
-                                onClick={() => {
-                                    if (onUpdateCartQuantity) {
-                                        onUpdateCartQuantity(currentQuantity + 1);
-                                    }
-                                }}
-                                variant="outline"
-                                size={'icon'}>
-                                +
-                            </Button>
-                        </div>
-                    ) : (
-                        ''
-                    )}
-                </div>
-            </CardContent>
-        </Card>
-    );
+          {currentQuantity && currentQuantity > 0 ? (
+            <div className="flex items-center space-x-2 gap-2">
+              <Button
+                onClick={() => {
+                  if (onUpdateCartQuantity) {
+                    onUpdateCartQuantity(currentQuantity - 1);
+                  }
+                }}
+                variant="outline"
+                size={'icon'}>
+                -
+              </Button>
+              <span>{currentQuantity}</span>
+              <Button
+                onClick={() => {
+                  if (onUpdateCartQuantity) {
+                    onUpdateCartQuantity(currentQuantity + 1);
+                  }
+                }}
+                variant="outline"
+                size={'icon'}>
+                +
+              </Button>
+            </div>
+          ) : (
+            ''
+          )}
+        </div>
+      </CardContent>
+    </Card>
+  );
 };

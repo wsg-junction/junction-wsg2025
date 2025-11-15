@@ -17,9 +17,12 @@ import { ShoppingCartList, type CartItem } from '@/pages/customers/customer-shop
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert.tsx';
 import { AlertTriangleIcon } from 'lucide-react';
 import { productService, type Product } from '@/services/ProductService';
+import { useProductName } from '@/hooks/use-product-name.ts';
 
 export const CheckoutPage = () => {
   const { t } = useTranslation();
+  const { i18n } = useTranslation();
+  const getTranslatedProductName = useProductName(i18n);
   const [step, setStep] = useState(1);
   // increase steps: 1=Cart, 2=Contact, 3=Fallbacks, 4=Review
   const maxSteps = 4;
@@ -113,7 +116,7 @@ export const CheckoutPage = () => {
   const getProductName = (id: string | null | undefined) => {
     if (!id) return null;
     const p = products.find((x) => x.id === id);
-    return p ? p.name || p.title || id : id;
+    return getTranslatedProductName(p);
   };
 
   return (
@@ -224,7 +227,7 @@ export const CheckoutPage = () => {
                                 <option
                                   key={p.id}
                                   value={p.id}>
-                                  {p.name || p.title || p.id}
+                                  {getTranslatedProductName(p)}
                                 </option>
                               ))}
                           </select>

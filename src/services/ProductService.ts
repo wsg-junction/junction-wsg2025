@@ -1,7 +1,29 @@
 import productsData from '@/products.json'; // make sure to have products.json in src/data/
 
 export interface Product {
-  [key: string]: any;
+  categories: ProductCategory[];
+  ean: string;
+  price: number;
+  vendor: Vendor;
+  id: string;
+  names: TranslatedName[];
+  priceString?: string;
+  image?: string;
+}
+
+export interface Vendor {
+  code: string;
+  name: string;
+}
+
+export interface TranslatedName {
+  value: string;
+  language: string;
+}
+
+export interface ProductCategory {
+  code: string;
+  name: string;
 }
 export interface PageResult<T> {
   data: T[];
@@ -10,7 +32,7 @@ export interface PageResult<T> {
   pageSize: number;
 }
 
-const products = productsData['products'] as Product[];
+const products = productsData as Product[];
 export class ProductService {
   async getProducts(page = -1): Promise<PageResult<Product>> {
     let data: Product[] = [];
@@ -61,13 +83,10 @@ export class ProductService {
     const product = products.find((p) => p.id === id);
     if (!product) return undefined;
 
-    const imageName = product.images?.find((t) => t.format === 'product')?.savedImage ?? null;
-    const priceString = product.price.value ? product.price.value.toFixed(2) : '0.00';
+    const priceString = product.price ? product.price.toFixed(2) : '0.00';
     return {
       ...product,
-      imageUrl: imageName ? `/product_images/${imageName}` : null,
-      // eslint-disable-next-line no-irregular-whitespace
-      priceString: `${priceString} €`,
+      priceString: `${priceString} €`,
     };
   }
 }

@@ -19,7 +19,6 @@ import { productService, type Product } from '@/services/ProductService';
 
 export default function CustomerShoppingPage() {
   const { t } = useTranslation();
-  const navigate = useNavigate();
 
   const [page, setPage] = useState(0);
   const [products, setProducts] = useState<Product[]>([]);
