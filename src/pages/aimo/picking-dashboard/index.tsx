@@ -32,7 +32,6 @@ export type Order = {
 
 export default function AimoPickingDashboard() {
   const { t, i18n } = useTranslation();
-  const getTranslatedProductName = useProductName(i18n);
 
   const orders = useQuery<Order>(useMemo(() => collection(firestore, 'orders'), []));
   console.log(orders);
@@ -99,13 +98,13 @@ export default function AimoPickingDashboard() {
           </TableHeader>
           <TableBody>
             {Object.values(orders).flatMap((order) =>
-              Object.values(order.products).map((product) => (
+              Object.values(order.products).map((item) => (
                 <PickingRow
-                  orderId={order.id}
-                  productName={getTranslatedProductName(product)}
-                  orderedQty={product.orderedQuantity}
-                  setPickEvent={(e) => onPickEvent(e, order.id, product.id)}
-                  defaultPickedQuantity={product.pickEvent?.quantity}
+                  order={order}
+                  item={item}
+                  orderedQty={item.orderedQuantity}
+                  setPickEvent={(e) => onPickEvent(e, order.id, item.id)}
+                  defaultPickedQuantity={item.pickEvent?.quantity}
                 />
               )),
             )}
@@ -123,18 +122,20 @@ export default function AimoPickingDashboard() {
 }
 
 function PickingRow({
-  orderId,
-  productName,
+  order,
+  item,
   orderedQty,
   setPickEvent,
   defaultPickedQuantity,
 }: {
-  orderId: string;
-  productName: string;
+  order: Order;
+  item: Item;
   orderedQty: number;
   setPickEvent: (event: PickEvent) => void;
   defaultPickedQuantity?: number;
 }) {
+  const getTranslatedProductName = useProductName();
+
   const [error, setError] = useState<string | null>(calculateError(defaultPickedQuantity ?? orderedQty));
   const [errorColor, setErrorColor] = useState<string | undefined>(
     calculateErrorColor(defaultPickedQuantity ?? orderedQty),
@@ -162,8 +163,8 @@ function PickingRow({
 
   return (
     <TableRow>
-      <TableCell>{orderId}</TableCell>
-      <TableCell>{productName}</TableCell>
+      {item.id === order.products[0].id && <TableCell rowSpan={order.products.length}>{order.id}</TableCell>}
+      <TableCell>{getTranslatedProductName(item)}</TableCell>
       <TableCell>{orderedQty}</TableCell>
       <TableCell>
         <div className="flex flex-col gap-2">
