@@ -35,13 +35,6 @@ const callSchema = z.object({
     mode: z.enum(['inbound', 'outbound']),
 });
 
-const voices = {
-    en: 'en-US-JennyNeural',
-    fi: 'fi-FI-HarriNeural',
-    sv: 'sv-SE-SofieNeural',
-    de: 'de-DE-KatjaNeural',
-} as const;
-
 const languageName = {
     en: 'english',
     fi: 'finish',
@@ -59,10 +52,13 @@ export const helloWorld = onCall((input) => {
                     : '5b2b2220-7f9a-4e57-a03e-cc7d1826a392',
             customer: { number: data.phone_number },
             assistantOverrides: {
-                voice: { provider: 'azure', voiceId: voices[data.language] },
+                voice: {
+                    provider: '11labs',
+                    model: 'eleven_turbo_v2_5',
+                    voiceId: 'Alice',
+                },
                 transcriber: {
-                    provider: 'deepgram',
-                    model: 'nova-2', // or "nova-3"
+                    provider: '11labs',
                     language: data.language,
                 },
                 variableValues: {
