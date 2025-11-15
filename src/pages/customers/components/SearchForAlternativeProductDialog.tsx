@@ -40,10 +40,10 @@ export function SearchForAlternativeProductDialog() {
 
     const existingItem = cart.find((item) => item.id === product.id);
     if (existingItem) {
-      setCart(cart.map((item) => (item.id === product.id ? { ...product, quantity } : item)));
+      setCart(cart.map((item) => (item.id === product.id ? { ...item, quantity } : item)));
       return;
     }
-    setCart([...cart, { ...product, quantity }]);
+    setCart([...cart, { ...product, quantity, warnings: [] }]);
   };
   const getQuantityInCart = (cart: CartItem[], product: Product) => {
     const item = cart.find((item) => item.id === product.id);
