@@ -4,6 +4,7 @@ import DashboardPage from '@/pages/dashboard';
 import { ThemeProvider } from '@/components/core/theme-provider.tsx';
 import { NotFoundErrorPage } from '@/pages/error-pages/not-found.page.tsx';
 import CustomerShoppingPage from '@/pages/customers/customer-shopping';
+import { CheckoutPage } from '@/pages/customers/checkout';
 
 export const ROUTES = createBrowserRouter([
     {
@@ -27,6 +28,10 @@ export const ROUTES = createBrowserRouter([
                     {
                         index: true,
                         Component: CustomerShoppingPage,
+                    },
+                    {
+                        path: 'checkout',
+                        Component: CheckoutPage,
                     },
                 ],
             },
