@@ -28,6 +28,11 @@
   "error_quantity_greater": "The picked quantity is greater than the ordered quantity. Please select at most as many as ordered.",
   "error_quantity_smaller": "The picked quantity is smaller than the ordered quantity.",
   "no_image": "No Image",
+  "aimo_picking_dashboard": {
+    "picking_row": {
+      "quantity_custom": "Custom"
+    }
+  },
   "select_alternatives": {
     "title": "Select Alternatives",
     "alternative_products": "Alternative Products",

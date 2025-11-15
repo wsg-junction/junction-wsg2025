@@ -6,7 +6,7 @@ import { TriangleAlertIcon, WarehouseIcon } from 'lucide-react';
 
 export default function AimoHomePage() {
   return (
-    <div>
+    <>
       <Header />
       <div className="flex flex-col md:flex-row gap-4 justify-center items-center md:items-stretch p-4">
         <Card className="w-xs">
@@ -44,6 +44,6 @@ export default function AimoHomePage() {
           </CardFooter>
         </Card>
       </div>
-    </div>
+    </>
   );
 }
