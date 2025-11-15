@@ -1,13 +1,10 @@
-import { use } from 'react';
-import { useTranslation } from 'react-i18next';
+import { Button } from '@/components/ui/button';
+import { useProductName } from '@/hooks/use-product-name';
 import { useLocation, useNavigate } from 'react-router';
 import type { Order } from '.';
-import { Button } from '@/components/ui/button';
 import { Header } from '../components/Header';
-import { useProductName } from '@/hooks/use-product-name';
 
 export default function AimoPickingDashboardConfirmPage() {
-  const { t } = useTranslation();
   const { state } = useLocation();
   const ordersToConfirm = state as Record<number, Order>;
   const navigate = useNavigate();
