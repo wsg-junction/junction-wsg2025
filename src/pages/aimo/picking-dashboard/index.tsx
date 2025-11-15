@@ -15,6 +15,7 @@ import { Header } from "../components/Header";
 import { t } from "i18next";
 import { firestore, useQuery } from "@/lib/firebase";
 import { collection, doc, updateDoc } from "@firebase/firestore";
+import type { Warning } from "../warnings";
 
 export type PickEvent = {
 	quantity: number;
@@ -26,6 +27,7 @@ export type Item = {
 	name: string;
 	orderedQuantity: number;
 	pickEvent: PickEvent | null;
+	warnings: Warning[]
 };
 
 export type Order = {
