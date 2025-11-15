@@ -1,3 +1,18 @@
 {
-  "welcome": "Welcome to our application!"
+  "welcome": "Welcome to our application!",
+  "all_products": "All Products",
+  "categories": "Categories",
+  "contact_us": "Contact Us",
+  "search": "Search",
+  "add_to_cart": "Add to Cart",
+  "view_cart": "View Cart",
+  "checkout": "Checkout",
+  "shop": "Shop",
+  "about_us": "About Us",
+  "terms_of_service": "Terms of Service",
+  "privacy_policy": "Privacy Policy",
+  "sign_out": "Sign Out",
+  "sign_in": "Sign In",
+  "change_language": "Change Language"
+
 }
