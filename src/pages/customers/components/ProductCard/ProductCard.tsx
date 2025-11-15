@@ -1,6 +1,7 @@
 import { Card, CardContent, CardDescription, CardTitle } from '@/components/ui/card.tsx';
 import { ShoppingCart, StarIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button.tsx';
+import { useTranslation } from 'react-i18next';
 import { productService } from '@/services/ProductService';
 
 interface ProductCardProps {
@@ -16,6 +17,8 @@ export const ProductCard = ({
     onUpdateCartQuantity,
     currentQuantity,
 }: ProductCardProps) => {
+    const { t } = useTranslation();
+
     const product = productService.getProductById(id)!;
     return (
         <Card className={'p-0'}>
@@ -28,7 +31,7 @@ export const ProductCard = ({
                                 className={'w-full h-full object-contain'}
                             />
                         ) : (
-                            'No Image'
+                            t('no_image')
                         )}
                     </div>
                 </div>

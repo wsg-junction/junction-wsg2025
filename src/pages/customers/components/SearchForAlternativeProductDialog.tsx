@@ -1,19 +1,15 @@
-import { InputGroup, InputGroupInput, InputGroupAddon } from '@/components/ui/input-group';
+import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from '@/components/ui/empty';
+import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group';
+import { Spinner } from '@/components/ui/spinner';
 import { type Product, productService } from '@/services/ProductService';
 import { useDebouncedCallback } from '@tanstack/react-pacer';
 import { t } from 'i18next';
 import { Search } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { ProductCard } from './ProductCard/ProductCard';
 import type { CartItem } from '../customer-shopping';
-import { Empty, EmptyHeader, EmptyTitle, EmptyDescription } from '@/components/ui/empty';
-import { Spinner } from '@/components/ui/spinner';
+import { ProductCard } from './ProductCard/ProductCard';
 
-interface Props {
-  originalCartItem: CartItem;
-}
-
-export function SearchForAlternativeProductDialog({ originalCartItem }: Props) {
+export function SearchForAlternativeProductDialog() {
   const [isLoading, setIsLoading] = useState(true);
   const [products, setProducts] = useState<Product[]>([]);
   const search = useDebouncedCallback(
