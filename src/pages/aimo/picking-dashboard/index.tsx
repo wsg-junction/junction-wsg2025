@@ -8,70 +8,86 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
-import type {
-	DateTimezoneSetter,
-	ValueSetter,
-} from "node_modules/date-fns/parse/_lib/Setter";
-import { useReducer, useState } from "react";
+import type { N } from "node_modules/react-router/dist/development/router-DIAPGK5f.d.mts";
+import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router";
 
-type PickEvent = {
+export type PickEvent = {
 	quantity: number;
 	datetime: Date;
 };
 
-type Product = {
+export type Product = {
+	id: number;
 	name: string;
 	ordered_qty: number;
 	pick_event: PickEvent | null;
 };
 
-type Order = {
+export type Order = {
 	id: number;
-	products: Product[];
+	products: Record<number, Product>;
 };
 
-const orders = [
-	{
+const mockOrders = {
+	1: {
 		id: 1,
-		products: [
-			{
+		products: {
+			1: {
+				id: 1,
 				name: "Product A",
 				ordered_qty: 10,
 				pick_event: null,
 			},
-			{
+			2: {
+				id: 2,
 				name: "Product B",
 				ordered_qty: 5,
 				pick_event: null,
 			},
-		],
+		}
 	},
-] as Order[];
+} satisfies Record<number, Order>;
 
 export default function AimoPickingDashboard() {
 	const { t } = useTranslation();
 
-	const [, rebuild] = useReducer((x) => x + 1, 0);
-	const rows = [];
-	for (const [i, order] of orders.entries()) {
-		for (const [j, product] of order.products.entries()) {
-			rows.push(
-				PickingRow(
-					i + j * orders.length,
-					order.id,
-					product.name,
-					product.ordered_qty,
-					product.pick_event,
-					(event) => {
-						console.log("here");
-						product.pick_event = event;
-						rebuild();
-					},
-				),
-			);
+	const [orders, setOrders] = useState<Record<number, Order>>(mockOrders);
+	const navigate = useNavigate();
+	function getOrdersToConfirm() {
+		const ret = [];
+		const ordersCopy = structuredClone(orders);
+		for (const order of Object.values(ordersCopy)) {
+			order.products = Object.values(order.products).filter(it => it.ordered_qty !== it.pick_event?.quantity);
+			if (Object.entries(order.products).length > 0) {
+				ret.push(order);
+			}
 		}
+		return ret;
 	}
+
+	const isDisabled = useMemo(() => {
+		for (const order of Object.values(orders)) {
+			for (const product of Object.values(order.products)) {
+				if (product.pick_event == null) {
+					return true;
+				}
+				if (product.pick_event!.quantity > product.ordered_qty) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}, [orders]);
+
+	const onPickEvent = (pickEvent: PickEvent | null, orderId: number, productId: number) => {
+		const copy = structuredClone(orders);
+		copy[orderId].products[productId].pick_event = pickEvent;
+		setOrders(copy);
+		console.log(copy);
+	}
+
 	return (
 		<div className="flex flex-col gap-4">
 			<Table>
@@ -80,27 +96,39 @@ export default function AimoPickingDashboard() {
 						<TableHead>Order ID</TableHead>
 						<TableHead>Product name</TableHead>
 						<TableHead>Ordered Quantity</TableHead>
-						<TableHead style={{width:"33%"}}>Picked Quantity</TableHead>
+						<TableHead style={{ width: "33%" }}>Picked Quantity</TableHead>
 					</TableRow>
 				</TableHeader>
-				<TableBody>{rows}</TableBody>
+				<TableBody>
+					{Object.values(orders).flatMap(order =>
+						Object.values(order.products).map(product =>
+							<PickingRow
+								order_id={order.id}
+								productName={product.name}
+								orderedQty={product.ordered_qty}
+								setPickEvent={(e) => onPickEvent(e, order.id, product.id)} />
+						)
+					)}
+				</TableBody>
+
 			</Table>
-			<Button className="w-32 self-end">Submit</Button>
+			<Button className="w-32 self-end" disabled={isDisabled} onClick={() => navigate("/aimo/dashboard/confirm", { state: getOrdersToConfirm() })}>Submit</Button>
 		</div>
 	);
 }
 
 function PickingRow(
-	key: number,
-	order_id: number,
-	productName: string,
-	orderedQty: number,
-	pickEvent: PickEvent | null,
-	setPickEvent: (event: PickEvent | null) => void,
+	{ order_id, productName, orderedQty, setPickEvent, }:
+		{
+			order_id: number,
+			productName: string,
+			orderedQty: number,
+			setPickEvent: (event: PickEvent | null) => void,
+		}
 ) {
 	const [error, setError] = useState<string | null>(null);
 	return (
-		<TableRow key={key}  >
+		<TableRow>
 			<TableCell>{order_id}</TableCell>
 			<TableCell>{productName}</TableCell>
 			<TableCell>{orderedQty}</TableCell>
@@ -108,7 +136,6 @@ function PickingRow(
 				<div className="flex flex-col gap-2">
 					<Input
 						type="number"
-						value={pickEvent?.quantity}
 						placeholder="Enter the picked quantity"
 						onChange={(event) => {
 							const value = event.target.valueAsNumber;
@@ -123,15 +150,15 @@ function PickingRow(
 							} else {
 								setError(null);
 							}
-							const pickEvent = {
+							const pickEvent = isNaN(value) ? null : {
 								quantity: value,
 								datetime: new Date(),
 							};
 							setPickEvent(pickEvent);
 						}}
-						onSelect={(event) => event.target.select()}
+						onFocus={(event) => event.target.select()}
 					/>
-					<p style={{color: "red"}}>
+					<p style={{ color: "red" }}>
 						{error}
 					</p>
 				</div>

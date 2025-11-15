@@ -4,6 +4,7 @@ import DashboardPage from "@/pages/dashboard";
 import { ThemeProvider } from "@/components/core/theme-provider.tsx";
 import { NotFoundErrorPage } from "@/pages/error-pages/not-found.page.tsx";
 import AimoPickingDashboard from "./pages/aimo/picking-dashboard";
+import AimoPickingDashboardConfirmPage from "./pages/aimo/picking-dashboard/confirm";
 
 export const ROUTES = createBrowserRouter([
   {
@@ -21,7 +22,7 @@ export const ROUTES = createBrowserRouter([
       },
     ],
   },
-   {
+  {
     path: "/aimo/dashboard",
     element: (
       <ThemeProvider defaultTheme={"dark"} storageKey={"app-theme"}>
@@ -33,6 +34,21 @@ export const ROUTES = createBrowserRouter([
       {
         index: true,
         Component: AimoPickingDashboard,
+      },
+    ],
+  },
+  {
+    path: "/aimo/dashboard/confirm",
+    element: (
+      <ThemeProvider defaultTheme={"dark"} storageKey={"app-theme"}>
+        <App></App>
+      </ThemeProvider>
+    ),
+    errorElement: <NotFoundErrorPage></NotFoundErrorPage>,
+    children: [
+      {
+        index: true,
+        Component: AimoPickingDashboardConfirmPage,
       },
     ],
   },
