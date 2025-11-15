@@ -1,14 +1,17 @@
-import { createBrowserRouter } from "react-router";
-import App from "@/App.tsx";
-import DashboardPage from "@/pages/dashboard";
-import { ThemeProvider } from "@/components/core/theme-provider.tsx";
-import { NotFoundErrorPage } from "@/pages/error-pages/not-found.page.tsx";
+import { createBrowserRouter } from 'react-router';
+import App from '@/App.tsx';
+import DashboardPage from '@/pages/dashboard/index';
+import { ThemeProvider } from '@/components/core/theme-provider.tsx';
+import { NotFoundErrorPage } from '@/pages/error-pages/not-found.page.tsx';
+import MapPage from './pages/dashboard/map';
 
 export const ROUTES = createBrowserRouter([
   {
-    path: "/",
+    path: '/',
     element: (
-      <ThemeProvider defaultTheme={"dark"} storageKey={"app-theme"}>
+      <ThemeProvider
+        defaultTheme={'dark'}
+        storageKey={'app-theme'}>
         <App></App>
       </ThemeProvider>
     ),
@@ -17,6 +20,10 @@ export const ROUTES = createBrowserRouter([
       {
         index: true,
         Component: DashboardPage,
+      },
+      {
+        path: 'map',
+        element: <MapPage />,
       },
     ],
   },
