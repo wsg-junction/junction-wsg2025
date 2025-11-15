@@ -6,18 +6,14 @@ import { productService } from '@/services/ProductService';
 interface ProductCardProps {
     id: string;
     rating?: number;
-    onAddToCart?: () => void;
     onUpdateCartQuantity?: (quantity: number) => void;
-    onRemoveFromCart?: () => void;
     currentQuantity?: number;
 }
 
 export const ProductCard = ({
     id,
     rating,
-    onAddToCart,
     onUpdateCartQuantity,
-    onRemoveFromCart,
     currentQuantity,
 }: ProductCardProps) => {
     const product = productService.getProductById(id)!;
@@ -75,7 +71,7 @@ export const ProductCard = ({
 
                     {(!currentQuantity || currentQuantity === 0) && (
                         <Button
-                            onClick={onAddToCart}
+                            onClick={() => onUpdateCartQuantity && onUpdateCartQuantity(1)}
                             variant="default"
                             size={'icon'}>
                             <ShoppingCart></ShoppingCart>
