@@ -31,12 +31,25 @@
     "title": "Select Alternatives",
     "alternative_products": "Alternative Products",
     "alternative_recipes": "Alternative Recipes",
-    "supermarket": "Look for Supermarket"
+    "supermarket": "Look for Supermarket",
+    "select_some_first": "Select at least one product to search nearby"
   },
   "search_for_alternative_product_dialog": {
     "title": "Search for Alternative Products",
     "search_placeholder": "Search for products…",
     "no_products_found": "No products found",
     "no_products_found_description": "Try adjusting your search or filter to find what you're looking for."
+  },
+  "search_for_alternative_recipe_dialog": {
+    "title": "Alternative Recipes",
+    "loading": "Generating recipe…",
+    "placeholder": "Type your question about alternatives…",
+    "error_fetch": "Error fetching response.",
+    "error_retry": "Something went wrong — please try again later.",
+    "loading_btn": "Loading…",
+    "send": "Send",
+    "loaded_from_cache": "Loaded from cache",
+    "clear_cache": "Clear cache",
+    "cache_cleared": "Cache cleared"
   }
 }

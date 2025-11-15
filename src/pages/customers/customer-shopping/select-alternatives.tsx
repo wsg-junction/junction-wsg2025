@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next';
+import { useState } from 'react';
 import { Header } from '@/pages/customers/components/Header/Header.tsx';
 import {
   Breadcrumb,
@@ -14,9 +15,12 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import SupermarketMap from '../components/SupermarketMap';
 import { ProductCard } from '../components/ProductCard/ProductCard';
 import { SearchForAlternativeProductDialog } from '../components/SearchForAlternativeProductDialog';
+import SearchForAlternativeRecipeDialog from '../components/SearchForAlternativeRecipeDialog';
 
 export default function SelectAlternativesPage() {
   const { t } = useTranslation();
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+
   return (
     <div>
       <Header></Header>
@@ -48,9 +52,40 @@ export default function SelectAlternativesPage() {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-6">
-              <ProductCard id="9042d0eb-a792-4b2f-9770-dac62f894148" />
-              <ProductCard id="10b64381-9d0d-4077-bfa7-2b1f3eefb7bc" />
-              <ProductCard id="ce5509b2-3148-49e2-b83c-7c636e38dfbf" />
+              {[
+                '9042d0eb-a792-4b2f-9770-dac62f894148',
+                '10b64381-9d0d-4077-bfa7-2b1f3eefb7bc',
+                'ce5509b2-3148-49e2-b83c-7c636e38dfbf',
+              ].map((id) => {
+                const selected = selectedIds.includes(id);
+                return (
+                  <div
+                    key={id}
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => {
+                      setSelectedIds((prev) =>
+                        prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
+                      );
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        setSelectedIds((prev) =>
+                          prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
+                        );
+                      }
+                    }}
+                    className={`cursor-pointer relative rounded ${selected ? 'ring-2 ring-blue-500' : ''}`}>
+                    <ProductCard id={id} />
+                    {selected && (
+                      <div className="absolute top-2 right-2 bg-blue-600 text-white text-xs px-2 py-0.5 rounded">
+                        Selected
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           </CardContent>
           <CardContent>
@@ -70,7 +105,7 @@ export default function SelectAlternativesPage() {
                   <SearchForAlternativeProductDialog originalCartItem={'TODO'} />
                 </DialogContent>
               </Dialog>
-              <Button variant="outline">{t('select_alternatives.alternative_recipes')}</Button>
+              <SearchForAlternativeRecipeDialog selectedIds={selectedIds} />
               <Dialog>
                 <DialogTrigger asChild>
                   <Button

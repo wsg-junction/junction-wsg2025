@@ -4,22 +4,44 @@ const DEFAULT_API_KEY = /*process.env.VITE_GOOGLE_GENAI_KEY ??*/ "AIzaSyBR46RGV1
 
 const ai = new GoogleGenAI({ apiKey: DEFAULT_API_KEY });
 
-export async function generateGeminiRecipe(ingredients: string[]): Promise<string> {
+export async function generateGeminiRecipe(
+    ingredients: string[],
+    context?: string | string[],
+    languageShort?: string
+): Promise<string> {
     const prompt = `Create a simple recipe using the following ingredients: ${ingredients.join(
         ", "
     )}. Provide step-by-step instructions.`;
-    return generateGeminiContent(prompt, "gemini-2.5-flash-lite", 300);
+    return generateGeminiContent(prompt, "gemini-2.5-flash-lite", 300, context, languageShort);
 }
 
 
 export async function generateGeminiContent(
     prompt: string,
     model = "gemini-2.5-flash-lite",
-    maxTokens: number = 200
+    maxTokens: number = 200,
+    context?: string | string[],
+    languageShort?: string
 ): Promise<string> {
+    // Build a final prompt that includes optional context and a language instruction
+    let finalPrompt = '';
+    if (context) {
+        if (Array.isArray(context)) {
+            finalPrompt += context.map((c) => `${c}`).join('\n') + '\n\n';
+        } else {
+            finalPrompt += context + '\n\n';
+        }
+    }
+
+    finalPrompt += prompt;
+
+    if (languageShort) {
+        finalPrompt += `\n\nPlease respond in ${languageShort}.`; // languageShort like 'fi', 'sv', 'en'
+    }
+
     const request: Record<string, unknown> = {
         model,
-        contents: prompt,
+        contents: finalPrompt,
     };
 
     if (typeof maxTokens === "number") {
