@@ -1,4 +1,4 @@
-import { Header } from '@/pages/customers/components/Header/Header.tsx';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert.tsx';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -7,23 +7,26 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb.tsx';
-import { useTranslation } from 'react-i18next';
-import { Progress } from '@/components/ui/progress.tsx';
-import { Input } from '@/components/ui/input.tsx';
 import { Button } from '@/components/ui/button.tsx';
-import { motion } from 'framer-motion';
-import { useEffect, useState } from 'react';
-import { ShoppingCartList, type CartItem } from '@/pages/customers/customer-shopping';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert.tsx';
-import { AlertTriangleIcon } from 'lucide-react';
-import { productService, type Product } from '@/services/ProductService';
-import { useProductName } from '@/hooks/use-product-name.ts';
-import { useNavigate } from 'react-router';
-import { doc, setDoc } from 'firebase/firestore';
-import { firestore } from '@/lib/firebase';
-import { v4 } from "uuid";
+import { Checkbox } from '@/components/ui/checkbox';
+import { Input } from '@/components/ui/input.tsx';
+import { Label } from '@/components/ui/label';
+import { Progress } from '@/components/ui/progress.tsx';
+import { useProductName } from '@/hooks/use-product-name';
+import { firestore, messaging, vapidKey } from '@/lib/firebase';
 import type { Item, Order } from '@/pages/aimo/picking-dashboard';
 import type { Warning } from '@/pages/aimo/warnings';
+import { Header } from '@/pages/customers/components/Header/Header.tsx';
+import { ShoppingCartList, type CartItem } from '@/pages/customers/customer-shopping';
+import { productService, type Product } from '@/services/ProductService';
+import { doc, setDoc } from 'firebase/firestore';
+import { getToken } from 'firebase/messaging';
+import { motion } from 'framer-motion';
+import { AlertTriangleIcon } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router';
+import { v4 } from "uuid";
 
 export const CheckoutPage = () => {
   const { t } = useTranslation();
@@ -72,10 +75,14 @@ export const CheckoutPage = () => {
   });
 
   function cartItemToItem(item: CartItem): Item {
-    const new_item = { id: item.id, ean: item.ean, names: item.names, orderedQuantity: item.quantity, pickEvent: null };
-    return new_item;
+    const newItem = { id: item.id, ean: item.ean, names: item.names, orderedQuantity: item.quantity, pickEvent: null };
+    return newItem;
   }
 
+  const [pushNotificationToken, setPushNotificationToken] = useState<string | null>(() => {
+    const token = localStorage.getItem('pushNotificationToken');
+    return token ? token : null;
+  });
   const next = () => setStep((s) => {
     if (s === maxSteps) {
       const orderId = v4();
@@ -90,7 +97,8 @@ export const CheckoutPage = () => {
       }
       const order = {
         id: orderId,
-        products: cart.map(cartItemToItem)
+        products: cart.map(cartItemToItem),
+        pushNotificationToken: pushNotificationToken || undefined,
       } satisfies Order;
       const d = doc(firestore, "orders", orderId);
       setDoc(d, order);
@@ -150,7 +158,17 @@ export const CheckoutPage = () => {
   }, [cart]);
 
   const onUpdateItem = (product: Product, quantity: number) => {
-    setCart(cart.map((item) => (item.id === product.id ? { ...item, quantity } : item)));
+    if (quantity <= 0) {
+      setCart(cart.filter((item) => item.id !== product.id));
+      return;
+    }
+
+    const existingItem = cart.find((item) => item.id === product.id);
+    if (existingItem) {
+      setCart(cart.map((item) => (item.id === product.id ? { ...existingItem, quantity } : item)));
+      return;
+    }
+    setCart([...cart, { ...product, quantity, warnings: [] }]);
   };
 
   // set a fallback for a cart item (pass fallbackId as string or null)
@@ -263,6 +281,35 @@ export const CheckoutPage = () => {
                   placeholder="Telephone"
                   type={'tel'}
                 />
+                <div className="mt-4 flex items-start gap-3">
+                  <Checkbox
+                    id="push-notifications"
+                    checked={!!pushNotificationToken}
+                    onCheckedChange={async (checked) => {
+                      if (!checked) {
+                        setPushNotificationToken(null);
+                        return;
+                      }
+
+                      try {
+                        const token = await getToken(messaging, { vapidKey });
+                        console.log('Push notification token:', token);
+                        setPushNotificationToken(token);
+                        localStorage.setItem('pushNotificationToken', token);
+                      } catch (error) {
+                        console.error('Error getting push notification token:', error);
+                      }
+                    }}
+                  />
+                  <Label htmlFor="push-notifications">
+                    <div className="grid gap-2">
+                      Receive push notifications
+                      <p className="text-muted-foreground text-sm">
+                        Get notified if there are any issues while fulfilling your order.
+                      </p>
+                    </div>
+                  </Label>
+                </div>
               </div>
             )}
 
