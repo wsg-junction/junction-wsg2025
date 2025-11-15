@@ -12,6 +12,7 @@ import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router";
 import { Header } from "../components/Header";
+import { t } from "i18next";
 
 export type PickEvent = {
 	quantity: number;
@@ -96,10 +97,10 @@ export default function AimoPickingDashboard() {
 				<Table>
 					<TableHeader>
 						<TableRow>
-							<TableHead>Order ID</TableHead>
-							<TableHead>Product name</TableHead>
-							<TableHead>Ordered Quantity</TableHead>
-							<TableHead style={{ width: "45%" }}>Picked Quantity</TableHead>
+							<TableHead style={{ width: "10%" }}>{t("order_id")}</TableHead>
+							<TableHead>{t("product_name")}</TableHead>
+							<TableHead>{t("ordered_quantity")}</TableHead>
+							<TableHead style={{ width: "50%" }}>{t("picked_quantity")}</TableHead>
 						</TableRow>
 					</TableHeader>
 					<TableBody>
@@ -113,9 +114,8 @@ export default function AimoPickingDashboard() {
 							)
 						)}
 					</TableBody>
-
 				</Table>
-				<Button className="w-32 self-end" disabled={isDisabled} onClick={() => navigate("/aimo/dashboard/confirm", { state: getOrdersToConfirm() })}>Submit</Button>
+				<Button className="w-32 self-end" disabled={isDisabled} onClick={() => navigate("/aimo/dashboard/confirm", { state: getOrdersToConfirm() })}>{t("submit")}</Button>
 			</div>
 		</div>
 
@@ -142,17 +142,17 @@ function PickingRow(
 				<div className="flex flex-col gap-2">
 					<Input
 						type="number"
-						placeholder="Enter the picked quantity"
+						placeholder={t("enter_quantity")}
 						onChange={(event) => {
 							const value = event.target.valueAsNumber;
 							if (value > orderedQty) {
 								setError(
-									"Picked quantity is greater than ordered quantity.\nPlease select at most as many as ordered.",
+									t("error_quantity_greater")
 								);
 								setErrorColor("red");
 							} else if (value < orderedQty) {
 								setError(
-									"Picked quantity is less than ordered quantity",
+									t("error_quantity_smaller")
 								);
 								setErrorColor("orange");
 							} else {

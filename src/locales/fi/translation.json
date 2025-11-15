@@ -13,5 +13,13 @@
   "privacy_policy": "Tietosuojakäytäntö",
   "sign_out": "Kirjaudu ulos",
   "sign_in": "Kirjaudu sisään",
-  "change_language": "Vaihda kieltä"
+  "change_language": "Vaihda kieltä",
+  "order_id": "Tilausnumero",
+  "product_name": "Tuotteen nimi",
+  "ordered_quantity": "Tilattu määrä",
+  "picked_quantity": "Poimittu määrä",
+  "submit": "Lähetä",
+  "enter_quantity": "Syötä määrä",
+  "error_quantity_greater": "Poimittu määrä on suurempi kuin tilattu määrä. Valitse enintään tilattu määrä.",
+  "error_quantity_smaller": "Poimittu määrä on pienempi kuin tilattu määrä."
 }
