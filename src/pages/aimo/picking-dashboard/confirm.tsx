@@ -22,8 +22,8 @@ export default function AimoPickingDashboardConfirmPage() {
                             <div className="p-4 flex flex-row border rounded-lg">
                                 <h3 className="flex w-32 font-bold mb-2">{order.id}</h3>
                                 <h3 className="flex flex-1 mb-2">{product.name}</h3>
-                                <p className="flex flex-1">Ordered Quantity: {product.ordered_qty}</p>
-                                <p className="flex flex-1">Picked Quantity: {product.pick_event?.quantity ?? 0}</p>
+                                <p className="flex flex-1">Ordered Quantity: {product.orderedQuantity}</p>
+                                <p className="flex flex-1">Picked Quantity: {product.pickEvent?.quantity ?? 0}</p>
                             </div>
                         )
                     )

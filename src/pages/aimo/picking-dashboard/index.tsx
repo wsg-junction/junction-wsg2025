@@ -13,54 +13,43 @@ import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router";
 import { Header } from "../components/Header";
 import { t } from "i18next";
+import { firestore, useQuery } from "@/lib/firebase";
+import { collection, doc, updateDoc } from "@firebase/firestore";
 
 export type PickEvent = {
 	quantity: number;
 	datetime: Date;
 };
 
-export type Product = {
-	id: number;
+export type Item = {
+	id: string;
 	name: string;
-	ordered_qty: number;
-	pick_event: PickEvent | null;
+	orderedQuantity: number;
+	pickEvent: PickEvent | null;
 };
 
 export type Order = {
-	id: number;
-	products: Record<number, Product>;
+	id: string;
+	products: Item[];
 };
-
-const mockOrders = {
-	1: {
-		id: 1,
-		products: {
-			1: {
-				id: 1,
-				name: "Product A",
-				ordered_qty: 10,
-				pick_event: null,
-			},
-			2: {
-				id: 2,
-				name: "Product B",
-				ordered_qty: 5,
-				pick_event: null,
-			},
-		}
-	},
-} satisfies Record<number, Order>;
 
 export default function AimoPickingDashboard() {
 	const { t } = useTranslation();
 
-	const [orders, setOrders] = useState<Record<number, Order>>(mockOrders);
+	const orders = useQuery<Order>(useMemo(() => collection(firestore, "orders"), []));
+	console.log(orders);
+
+	async function updateOrder(order: Order) {
+		const ref = doc(firestore, "orders", order.id);
+		await updateDoc(ref, order);
+	}
+
 	const navigate = useNavigate();
 	function getOrdersToConfirm() {
 		const ret = [];
 		const ordersCopy = structuredClone(orders);
 		for (const order of Object.values(ordersCopy)) {
-			order.products = Object.values(order.products).filter(it => it.ordered_qty !== it.pick_event?.quantity);
+			order.products = Object.values(order.products).filter(it => it.orderedQuantity !== it.pickEvent?.quantity);
 			if (Object.entries(order.products).length > 0) {
 				ret.push(order);
 			}
@@ -71,10 +60,10 @@ export default function AimoPickingDashboard() {
 	const isDisabled = useMemo(() => {
 		for (const order of Object.values(orders)) {
 			for (const product of Object.values(order.products)) {
-				if (product.pick_event == null) {
+				if (product.pickEvent == null) {
 					return true;
 				}
-				if (product.pick_event!.quantity > product.ordered_qty) {
+				if (product.pickEvent!.quantity > product.orderedQuantity) {
 					return true;
 				}
 			}
@@ -82,11 +71,11 @@ export default function AimoPickingDashboard() {
 		return false;
 	}, [orders]);
 
-	const onPickEvent = (pickEvent: PickEvent | null, orderId: number, productId: number) => {
-		const copy = structuredClone(orders);
-		copy[orderId].products[productId].pick_event = pickEvent;
-		setOrders(copy);
-		console.log(copy);
+	const onPickEvent = (pickEvent: PickEvent | null, orderId: string, productId: string) => {
+		const order = orders.find(o => o.id === orderId);
+		const product = order?.products.find(p => p.id === productId);
+		product.pickEvent = pickEvent;
+		updateOrder(order);
 	}
 	const getSubmitAction = () => {
 		if (getOrdersToConfirm().length > 0) {
@@ -114,8 +103,9 @@ export default function AimoPickingDashboard() {
 								<PickingRow
 									order_id={order.id}
 									productName={product.name}
-									orderedQty={product.ordered_qty}
-									setPickEvent={(e) => onPickEvent(e, order.id, product.id)} />
+									orderedQty={product.orderedQuantity}
+									setPickEvent={(e) => onPickEvent(e, order.id, product.id)}
+									defaultPickedQuantity={product.pickEvent?.quantity} />
 							)
 						)}
 					</TableBody>
@@ -128,12 +118,13 @@ export default function AimoPickingDashboard() {
 }
 
 function PickingRow(
-	{ order_id, productName, orderedQty, setPickEvent, }:
+	{ order_id, productName, orderedQty, setPickEvent, defaultPickedQuantity }:
 		{
-			order_id: number,
+			order_id: string,
 			productName: string,
 			orderedQty: number,
 			setPickEvent: (event: PickEvent | null) => void,
+			defaultPickedQuantity?: number,
 		}
 ) {
 	const [error, setError] = useState<string | null>(null);
@@ -147,6 +138,7 @@ function PickingRow(
 				<div className="flex flex-col gap-2">
 					<Input
 						type="number"
+						defaultValue={defaultPickedQuantity}
 						placeholder={t("enter_quantity")}
 						onChange={(event) => {
 							const value = event.target.valueAsNumber;
