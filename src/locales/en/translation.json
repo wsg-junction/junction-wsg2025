@@ -32,5 +32,17 @@
     "alternative_products": "Alternative Products",
     "alternative_recipes": "Alternative Recipes",
     "supermarket": "Look for Supermarket"
+  },
+  "select_alternatives.dialog": {
+    "title": "Alternative Recipes",
+    "loading": "Generating recipe...",
+    "placeholder": "Type your question about alternatives...",
+    "error_fetch": "Error fetching response.",
+    "loading_btn": "Loading...",
+    "send": "Send",
+    "loaded_from_cache": "Loaded from cache",
+    "clear_cache": "Clear cache"
   }
+  ,
+  "select_alternatives.dialog.cache_cleared": "Cache cleared"
 }
