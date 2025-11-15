@@ -160,7 +160,7 @@ export default function CustomerShoppingPage() {
 
 export type CartItem = Product & {
   quantity: number;
-  warnings: Warning[],
+  warnings: Warning[];
 };
 
 interface ShoppingCartProps {
@@ -219,7 +219,7 @@ export const ShoppingCartList = ({
                 </div>
               )}
             </div>
-            <div className='flex-1' />
+            <div className="flex-1" />
 
             {!readOnly ? (
               <div className={'flex items-center gap-2'}>
@@ -295,6 +295,6 @@ export const ShoppingCartList = ({
           </span>
         </div>
       </div>
-    </div >
+    </div>
   );
 };
