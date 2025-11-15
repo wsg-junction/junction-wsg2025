@@ -1,14 +1,11 @@
 import { Card, CardContent, CardDescription, CardTitle } from '@/components/ui/card.tsx';
 import { ShoppingCart, StarIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button.tsx';
-import { initializeApp } from 'firebase/app';
+import { productService } from '@/services/ProductService';
 
 interface ProductCardProps {
-    name: string;
-    description: string;
-    price: string;
+    id: string;
     rating?: number;
-    imageUrl?: string;
     onAddToCart?: () => void;
     onUpdateCartQuantity?: (quantity: number) => void;
     onRemoveFromCart?: () => void;
@@ -16,24 +13,22 @@ interface ProductCardProps {
 }
 
 export const ProductCard = ({
-    name,
-    description,
-    price,
+    id,
     rating,
-    imageUrl,
     onAddToCart,
     onUpdateCartQuantity,
     onRemoveFromCart,
     currentQuantity,
 }: ProductCardProps) => {
+    const product = productService.getProductById(id)!;
     return (
         <Card className={'p-0'}>
             <CardContent className="p-3">
                 <div className="aspect-square rounded-md mb-2 flex justify-center items-center">
                     <div className={'w-full h-full  p-10'}>
-                        {imageUrl ? (
+                        {product.imageUrl ? (
                             <img
-                                src={imageUrl}
+                                src={product.imageUrl}
                                 className={'w-full h-full object-contain'}
                             />
                         ) : (
@@ -46,7 +41,7 @@ export const ProductCard = ({
                     style={{
                         textOverflow: 'ellipsis',
                     }}>
-                    {name}
+                    {product.name}
                 </CardTitle>
                 <div className="flex items-center space-x-1 mb-2 ">
                     <div className="flex">
@@ -70,11 +65,11 @@ export const ProductCard = ({
                                 }
                             })}
                     </div>
-                    <span className="text-xs text-muted-foreground">{rating.toFixed(1)}</span>
+                    {rating && <span className="text-xs text-muted-foreground">{rating.toFixed(1)}</span>}
                 </div>
                 <div className="flex items-center justify-between">
                     <span className="text-sm font-bold">
-                        <span className={'text-lg'}>{price}</span>
+                        <span className={'text-lg'}>{product.priceString}</span>
                         <span className="text-sm text-muted-foreground font-light"> / pcs</span>
                     </span>
 

@@ -14,15 +14,15 @@ import { Button } from '@/components/ui/button.tsx';
 import { ShoppingCart, Trash2 } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover.tsx';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select.tsx';
-import { ProductService } from '@/services/product.service/IProductService.ts';
 import { useNavigate } from 'react-router';
+import { productService, type Product } from '@/services/ProductService';
 
 export default function CustomerShoppingPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
 
   const [page, setPage] = useState(0);
-  const [products, setProducts] = useState([]);
+  const [products, setProducts] = useState<Product[]>([]);;
   const [_, setFetchedPages] = useState([]);
   const [isLoading, setIsLoading] = useState(false); // for initial load and page load
   const [totalProducts, setTotalProducts] = useState(0);
@@ -40,7 +40,7 @@ export default function CustomerShoppingPage() {
     const fetchProducts = async () => {
       setIsLoading(true); // start loading
       try {
-        const result = await ProductService.getProducts(page);
+        const result = await productService.getProducts(page);
         setFetchedPages((prev) => {
           if (prev.find((p) => p.page === page)) {
             return prev; // already fetched
@@ -116,13 +116,9 @@ export default function CustomerShoppingPage() {
         <>
           <div className="px-8 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-6">
             {products.map((product, index) => {
-              const { name, description, price } = product;
-              const formattedPrice = price.value ? price.value.toFixed(2) : '0.00';
-              const imageName = product.images?.find((t) => t.format === 'product')?.savedImage ?? null;
-              const imageUrl = imageName ? '/product_images/' + imageName : null;
-
               return (
                 <ProductCard
+                  id={product.id}
                   onUpdateCartQuantity={(newQuantity) => {
                     if (newQuantity === 0) {
                       onRemoveItem(product);
@@ -133,11 +129,7 @@ export default function CustomerShoppingPage() {
                   currentQuantity={getQuantityInCart(cart, product)}
                   key={index}
                   onAddToCart={() => onAddToCart(product)}
-                  imageUrl={imageUrl}
-                  name={name}
-                  description={description}
                   rating={3}
-                  price={formattedPrice + '€'}
                 />
               );
             })}

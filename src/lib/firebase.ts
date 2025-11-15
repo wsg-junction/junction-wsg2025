@@ -1,7 +1,7 @@
 import { firebaseConfig } from '@/lib/firebaseConfig';
-import { initializeApp } from '@firebase/app';
-import { getFirestore, onSnapshot, Query, type DocumentData, type Unsubscribe } from '@firebase/firestore';
-import { useEffect, useMemo, useState } from 'react';
+import { initializeApp } from 'firebase/app';
+import { getFirestore, onSnapshot, Query, type DocumentData, type Unsubscribe } from 'firebase/firestore';
+import { useEffect, useState } from 'react';
 const app = initializeApp(firebaseConfig);
 
 export const firestore = getFirestore(app);
