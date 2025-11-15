@@ -13,6 +13,11 @@
   "privacy_policy": "Privacy Policy",
   "sign_out": "Sign Out",
   "sign_in": "Sign In",
-  "change_language": "Change Language"
-
+  "change_language": "Change Language",
+  "select_alternatives": {
+    "title": "Select Alternatives",
+    "alternative_products": "Alternative Products",
+    "alternative_recipes": "Alternative Recipes",
+    "supermarket": "Look for Supermarket"
+  }
 }
