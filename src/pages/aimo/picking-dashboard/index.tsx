@@ -31,10 +31,9 @@ export type Order = {
 };
 
 export default function AimoPickingDashboard() {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
 
   const orders = useQuery<Order>(useMemo(() => collection(firestore, 'orders'), []));
-  console.log(orders);
 
   async function updateOrder(order: Order) {
     const ref = doc(firestore, 'orders', order.id);
@@ -56,7 +55,7 @@ export default function AimoPickingDashboard() {
     return ret;
   }
 
-  const isDisabled = useMemo(() => {
+  const isSubmitDisabled = useMemo(() => {
     for (const order of Object.values(orders)) {
       for (const product of Object.values(order.products)) {
         if (product.pickEvent == null) {
@@ -70,10 +69,10 @@ export default function AimoPickingDashboard() {
     return false;
   }, [orders]);
 
-  const onPickEvent = (pickEvent: PickEvent, orderId: string, productId: string) => {
+  const onPickEvent = (pickEvent: PickEvent | null, orderId: string, productId: string) => {
     const order = orders.find((o) => o.id === orderId)!;
     const product = order.products.find((p) => p.id === productId)!;
-    if (pickEvent.quantity > product.orderedQuantity) return;
+    if (pickEvent && pickEvent.quantity > product.orderedQuantity) return;
     product.pickEvent = pickEvent;
     updateOrder(order);
   };
@@ -112,7 +111,7 @@ export default function AimoPickingDashboard() {
         </Table>
         <Button
           className="w-32 self-end"
-          disabled={isDisabled}
+          disabled={isSubmitDisabled}
           onClick={getSubmitAction()}>
           {t('submit')}
         </Button>
@@ -131,7 +130,7 @@ function PickingRow({
   order: Order;
   item: Item;
   orderedQty: number;
-  setPickEvent: (event: PickEvent) => void;
+  setPickEvent: (event: PickEvent | null) => void;
   defaultPickedQuantity?: number;
 }) {
   const getTranslatedProductName = useProductName();
@@ -176,11 +175,14 @@ function PickingRow({
               const value = event.target.valueAsNumber;
               setError(calculateError(value));
               setErrorColor(calculateErrorColor(value));
-              if (isNaN(value)) return;
-              setPickEvent({
-                quantity: value,
-                datetime: new Date(),
-              });
+              setPickEvent(
+                isNaN(value)
+                  ? null
+                  : {
+                      quantity: value,
+                      datetime: new Date(),
+                    },
+              );
             }}
             onFocus={(event) => event.target.select()}
           />
