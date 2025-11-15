@@ -1,0 +1,17 @@
+{
+  "welcome": "Välkommen till vår applikation!",
+  "all_products": "Alla produkter",
+  "categories": "Kategorier",
+  "contact_us": "Kontakta oss",
+  "search": "Sök",
+  "add_to_cart": "Lägg i varukorg",
+  "view_cart": "Visa varukorg",
+  "checkout": "Till kassan",
+  "shop": "Butik",
+  "about_us": "Om oss",
+  "terms_of_service": "Användarvillkor",
+  "privacy_policy": "Integritetspolicy",
+  "sign_out": "Logga ut",
+  "sign_in": "Logga in",
+  "change_language": "Byt språk"
+}
