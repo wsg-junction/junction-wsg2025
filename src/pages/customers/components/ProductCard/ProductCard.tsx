@@ -1,6 +1,7 @@
 import { Card, CardContent, CardDescription, CardTitle } from '@/components/ui/card.tsx';
 import { ShoppingCart, StarIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button.tsx';
+import { initializeApp } from 'firebase/app';
 
 interface ProductCardProps {
     name: string;
@@ -9,6 +10,9 @@ interface ProductCardProps {
     rating?: number;
     imageUrl?: string;
     onAddToCart?: () => void;
+    onUpdateCartQuantity?: (quantity: number) => void;
+    onRemoveFromCart?: () => void;
+    currentQuantity?: number;
 }
 
 export const ProductCard = ({
@@ -18,6 +22,9 @@ export const ProductCard = ({
     rating,
     imageUrl,
     onAddToCart,
+    onUpdateCartQuantity,
+    onRemoveFromCart,
+    currentQuantity,
 }: ProductCardProps) => {
     return (
         <Card className={'p-0'}>
@@ -70,12 +77,43 @@ export const ProductCard = ({
                         <span className={'text-lg'}>{price}</span>
                         <span className="text-sm text-muted-foreground font-light"> / pcs</span>
                     </span>
-                    <Button
-                        onClick={onAddToCart}
-                        variant="default"
-                        size={'icon'}>
-                        <ShoppingCart></ShoppingCart>
-                    </Button>
+
+                    {(!currentQuantity || currentQuantity === 0) && (
+                        <Button
+                            onClick={onAddToCart}
+                            variant="default"
+                            size={'icon'}>
+                            <ShoppingCart></ShoppingCart>
+                        </Button>
+                    )}
+
+                    {currentQuantity && currentQuantity > 0 ? (
+                        <div className="flex items-center space-x-2 gap-2">
+                            <Button
+                                onClick={() => {
+                                    if (onUpdateCartQuantity) {
+                                        onUpdateCartQuantity(currentQuantity - 1);
+                                    }
+                                }}
+                                variant="outline"
+                                size={'icon'}>
+                                -
+                            </Button>
+                            <span>{currentQuantity}</span>
+                            <Button
+                                onClick={() => {
+                                    if (onUpdateCartQuantity) {
+                                        onUpdateCartQuantity(currentQuantity + 1);
+                                    }
+                                }}
+                                variant="outline"
+                                size={'icon'}>
+                                +
+                            </Button>
+                        </div>
+                    ) : (
+                        ''
+                    )}
                 </div>
             </CardContent>
         </Card>

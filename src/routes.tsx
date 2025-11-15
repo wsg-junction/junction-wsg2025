@@ -6,6 +6,7 @@ import { NotFoundErrorPage } from "@/pages/error-pages/not-found.page.tsx";
 import AimoPickingDashboardPage from "./pages/aimo/picking-dashboard";
 import AimoPickingDashboardConfirmPage from "./pages/aimo/picking-dashboard/confirm";
 import CustomerShoppingPage from '@/pages/customers/customer-shopping';
+import { CheckoutPage } from '@/pages/customers/checkout';
 import SelectAlternativesPage from './pages/customers/customer-shopping/select-alternatives';
 import AimoWarningsPage from "./pages/aimo/warnings";
 import AimoHomePage from "./pages/aimo";
@@ -30,12 +31,16 @@ export const ROUTES = createBrowserRouter([
         path: 'customer',
         children: [
           {
-            index: true,
-            Component: CustomerShoppingPage,
-          },
-          {
             path: 'select-alternatives',
             Component: SelectAlternativesPage,
+          },
+          {
+            path: 'checkout',
+            Component: CheckoutPage,
+          },
+          {
+            index: true,
+            Component: CustomerShoppingPage,
           },
         ],
       },
