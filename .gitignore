@@ -10,6 +10,9 @@ dist/
 # testing
 /coverage
 
+.env*
+**/.env*
+
 # next.js
 /.next/
 /out/
