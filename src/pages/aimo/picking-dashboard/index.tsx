@@ -10,6 +10,9 @@ import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
 import { Header } from '../components/Header';
+import { ButtonGroup } from '@/components/ui/button-group';
+import { ToggleGroup } from '@/components/ui/toggle-group';
+import { ToggleGroupItem } from '@radix-ui/react-toggle-group';
 
 export type PickEvent = {
   quantity: number;
@@ -83,9 +86,9 @@ export default function AimoPickingDashboard() {
     return () => navigate('/aimo');
   };
   return (
-    <div className="p-8">
+    <>
       <Header />
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-4 p-8">
         <Table>
           <TableHeader>
             <TableRow>
@@ -114,7 +117,7 @@ export default function AimoPickingDashboard() {
           {t('submit')}
         </Button>
       </div>
-    </div>
+    </>
   );
 }
 
@@ -129,11 +132,11 @@ function PickingRow({
 }) {
   const getTranslatedProductName = useProductName();
 
-  const [error, setError] = useState<string | null>(
-    calculateError(item.pickEvent?.quantity ?? item.orderedQuantity),
-  );
+  const quantity = item.pickEvent?.quantity;
+
+  const [error, setError] = useState<string | null>(calculateError(quantity ?? item.orderedQuantity));
   const [errorColor, setErrorColor] = useState<string | undefined>(
-    calculateErrorColor(item.pickEvent?.quantity ?? item.orderedQuantity),
+    calculateErrorColor(quantity ?? item.orderedQuantity),
   );
 
   function calculateError(value: number): string | null {
@@ -156,6 +159,20 @@ function PickingRow({
     }
   }
 
+  function setQuantity(rawValue: number) {
+    setError(calculateError(rawValue));
+    setErrorColor(calculateErrorColor(rawValue));
+    const value = isNaN(rawValue) ? rawValue : Math.min(rawValue, item.orderedQuantity);
+    setPickEvent(
+      isNaN(value)
+        ? null
+        : {
+            quantity: value,
+            datetime: new Date(),
+          },
+    );
+  }
+
   return (
     <TableRow>
       {item.id === order.products[0].id && <TableCell rowSpan={order.products.length}>{order.id}</TableCell>}
@@ -163,26 +180,28 @@ function PickingRow({
       <TableCell>{item.orderedQuantity}</TableCell>
       <TableCell>
         <div className="flex flex-col gap-2">
-          <Input
-            type="number"
-            defaultValue={item.pickEvent?.quantity}
-            placeholder={t('enter_quantity')}
-            max={item.orderedQuantity}
-            onChange={(event) => {
-              const value = event.target.valueAsNumber;
-              setError(calculateError(value));
-              setErrorColor(calculateErrorColor(value));
-              setPickEvent(
-                isNaN(value)
-                  ? null
-                  : {
-                      quantity: value,
-                      datetime: new Date(),
-                    },
-              );
-            }}
-            onFocus={(event) => event.target.select()}
-          />
+          <ButtonGroup>
+            <Button
+              variant="outline"
+              className={quantity == item.orderedQuantity ? 'bg-[#eee8f5]' : ''}
+              onClick={() => setQuantity(item.orderedQuantity)}>
+              All
+            </Button>
+            <Button
+              variant="outline"
+              className={quantity == 0 ? 'bg-[#eee8f5]' : ''}
+              onClick={() => setQuantity(0)}>
+              None
+            </Button>
+            <Input
+              type="number"
+              value={quantity && quantity !== item.orderedQuantity ? quantity : undefined}
+              placeholder={t('aimo_picking_dashboard.picking_row.quantity_custom')}
+              className={quantity && quantity !== item.orderedQuantity ? 'bg-[#eee8f5]' : ''}
+              onChange={(event) => setQuantity(event.target.valueAsNumber)}
+              onFocus={(event) => event.target.select()}
+            />
+          </ButtonGroup>
           <p style={{ color: errorColor }}>{error}</p>
         </div>
       </TableCell>
