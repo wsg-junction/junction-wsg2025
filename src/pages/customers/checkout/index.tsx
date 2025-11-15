@@ -13,9 +13,10 @@ import { Input } from '@/components/ui/input.tsx';
 import { Button } from '@/components/ui/button.tsx';
 import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
-import { ShoppingCartList } from '@/pages/customers/customer-shopping';
+import { ShoppingCartList, type CartItem } from '@/pages/customers/customer-shopping';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert.tsx';
 import { AlertTriangleIcon } from 'lucide-react';
+import type { Product } from '@/services/ProductService';
 
 export const CheckoutPage = () => {
   const { t } = useTranslation();
@@ -32,19 +33,15 @@ export const CheckoutPage = () => {
   const [name, setName] = useState('');
   const [cart, setCart] = useState(() => {
     const stored = localStorage.getItem('cart');
-    return stored ? JSON.parse(stored) : [];
+    return stored ? (JSON.parse(stored) as CartItem[]) : [];
   });
 
   useEffect(() => {
     localStorage.setItem('cart', JSON.stringify(cart));
   }, [cart]);
 
-  const onUpdateItem = (product, newProduct) => {
-    setCart(cart.map((item) => (item.id === product.id ? newProduct : item)));
-  };
-
-  const onRemoveItem = (product) => {
-    setCart(cart.filter((item) => item.id !== product.id));
+  const onUpdateItem = (product: Product, quantity: number) => {
+    setCart(cart.map((item) => (item.id === product.id ? { ...item, quantity } : item)));
   };
 
   return (
@@ -90,7 +87,6 @@ export const CheckoutPage = () => {
                   readOnly={false}
                   cart={cart}
                   onUpdateItem={onUpdateItem}
-                  onRemoveItem={onRemoveItem}
                   setCart={() => {}}
                 />
               </div>
@@ -145,7 +141,6 @@ export const CheckoutPage = () => {
                     readOnly={true}
                     cart={cart}
                     onUpdateItem={onUpdateItem}
-                    onRemoveItem={onRemoveItem}
                     setCart={() => {}}
                   />
                 </div>
