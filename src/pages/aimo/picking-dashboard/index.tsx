@@ -69,7 +69,6 @@ export default function AimoPickingDashboard() {
 	}
 
 	const isDisabled = useMemo(() => {
-		if (getOrdersToConfirm().length === 0) return true;
 		for (const order of Object.values(orders)) {
 			for (const product of Object.values(order.products)) {
 				if (product.pick_event == null) {
@@ -89,7 +88,13 @@ export default function AimoPickingDashboard() {
 		setOrders(copy);
 		console.log(copy);
 	}
+	const getSubmitAction = () => {
+		if (getOrdersToConfirm().length > 0) {
+			return () => navigate('/aimo/dashboard/confirm', { state: getOrdersToConfirm() });
+		}
+		return () => navigate('/aimo');
 
+	}
 	return (
 		<div className="p-8">
 			<Header />
@@ -115,7 +120,7 @@ export default function AimoPickingDashboard() {
 						)}
 					</TableBody>
 				</Table>
-				<Button className="w-32 self-end" disabled={isDisabled} onClick={() => navigate("/aimo/dashboard/confirm", { state: getOrdersToConfirm() })}>{t("submit")}</Button>
+				<Button className="w-32 self-end" disabled={isDisabled} onClick={getSubmitAction()}>{t("submit")}</Button>
 			</div>
 		</div>
 

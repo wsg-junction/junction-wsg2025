@@ -8,6 +8,7 @@ import AimoPickingDashboardConfirmPage from "./pages/aimo/picking-dashboard/conf
 import CustomerShoppingPage from '@/pages/customers/customer-shopping';
 import MapPage from './pages/dashboard/map';
 import AimoWarningsPage from "./pages/aimo/warnings";
+import AimoHomePage from "./pages/aimo";
 
 export const ROUTES = createBrowserRouter([
   {
@@ -41,6 +42,10 @@ export const ROUTES = createBrowserRouter([
       {
         path: 'aimo',
         children: [
+          {
+            index: true,
+            Component: AimoHomePage,
+          },
           {
             path: 'dashboard',
             children: [

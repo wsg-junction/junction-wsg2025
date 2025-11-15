@@ -1,6 +1,6 @@
 import { use } from "react";
 import { useTranslation } from "react-i18next";
-import { useLocation } from "react-router";
+import { useLocation, useNavigate } from "react-router";
 import type { Order } from ".";
 import { Button } from "@/components/ui/button";
 import { Header } from "../components/Header";
@@ -9,7 +9,7 @@ export default function AimoPickingDashboardConfirmPage() {
     const { t } = useTranslation();
     const { state } = useLocation();
     const ordersToConfirm = state as Record<number, Order>;
-    console.log(ordersToConfirm);
+    const navigate = useNavigate();
 
     return (
         <div className="p-8">
@@ -28,7 +28,8 @@ export default function AimoPickingDashboardConfirmPage() {
                         )
                     )
                 }
-                <Button onClick={() => alert("Success")} className="w-64 self-end">Confirm and notify clients</Button>
+                <Button onClick={() => navigate("/aimo")} className="w-64 self-end">Confirm and notify clients</Button>
             </div>
-        </div>);
+        </div>
+    );
 }
