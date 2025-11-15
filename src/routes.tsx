@@ -11,7 +11,7 @@ export const ROUTES = createBrowserRouter([
     path: '/',
     element: (
       <ThemeProvider
-        defaultTheme={'dark'}
+        defaultTheme={'system'}
         storageKey={'app-theme'}>
         <App></App>
       </ThemeProvider>
