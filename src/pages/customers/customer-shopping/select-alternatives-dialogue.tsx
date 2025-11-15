@@ -70,7 +70,7 @@ export default function SelectAlternativesDialogue({ selectedIds }: { selectedId
         saveCachedMessages(selectedIds, msgs);
         setCachedLoaded(true);
       } catch {
-        const errMsg: Message = { role: 'assistant', text: 'Error generating recipe.' };
+        const errMsg: Message = { role: 'assistant', text: t('select_alternatives.dialog.error_retry', 'Something went wrong — please try again later.') };
         setMessages((prev) => {
           const next = [...prev, errMsg];
           saveCachedMessages(selectedIds, next);
@@ -80,7 +80,7 @@ export default function SelectAlternativesDialogue({ selectedIds }: { selectedId
         setLoading(false);
       }
     })();
-  }, [open, selectedIds, i18n?.language]);
+  }, [open, selectedIds, i18n?.language, t]);
 
   function clearCacheForSelection(ids: string[]) {
     try {
@@ -138,7 +138,7 @@ export default function SelectAlternativesDialogue({ selectedIds }: { selectedId
         </Button>
       </DialogTrigger>
 
-      <DialogContent className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col w-[95vw] max-w-full max-h-[80vh] overflow-hidden z-50">
+      <DialogContent className="flex flex-col w-[95vw] sm:w-[80vw] sm:max-w-5xl max-w-full max-h-[80vh] overflow-hidden">
         <DialogHeader className="sticky top-0 bg-white z-20 border-b flex items-center justify-between">
           <DialogTitle>{t('select_alternatives.dialog.title', 'Alternative Recipes')}</DialogTitle>
           <div className="flex items-center gap-2">
@@ -156,9 +156,11 @@ export default function SelectAlternativesDialogue({ selectedIds }: { selectedId
         <div className="flex-1 flex flex-col gap-4 min-h-0">
           <div className="flex-1 rounded-md overflow-hidden relative flex flex-col min-h-0">
             <div ref={containerRef} className="relative z-10 w-full p-4 overflow-auto flex-1 min-h-0 pb-6">
-              {loading ? (
-                <div className="text-center text-sm text-gray-500">{t('select_alternatives.dialog.loading', 'Generating recipe...')}</div>
-              ) : messages.length === 0 ? null : (
+              {messages.length === 0 ? (
+                loading ? (
+                  <div className="text-center text-sm text-gray-500">{t('select_alternatives.dialog.loading', 'Generating recipe...')}</div>
+                ) : null
+              ) : (
                 messages.map((m, idx) => (
                   <div key={idx} className={`mb-2 ${m.role === 'user' ? 'text-right' : 'text-left'}`}>
                     {m.role === 'assistant' ? (
@@ -169,18 +171,31 @@ export default function SelectAlternativesDialogue({ selectedIds }: { selectedId
                   </div>
                 ))
               )}
+
+              {loading && messages.length > 0 && (
+                <div className="mb-2 text-left">
+                  <div className="inline-block px-3 py-2 rounded bg-gray-50 text-gray-500 animate-pulse">{t('select_alternatives.dialog.loading', 'Generating recipe...')}</div>
+                </div>
+              )}
             </div>
           </div>
 
-          <div className="bg-white z-20 p-4 flex gap-2 items-end">
-            <textarea
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              placeholder={t('select_alternatives.dialog.placeholder', 'Type your question about alternatives...')}
-              className="flex-1 p-2 border rounded resize-none"
-              rows={2}
-              disabled={loading}
-            />
+          <div className={`bg-white z-20 p-4 ${loading ? 'opacity-60' : ''}`}>
+            {loading && (
+              <div className="w-full h-0.75 overflow-hidden relative mb-2">
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-gray-300 to-transparent" style={{ transform: 'translateX(-25%)', animation: 'shimmer 1.2s infinite' }} />
+                  <style>{`@keyframes shimmer { 0% { transform: translateX(-100%);} 100% { transform: translateX(100%);} } .h-0\\.75{height:3px}`}</style>
+              </div>
+            )}
+            <div className="flex gap-2 items-end">
+              <textarea
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                placeholder={t('select_alternatives.dialog.placeholder', 'Type your question about alternatives...')}
+                className="flex-1 p-2 border rounded resize-none"
+                rows={2}
+                disabled={loading}
+              />
             <Button
               variant={input.trim() && !loading ? 'default' : 'ghost'}
               size="icon"
@@ -208,7 +223,7 @@ export default function SelectAlternativesDialogue({ selectedIds }: { selectedId
                     return next;
                   });
                 } catch {
-                  const errMsg: Message = { role: 'assistant', text: t('select_alternatives.dialog.error_fetch', 'Error fetching response.') };
+                  const errMsg: Message = { role: 'assistant', text: t('select_alternatives.dialog.error_retry', 'Something went wrong — please try again later.') };
                   setMessages((m) => {
                     const next = [...m, errMsg];
                     saveCachedMessages(selectedIds, next);
@@ -221,6 +236,7 @@ export default function SelectAlternativesDialogue({ selectedIds }: { selectedId
             >
               <Send className="size-6" />
             </Button>
+            </div>
           </div>
         </div>
       </DialogContent>

@@ -32,12 +32,14 @@
     "alternative_products": "Alternative Products",
     "alternative_recipes": "Alternative Recipes",
     "supermarket": "Look for Supermarket"
+    ,"select_some_first":"Select at least one product to search nearby"
   },
   "select_alternatives.dialog": {
     "title": "Alternative Recipes",
     "loading": "Generating recipe...",
     "placeholder": "Type your question about alternatives...",
     "error_fetch": "Error fetching response.",
+    "error_retry": "Something went wrong — please try again later.",
     "loading_btn": "Loading...",
     "send": "Send",
     "loaded_from_cache": "Loaded from cache",

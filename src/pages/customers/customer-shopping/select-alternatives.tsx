@@ -88,26 +88,31 @@ export default function SelectAlternativesPage() {
             </div>
           </CardContent>
           <CardContent>
-            <div className="flex flex-row gap-2">
-              <Button variant="outline">{t('select_alternatives.alternative_products')}</Button>
+            <div className="flex flex-col sm:flex-row gap-2">
+              <div className="w-full sm:w-auto">
+                <SelectAlternativesDialogue selectedIds={selectedIds} />
+              </div>
 
-              <SelectAlternativesDialogue selectedIds={selectedIds} />
-
-              <Dialog>
-                <DialogTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className="cursor-pointer">
-                    {t('select_alternatives.supermarket')}
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="flex flex-col w-[90vw]! max-w-full!">
-                  <DialogHeader className="flex-auto">
-                    <DialogTitle>{t('select_alternatives.supermarket')}</DialogTitle>
-                  </DialogHeader>
-                  <SupermarketMap />
-                </DialogContent>
-              </Dialog>
+              <div className="w-full sm:w-auto">
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className="cursor-pointer w-full sm:w-auto"
+                      disabled={selectedIds.length === 0}
+                      title={selectedIds.length === 0 ? t('select_alternatives.select_some_first', 'Select at least one product to search nearby') : undefined}
+                    >
+                      {t('select_alternatives.supermarket')}
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="flex flex-col w-[90vw]! max-w-full!">
+                    <DialogHeader className="flex-auto">
+                      <DialogTitle>{t('select_alternatives.supermarket')}</DialogTitle>
+                    </DialogHeader>
+                    <SupermarketMap />
+                  </DialogContent>
+                </Dialog>
+              </div>
             </div>
           </CardContent>
         </Card>
