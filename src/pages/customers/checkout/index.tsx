@@ -16,12 +16,16 @@ import { useEffect, useState } from 'react';
 import { ShoppingCartList, type CartItem } from '@/pages/customers/customer-shopping';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert.tsx';
 import { AlertTriangleIcon } from 'lucide-react';
-import type { Product } from '@/services/ProductService';
+import { productService, type Product } from '@/services/ProductService';
+import { useProductName } from '@/hooks/use-product-name.ts';
 
 export const CheckoutPage = () => {
   const { t } = useTranslation();
+  const { i18n } = useTranslation();
+  const getTranslatedProductName = useProductName(i18n);
   const [step, setStep] = useState(1);
-  const maxSteps = 3;
+  // increase steps: 1=Cart, 2=Contact, 3=Fallbacks, 4=Review
+  const maxSteps = 4;
 
   const next = () => setStep((s) => Math.min(maxSteps, s + 1));
   const prev = () => setStep((s) => Math.max(1, s - 1));
@@ -36,12 +40,83 @@ export const CheckoutPage = () => {
     return stored ? (JSON.parse(stored) as CartItem[]) : [];
   });
 
+  // --- fallback state: map from cartItemId -> fallbackProductId | null
+  const LOCALSTORAGE_FALLBACKS_KEY = 'checkout_fallbacks_v1';
+  const [fallbacks, setFallbacks] = useState<Record<string, string | null>>(() => {
+    try {
+      const raw = localStorage.getItem(LOCALSTORAGE_FALLBACKS_KEY) || '{}';
+      return JSON.parse(raw);
+    } catch {
+      return {};
+    }
+  });
+
+  // products for fallback choices
+  const [products, setProducts] = useState<Product[]>([]);
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        const res = await productService.getProducts(-1);
+        if (mounted) setProducts(res.data || []);
+      } catch (e) {
+        console.error('Failed to load products for fallbacks', e);
+      }
+    })();
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(LOCALSTORAGE_FALLBACKS_KEY, JSON.stringify(fallbacks));
+    } catch (e) {
+      // ignore storage errors
+      console.error('Failed to save fallbacks to localStorage', e);
+    }
+  }, [fallbacks]);
+
   useEffect(() => {
     localStorage.setItem('cart', JSON.stringify(cart));
   }, [cart]);
 
   const onUpdateItem = (product: Product, quantity: number) => {
     setCart(cart.map((item) => (item.id === product.id ? { ...item, quantity } : item)));
+  };
+
+  // set a fallback for a cart item (pass fallbackId as string or null)
+  const setFallbackForItem = (itemId: string, fallbackId: string | null) => {
+    if (!itemId) return;
+    if (fallbackId === itemId) return; // disallow same-product fallback
+    setFallbacks((prev) => {
+      const next = { ...prev, [itemId]: fallbackId };
+      try {
+        localStorage.setItem(LOCALSTORAGE_FALLBACKS_KEY, JSON.stringify(next));
+      } catch {
+        console.error('Failed to save fallbacks to localStorage');
+      }
+      return next;
+    });
+  };
+
+  const clearFallbackForItem = (itemId: string) => {
+    setFallbacks((prev) => {
+      const next = { ...prev };
+      delete next[itemId];
+      try {
+        localStorage.setItem(LOCALSTORAGE_FALLBACKS_KEY, JSON.stringify(next));
+      } catch {
+        console.error('Failed to save fallbacks to localStorage');
+      }
+      return next;
+    });
+  };
+
+  const getProductName = (id: string | null | undefined) => {
+    if (!id) return null;
+    const p = products.find((x) => x.id === id);
+    return getTranslatedProductName(p);
   };
 
   return (
@@ -123,6 +198,54 @@ export const CheckoutPage = () => {
               </div>
             )}
 
+            {step === 3 && (
+              <div>
+                <h2 className="text-xl font-semibold mb-4">Fallback items</h2>
+                <p className="text-sm text-gray-600 mb-3">
+                  Choose an alternative product to use if an item is unavailable.
+                </p>
+                <div className="space-y-3">
+                  {cart.length === 0 && <p className="text-sm">Your cart is empty.</p>}
+                  {cart.map((item, idx) => (
+                    <div
+                      key={item.id || idx}
+                      className="p-3 border rounded">
+                      <div className="flex justify-between items-center">
+                        <div>
+                          <div className="font-medium">{getTranslatedProductName(item)}</div>
+                          <div className="text-sm text-muted-foreground">Qty: {item.quantity}</div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <select
+                            className="border rounded p-1"
+                            value={fallbacks[item.id] ?? ''}
+                            onChange={(e) => setFallbackForItem(item.id, e.target.value || null)}>
+                            <option value="">No fallback</option>
+                            {products
+                              .filter((p) => p.id !== item.id)
+                              .map((p) => (
+                                <option
+                                  key={p.id}
+                                  value={p.id}>
+                                  {getTranslatedProductName(p)}
+                                </option>
+                              ))}
+                          </select>
+                          {fallbacks[item.id] ? (
+                            <Button
+                              variant="ghost"
+                              onClick={() => clearFallbackForItem(item.id)}>
+                              Clear
+                            </Button>
+                          ) : null}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {step === maxSteps && (
               <div>
                 <h2 className="text-xl font-semibold mb-4">Review & Confirm</h2>
@@ -143,6 +266,21 @@ export const CheckoutPage = () => {
                     onUpdateItem={onUpdateItem}
                     setCart={() => {}}
                   />
+
+                  {/* Show selected fallbacks for review */}
+                  <div className="mt-3">
+                    <h4 className="font-medium">Fallbacks</h4>
+                    {cart.map((item) => {
+                      const fb = fallbacks[item.id];
+                      return (
+                        <div
+                          key={item.id}
+                          className="text-sm">
+                          {getTranslatedProductName(item)}: {fb ? getProductName(fb) : 'No fallback selected'}
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
               </div>
             )}
@@ -157,8 +295,8 @@ export const CheckoutPage = () => {
             </Button>
             <Button
               onClick={next}
-              disabled={step === 4}>
-              {step === 3 ? 'Review' : step === 4 ? 'Done' : 'Next'}
+              disabled={step === maxSteps}>
+              {step === maxSteps - 1 ? 'Review' : step === maxSteps ? 'Done' : 'Next'}
             </Button>
           </div>
         </div>
