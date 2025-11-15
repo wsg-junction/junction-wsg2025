@@ -14,13 +14,13 @@ import { Button } from '@/components/ui/button.tsx';
 import { ShoppingCart, Trash2 } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover.tsx';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select.tsx';
-import { ProductService } from '@/services/product.service/IProductService.ts';
 import { useNavigate } from 'react-router';
+import { productService, type Product } from '@/services/ProductService';
 
 export default function CustomerShoppingPage() {
     const { t } = useTranslation();
     const [page, setPage] = useState(0);
-    const [products, setProducts] = useState([]);
+    const [products, setProducts] = useState<Product[]>([]);
     const [_, setFetchedPages] = useState([]);
     const [isLoading, setIsLoading] = useState(false); // for initial load and page load
     const [totalProducts, setTotalProducts] = useState(0);
@@ -38,7 +38,7 @@ export default function CustomerShoppingPage() {
         const fetchProducts = async () => {
             setIsLoading(true); // start loading
             try {
-                const result = await ProductService.getProducts(page);
+                const result = await productService.getProducts(page);
                 setFetchedPages((prev) => {
                     if (prev.find((p) => p.page === page)) {
                         return prev; // already fetched
