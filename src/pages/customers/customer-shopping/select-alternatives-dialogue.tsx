@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Send } from 'lucide-react';
 import { toast } from 'sonner';
 import { productService } from '@/services/ProductService';
-import { generateGeminiRecipe } from '@/pages/gemini/gemini-functions';
+import { generateGeminiRecipe, generateGeminiContent } from '@/pages/gemini/gemini-functions';
 
 type Message = { role: 'user' | 'assistant'; text: string };
 function cacheKey(ids: string[]) {
@@ -195,10 +195,11 @@ export default function SelectAlternativesDialogue({ selectedIds }: { selectedId
                 setInput('');
                 setLoading(true);
                 try {
-                  const names = selectedIds.map((id) => productService.getProductById(id)?.name).filter(Boolean) as string[];
                   const langShort = i18n?.language?.split('-')[0];
                   const context = currentMsgs.map((m) => `${m.role}: ${m.text}`);
-                  const reply = await generateGeminiRecipe(names, context, langShort);
+                  // For follow-ups, ask the model directly using the chat context so it answers questions
+                  const followUpPrompt = input.trim();
+                  const reply = await generateGeminiContent(followUpPrompt, undefined, 200, context, langShort);
                   const assistantMsg: Message = { role: 'assistant', text: reply };
                   setMessages((m) => {
                     const next = [...m, assistantMsg];
