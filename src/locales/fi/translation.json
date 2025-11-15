@@ -1,0 +1,17 @@
+{
+  "welcome": "Tervetuloa sovellukseemme!",
+  "all_products": "Kaikki tuotteet",
+  "categories": "Kategoriat",
+  "contact_us": "Ota yhteyttä",
+  "search": "Haku",
+  "add_to_cart": "Lisää ostoskoriin",
+  "view_cart": "Näytä ostoskori",
+  "checkout": "Kassalle",
+  "shop": "Kauppa",
+  "about_us": "Tietoa meistä",
+  "terms_of_service": "Käyttöehdot",
+  "privacy_policy": "Tietosuojakäytäntö",
+  "sign_out": "Kirjaudu ulos",
+  "sign_in": "Kirjaudu sisään",
+  "change_language": "Vaihda kieltä"
+}
