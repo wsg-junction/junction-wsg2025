@@ -74,6 +74,7 @@ export default function AimoPickingDashboard() {
 	const onPickEvent = (pickEvent: PickEvent | null, orderId: string, productId: string) => {
 		const order = orders.find(o => o.id === orderId);
 		const product = order?.products.find(p => p.id === productId);
+		if (pickEvent.quantity > product.orderedQuantity) return;
 		product.pickEvent = pickEvent;
 		updateOrder(order);
 	}
@@ -127,8 +128,29 @@ function PickingRow(
 			defaultPickedQuantity?: number,
 		}
 ) {
-	const [error, setError] = useState<string | null>(null);
-	const [errorColor, setErrorColor] = useState<string>(null);
+	const [error, setError] = useState<string | null>(calculateError(defaultPickedQuantity ?? orderedQty));
+	const [errorColor, setErrorColor] = useState<string>(calculateErrorColor(defaultPickedQuantity ?? orderedQty));
+
+	function calculateError(value: number): string | null {
+		if (value > orderedQty) {
+			return t("error_quantity_greater");
+		} else if (value < orderedQty) {
+			return t("error_quantity_smaller");
+		} else {
+			return null;
+		}
+	}
+
+	function calculateErrorColor(value: number): string | null {
+		if (value > orderedQty) {
+			return "red";
+		} else if (value < orderedQty) {
+			return "orange";
+		} else {
+			return null;
+		}
+	}
+
 	return (
 		<TableRow>
 			<TableCell>{order_id}</TableCell>
@@ -142,19 +164,8 @@ function PickingRow(
 						placeholder={t("enter_quantity")}
 						onChange={(event) => {
 							const value = event.target.valueAsNumber;
-							if (value > orderedQty) {
-								setError(
-									t("error_quantity_greater")
-								);
-								setErrorColor("red");
-							} else if (value < orderedQty) {
-								setError(
-									t("error_quantity_smaller")
-								);
-								setErrorColor("orange");
-							} else {
-								setError(null);
-							}
+							setError(calculateError(value));
+							setErrorColor(calculateErrorColor(value));
 							const pickEvent = isNaN(value) ? null : {
 								quantity: value,
 								datetime: new Date(),

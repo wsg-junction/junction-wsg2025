@@ -1,27 +1,17 @@
 import { t } from "i18next";
 import { Header } from "../components/Header";
+import { useMemo } from "react";
+import { collection } from "firebase/firestore";
+import { firestore, useQuery } from "@/lib/firebase";
 
 type Warning = {
     title: string;
     description: string;
 };
 
-const warnings = [
-    {
-        title: "Low safety margin for item type #1234",
-        description: "The safety margin for item type #1234 has fallen below the recommended threshold. Consider increasing stock levels to prevent potential stockouts."
-    },
-    {
-        title: "Supplier disruptions",
-        description: "Supplier XYZ has had increased disruptions for product type #9876"
-    },
-    {
-        title: "Frequent shortages for item #4567",
-        description: "Item #4567 has experienced frequent shortages in the past month."
-    }
-] satisfies Warning[];
 
 export default function AimoWarningsPage() {
+    const warnings = useQuery<Warning>(useMemo(() => collection(firestore, "warnings"), []));
     return <div>
         <Header />
         <div className="flex flex-col gap-4 p-4">
@@ -32,6 +22,7 @@ export default function AimoWarningsPage() {
                     <div>{warning.description}</div>
                 </div>
             )}
+            {warnings.length === 0 && <div>No warnings</div>}
         </div>
     </div>;
 }
