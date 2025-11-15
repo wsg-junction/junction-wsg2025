@@ -12,27 +12,58 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { firestore, useQuery } from '@/lib/firebase';
 import type { Order } from '@/pages/aimo/picking-dashboard';
 import { Header } from '@/pages/customers/components/Header/Header.tsx';
-import { productService } from '@/services/ProductService';
+import { type Product, productService } from '@/services/ProductService';
 import { collection } from 'firebase/firestore';
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ProductCard } from '../components/ProductCard/ProductCard';
 import { SearchForAlternativeProductDialog } from '../components/SearchForAlternativeProductDialog';
 import SupermarketMap from '../components/SupermarketMap';
 import { useProductName } from '@/hooks/use-product-name.ts';
+import { productCategoryService } from '@/services/ProductCategoryService.ts';
 
 export default function SelectAlternativesPage() {
   const { t, i18n } = useTranslation();
   const getTranslatedProductName = useProductName(i18n);
 
   const orders = useQuery<Order>(useMemo(() => collection(firestore, 'orders'), []));
-  const unfulfilledItmes = useMemo(
-    () =>
-      Object.values(orders)
-        .flatMap((order) => order.products)
-        .filter((p) => p.pickEvent && p.pickEvent.quantity < p.orderedQuantity),
-    [orders],
-  );
+  const unfulfilledItems = useMemo(() => {
+    return Object.values(orders)
+      .flatMap((order) => order.products)
+      .filter((p) => p.pickEvent && p.pickEvent.quantity < p.orderedQuantity);
+  }, [orders]);
+
+  const [similarProducts, setSimilarProducts] = useState<Record<string, Product[]>>({});
+
+  useEffect(() => {
+    let mounted = true;
+
+    async function loadSimilar() {
+      const results: Record<string, Product[]> = {};
+
+      await Promise.all(
+        unfulfilledItems.map(async (item) => {
+          try {
+            const category = await productCategoryService.findSimilarProductsById(item.id);
+            if (category.length > 0) {
+              results[item.id] = category;
+            }
+          } catch (err) {
+            console.error(err);
+            // optional: logging
+          }
+        }),
+      );
+
+      if (mounted) setSimilarProducts(results);
+    }
+
+    if (unfulfilledItems.length > 0) loadSimilar();
+
+    return () => {
+      mounted = false;
+    };
+  }, [unfulfilledItems]);
 
   return (
     <div>
@@ -53,7 +84,7 @@ export default function SelectAlternativesPage() {
       </div>
       <div className="m-8 flex flex-col gap-4">
         <h1>{t('select_alternatives.title')}</h1>
-        {unfulfilledItmes.map((item) => {
+        {unfulfilledItems.map((item) => {
           const product = productService.getProductById(item.id)!;
           return (
             <Card key={item.id}>
@@ -76,9 +107,16 @@ export default function SelectAlternativesPage() {
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-6">
-                  <ProductCard id="9042d0eb-a792-4b2f-9770-dac62f894148" />
-                  <ProductCard id="10b64381-9d0d-4077-bfa7-2b1f3eefb7bc" />
-                  <ProductCard id="ce5509b2-3148-49e2-b83c-7c636e38dfbf" />
+                  {similarProducts[item.id]
+                    ? similarProducts[item.id].map((product) => {
+                        return (
+                          <ProductCard
+                            key={product.id}
+                            id={product.id}
+                          />
+                        );
+                      })
+                    : null}
                 </div>
               </CardContent>
               <CardContent>
