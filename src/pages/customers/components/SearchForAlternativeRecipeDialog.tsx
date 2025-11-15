@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 import { productService } from '@/services/ProductService';
 import { generateGeminiRecipe, generateGeminiContent } from '@/pages/gemini/gemini-functions';
 import type { Item } from '@/pages/aimo/picking-dashboard';
+import { useProductName } from '@/hooks/use-product-name.ts';
 
 type Message = { role: 'user' | 'assistant'; text: string };
 function cacheKey(item: Item) {
@@ -18,8 +19,7 @@ function loadCachedMessages(item: Item) {
     const key = cacheKey(item);
     const raw = localStorage.getItem(key);
     if (!raw) return null;
-    const parsed = JSON.parse(raw) as Message[];
-    return parsed;
+    return JSON.parse(raw) as Message[];
   } catch {
     return null;
   }
@@ -42,6 +42,7 @@ export default function SearchForAlternativeRecipeDialog({ item }: { item: Item 
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const getTranslatedProductName = useProductName(i18n);
 
   useEffect(() => {
     if (!open) return;

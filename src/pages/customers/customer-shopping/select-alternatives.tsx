@@ -19,9 +19,11 @@ import { useTranslation } from 'react-i18next';
 import { ProductCard } from '../components/ProductCard/ProductCard';
 import { SearchForAlternativeProductDialog } from '../components/SearchForAlternativeProductDialog';
 import SupermarketMap from '../components/SupermarketMap';
+import { useProductName } from '@/hooks/use-product-name.ts';
 
 export default function SelectAlternativesPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const getTranslatedProductName = useProductName(i18n);
 
   const orders = useQuery<Order>(useMemo(() => collection(firestore, 'orders'), []));
   const unfulfilledItmes = useMemo(
@@ -58,13 +60,13 @@ export default function SelectAlternativesPage() {
               <CardHeader>
                 <div className="flex flex-row justify-between items-center">
                   <div className="flex flex-row gap-4 items-center">
-                    {product.imageUrl && (
+                    {product.image && (
                       <img
-                        src={product.imageUrl}
+                        src={product.image}
                         className="h-16 object-contain"
                       />
                     )}
-                    {product.name}
+                    {getTranslatedProductName(product)}
                   </div>
                   <div>
                     {item.orderedQuantity - item.pickEvent!.quantity}/{item.orderedQuantity}{' '}
@@ -92,7 +94,8 @@ export default function SelectAlternativesPage() {
                     <DialogContent className="flex flex-col w-[90vw]! max-w-full!">
                       <DialogHeader className="flex-auto">
                         <DialogTitle>
-                          {t('search_for_alternative_product_dialog.title')} {product.name}
+                          {t('search_for_alternative_product_dialog.title')}{' '}
+                          {getTranslatedProductName(product)}
                         </DialogTitle>
                       </DialogHeader>
                       <SearchForAlternativeProductDialog />
