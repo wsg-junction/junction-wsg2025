@@ -91,6 +91,7 @@ export const CheckoutPage = () => {
                   cart={cart}
                   onUpdateItem={onUpdateItem}
                   onRemoveItem={onRemoveItem}
+                  setCart={() => {}}
                 />
               </div>
             )}
@@ -145,6 +146,7 @@ export const CheckoutPage = () => {
                     cart={cart}
                     onUpdateItem={onUpdateItem}
                     onRemoveItem={onRemoveItem}
+                    setCart={() => {}}
                   />
                 </div>
               </div>
