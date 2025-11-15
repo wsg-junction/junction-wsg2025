@@ -9,7 +9,7 @@ import {
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb.tsx';
 import { ProductCard } from '@/pages/customers/components/ProductCard/ProductCard.tsx';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button.tsx';
 import { ShoppingCart, Trash2 } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover.tsx';
@@ -17,6 +17,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useNavigate } from 'react-router';
 import { productService, type Product } from '@/services/ProductService';
 import { useProductName } from '@/hooks/use-product-name.ts';
+import type { Warning } from '@/pages/aimo/warnings';
 
 export default function CustomerShoppingPage() {
   const { t } = useTranslation();
@@ -71,10 +72,10 @@ export default function CustomerShoppingPage() {
 
     const existingItem = cart.find((item) => item.id === product.id);
     if (existingItem) {
-      setCart(cart.map((item) => (item.id === product.id ? { ...product, quantity } : item)));
+      setCart(cart.map((item) => (item.id === product.id ? { ...product, quantity, warnings: [] } : item)));
       return;
     }
-    setCart([...cart, { ...product, quantity }]);
+    setCart([...cart, { ...product, quantity, warnings: [] }]);
   };
   const getQuantityInCart = (cart: CartItem[], product: Product) => {
     const item = cart.find((item) => item.id === product.id);
@@ -159,6 +160,7 @@ export default function CustomerShoppingPage() {
 
 export type CartItem = Product & {
   quantity: number;
+  warnings: Warning[],
 };
 
 interface ShoppingCartProps {
@@ -187,8 +189,6 @@ export const ShoppingCartList = ({
     return price ? price * item.quantity : 0;
   };
 
-  console.log(cart);
-
   return (
     <div className={'space-y-4 mt-2'}>
       {cart.map((item, index) => {
@@ -206,7 +206,20 @@ export const ShoppingCartList = ({
               <p className="text-sm text-muted-foreground">
                 {formattedPrice}€<span className="text-sm text-muted-foreground font-light"> / pcs</span>
               </p>
+              {item.warnings.length > 0 && (
+                <div className="mt-1 space-y-1">
+                  {item.warnings.map((warnings, wIndex) => (
+                    <div
+                      key={wIndex}
+                      className="p-2 border border-yellow-400 bg-yellow-100 rounded-lg">
+                      <div className="text-sm font-bold">{warnings.title}</div>
+                      <div className="text-sm">{warnings.description}</div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
+            <div className='flex-1' />
 
             {!readOnly ? (
               <div className={'flex items-center gap-2'}>
@@ -282,6 +295,6 @@ export const ShoppingCartList = ({
           </span>
         </div>
       </div>
-    </div>
+    </div >
   );
 };

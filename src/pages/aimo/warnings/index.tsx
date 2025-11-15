@@ -4,7 +4,9 @@ import { useMemo } from "react";
 import { collection } from "firebase/firestore";
 import { firestore, useQuery } from "@/lib/firebase";
 
-type Warning = {
+export type Warning = {
+    orderId?: string,
+    itemId?: string,
     title: string;
     description: string;
 };

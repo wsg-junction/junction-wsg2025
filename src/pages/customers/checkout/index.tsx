@@ -22,31 +22,101 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { getToken } from 'firebase/messaging';
 import { messaging, vapidKey } from '@/lib/firebase';
 import { useProductName } from '@/hooks/use-product-name';
+import { useProductName } from '@/hooks/use-product-name.ts';
+import { useNavigate } from 'react-router';
+import { doc, setDoc } from 'firebase/firestore';
+import { firestore } from '@/lib/firebase';
+import { v4 } from "uuid";
+import type { Item, Order } from '@/pages/aimo/picking-dashboard';
+import type { Warning } from '@/pages/aimo/warnings';
 
 export const CheckoutPage = () => {
   const { t } = useTranslation();
   const { i18n } = useTranslation();
   const getTranslatedProductName = useProductName(i18n);
   const [step, setStep] = useState(1);
-  // increase steps: 1=Cart, 2=Contact, 3=Fallbacks, 4=Review
-  const maxSteps = 4;
+  const maxSteps = 3;
+  const navigate = useNavigate();
 
-  const next = () => setStep((s) => Math.min(maxSteps, s + 1));
-  const prev = () => setStep((s) => Math.max(1, s - 1));
+  const calculateWarnings = (item: CartItem) => {
+    const warnings: Warning[] = [];
+    if (Math.random() < 0.2) {
+      warnings.push({
+        title: "Frequent Disruptions",
+        description: "This item has been disrupted more frequently than usual.",
+      });
+    }
+    if (Math.random() < 0.2) {
+      warnings.push({
+        title: "Unreliable Supplier",
+        description: "This supplier's reliability is below average.",
+      });
+    }
+    if (Math.random() < 0.2) {
+      warnings.push({
+        title: "Unreliable Supplier",
+        description: "This supplier's reliability is below average.",
+      });
+    }
+    if (Math.random() < 0.2) {
+      warnings.push({
+        title: "Seasonality Issues",
+        description: "This item is prone to seasonal availability issues.",
+      });
+    }
+    return warnings;
+  }
 
-  const progressValue = (step / maxSteps) * 100;
+  const [cart, setCart] = useState(() => {
+    const stored = localStorage.getItem('cart');
+    const cart = stored ? (JSON.parse(stored) as CartItem[]) : [];
+    for (const item of cart) {
+      item.warnings = calculateWarnings(item);
+    }
+    return cart;
+  });
 
-  const [email, setEmail] = useState('');
-  const [telephone, setTelephone] = useState('');
-  const [name, setName] = useState('');
+  function cartItemToItem(item: CartItem): Item {
+    const newItem = { id: item.id, ean: item.ean, names: item.names, orderedQuantity: item.quantity, pickEvent: null };
+    return newItem;
+  }
+
   const [pushNotificationToken, setPushNotificationToken] = useState<string | null>(() => {
+    const next = () => setStep((s) => {
+      if (s === maxSteps) {
+        const orderId = v4();
+        for (const item of cart) {
+          console.log(item);
+          for (const warning of item.warnings) {
+            warning.orderId = orderId;
+            warning.itemId = item.id;
+            const d = doc(firestore, "warnings", v4());
+            setDoc(d, warning);
+          }
+        }
+        const order = {
+          id: orderId,
+          products: cart.map(cartItemToItem),
+          pushNotificationToken: pushNotificationToken || undefined,
+        } satisfies Order;
+        const d = doc(firestore, "orders", orderId);
+        setDoc(d, order);
+        navigate('/customer');
+        return;
+      }
+      return Math.min(maxSteps, s + 1);
+    });
+    const prev = () => setStep((s) => Math.max(1, s - 1));
+
+    const progressValue = (step / maxSteps) * 100;
+
+    const [email, setEmail] = useState('');
+    const [telephone, setTelephone] = useState('');
+    const [name, setName] = useState('');
     const token = localStorage.getItem('pushNotificationToken');
     return token ? token : null;
   });
-  const [cart, setCart] = useState(() => {
-    const stored = localStorage.getItem('cart');
-    return stored ? (JSON.parse(stored) as CartItem[]) : [];
-  });
+
 
   // --- fallback state: map from cartItemId -> fallbackProductId | null
   const LOCALSTORAGE_FALLBACKS_KEY = 'checkout_fallbacks_v1';
@@ -180,7 +250,7 @@ export const CheckoutPage = () => {
                   readOnly={false}
                   cart={cart}
                   onUpdateItem={onUpdateItem}
-                  setCart={() => {}}
+                  setCart={() => { }}
                 />
               </div>
             )}
@@ -311,7 +381,7 @@ export const CheckoutPage = () => {
                     readOnly={true}
                     cart={cart}
                     onUpdateItem={onUpdateItem}
-                    setCart={() => {}}
+                    setCart={() => { }}
                   />
 
                   {/* Show selected fallbacks for review */}
@@ -341,8 +411,7 @@ export const CheckoutPage = () => {
               Back
             </Button>
             <Button
-              onClick={next}
-              disabled={step === maxSteps}>
+              onClick={next}>
               {step === maxSteps - 1 ? 'Review' : step === maxSteps ? 'Done' : 'Next'}
             </Button>
           </div>

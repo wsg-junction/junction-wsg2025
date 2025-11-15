@@ -15,6 +15,9 @@ import { Header } from "../components/Header";
 import { t } from "i18next";
 import { firestore, useQuery } from "@/lib/firebase";
 import { collection, doc, updateDoc } from "@firebase/firestore";
+import type { Warning } from "../warnings";
+import { useProductName } from "@/hooks/use-product-name";
+import type { TranslatedName } from "@/services/ProductService";
 
 export type PickEvent = {
 	quantity: number;
@@ -23,8 +26,9 @@ export type PickEvent = {
 
 export type Item = {
 	id: string;
-	name: string;
+	names: TranslatedName[];
 	orderedQuantity: number;
+	ean: string;
 	pickEvent: PickEvent | null;
 };
 
@@ -35,7 +39,8 @@ export type Order = {
 };
 
 export default function AimoPickingDashboard() {
-	const { t } = useTranslation();
+	const { t, i18n } = useTranslation();
+	const getTranslatedProductName = useProductName(i18n)
 
 	const orders = useQuery<Order>(useMemo(() => collection(firestore, "orders"), []));
 	console.log(orders);
@@ -104,7 +109,7 @@ export default function AimoPickingDashboard() {
 							Object.values(order.products).map(product =>
 								<PickingRow
 									order_id={order.id}
-									productName={product.name}
+									productName={getTranslatedProductName(product)}
 									orderedQty={product.orderedQuantity}
 									setPickEvent={(e) => onPickEvent(e, order.id, product.id)}
 									defaultPickedQuantity={product.pickEvent?.quantity} />
