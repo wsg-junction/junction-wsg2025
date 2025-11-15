@@ -47,13 +47,7 @@ export const CheckoutPage = () => {
     if (Math.random() < 0.2) {
       warnings.push({
         title: "Unreliable Supplier",
-        description: "This supplier's reliability is below average.",
-      });
-    }
-    if (Math.random() < 0.2) {
-      warnings.push({
-        title: "Unreliable Supplier",
-        description: "This supplier's reliability is below average.",
+        description: "This supplier's reliability is poor.",
       });
     }
     if (Math.random() < 0.2) {
