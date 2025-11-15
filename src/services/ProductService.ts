@@ -36,8 +36,18 @@ export class ProductService {
     });
   }
 
-  getProductById(id: number): Product | undefined {
-    return products.find((p) => p.id === id);
+  getProductById(id: string): Product | undefined {
+    const product = products.find((p) => p.id === id);
+    if (!product) return undefined;
+
+    const imageName = product.images?.find((t) => t.format === 'product')?.savedImage ?? null;
+    const priceString = product.price.value ? product.price.value.toFixed(2) : '0.00';
+    return {
+      ...product,
+      imageUrl: imageName ? `/product_images/${imageName}` : null,
+      // eslint-disable-next-line no-irregular-whitespace
+      priceString: `${priceString} €`,
+    };
   }
 }
 export const productService = new ProductService();

@@ -12,6 +12,7 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import SupermarketMap from '../components/SupermarketMap';
+import { ProductCard } from '../components/ProductCard/ProductCard';
 
 export default function SelectAlternativesPage() {
   const { t } = useTranslation();
@@ -45,9 +46,10 @@ export default function SelectAlternativesPage() {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="flex flex-row gap-4">
-              <Card>Dafgårds levain multiseed 48x110g</Card>
-              <Card>Dafgårds levain multiseed 48x110g</Card>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-6">
+              <ProductCard id="9042d0eb-a792-4b2f-9770-dac62f894148" />
+              <ProductCard id="10b64381-9d0d-4077-bfa7-2b1f3eefb7bc" />
+              <ProductCard id="ce5509b2-3148-49e2-b83c-7c636e38dfbf" />
             </div>
           </CardContent>
           <CardContent>

@@ -114,12 +114,6 @@ export default function CustomerShoppingPage() {
                 <>
                     <div className="px-8 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-6">
                         {products.map((product, index) => {
-                            const { name, description, price } = product;
-                            const formattedPrice = price.value ? price.value.toFixed(2) : '0.00';
-                            const imageName =
-                                product.images?.find((t) => t.format === 'product')?.savedImage ?? null;
-                            const imageUrl = imageName ? '/product_images/' + imageName : null;
-
                             return (
                                 <ProductCard
                                     onUpdateCartQuantity={(newQuantity) => {
@@ -131,12 +125,9 @@ export default function CustomerShoppingPage() {
                                     }}
                                     currentQuantity={getQuantityInCart(cart, product)}
                                     key={index}
+                                    id={product.id}
                                     onAddToCart={() => onAddToCart(product)}
-                                    imageUrl={imageUrl}
-                                    name={name}
-                                    description={description}
                                     rating={3}
-                                    price={formattedPrice + '€'}
                                 />
                             );
                         })}
