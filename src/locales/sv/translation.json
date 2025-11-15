@@ -13,5 +13,13 @@
   "privacy_policy": "Integritetspolicy",
   "sign_out": "Logga ut",
   "sign_in": "Logga in",
-  "change_language": "Byt språk"
+  "change_language": "Byt språk",
+  "order_id": "Order-ID",
+  "product_name": "Produktnamn",
+  "ordered_quantity": "Beställd kvantitet",
+  "picked_quantity": "Plockad kvantitet",
+  "submit": "Skicka",
+  "enter_quantity": "Ange kvantitet",
+  "error_quantity_greater": "Den plockade kvantiteten är större än den beställda kvantiteten. Välj högst lika många som beställts.",
+  "error_quantity_smaller": "Den plockade kvantiteten är mindre än den beställda kvantiteten."
 }

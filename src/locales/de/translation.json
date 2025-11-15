@@ -12,5 +12,14 @@
   "terms_of_service": "Nutzungsbedingungen",
   "privacy_policy": "Datenschutzerklärung",
   "sign_out": "Abmelden",
-  "sign_in": "Anmelden"
+  "sign_in": "Anmelden",
+  "change_language": "Sprache ändern",
+  "order_id": "Bestellungs-ID",
+  "product_name": "Produktname",
+  "ordered_quantity": "Bestellte Menge",
+  "picked_quantity": "ausgewählte Menge",
+  "submit": "Submit",
+  "enter_quantity": "Menge eingeben",
+  "error_quantity_greater": "Die ausgewählte Menge ist größer als die bestellte Menge. Bitte höchstens so viele auswählen, wie auch bestellt wurden.",
+  "error_quantity_smaller": "Die ausgewählte Menge ist kleiner als die bestellte Menge."
 }
