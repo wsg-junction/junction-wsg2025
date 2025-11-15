@@ -35,6 +35,27 @@ export class ProductService {
       ); // simulate network delay
     });
   }
+  async searchProducts(query: string): Promise<Product[]> {
+    const parts = query
+      .toLocaleLowerCase()
+      .split(/\s+/)
+      .filter((p) => p.length);
+
+    return new Promise((resolve) => {
+      setTimeout(
+        () =>
+          resolve(
+            products
+              .filter((product) => {
+                const lowerName = product.name.toLocaleLowerCase();
+                return parts.every((part) => lowerName.includes(part));
+              })
+              .slice(0, 50),
+          ),
+        300,
+      ); // simulate network delay
+    });
+  }
 
   getProductById(id: string): Product | undefined {
     const product = products.find((p) => p.id === id);

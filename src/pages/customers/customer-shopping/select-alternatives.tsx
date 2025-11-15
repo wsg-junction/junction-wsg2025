@@ -13,6 +13,7 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import SupermarketMap from '../components/SupermarketMap';
 import { ProductCard } from '../components/ProductCard/ProductCard';
+import { SearchForAlternativeProductDialog } from '../components/SearchForAlternativeProductDialog';
 
 export default function SelectAlternativesPage() {
   const { t } = useTranslation();
@@ -54,7 +55,21 @@ export default function SelectAlternativesPage() {
           </CardContent>
           <CardContent>
             <div className="flex flex-row gap-2">
-              <Button variant="outline">{t('select_alternatives.alternative_products')}</Button>
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className="cursor-pointer">
+                    {t('select_alternatives.alternative_products')}
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="flex flex-col w-[90vw]! max-w-full!">
+                  <DialogHeader className="flex-auto">
+                    <DialogTitle>{t('search_for_alternative_product_dialog.title')}</DialogTitle>
+                  </DialogHeader>
+                  <SearchForAlternativeProductDialog originalCartItem={'TODO'} />
+                </DialogContent>
+              </Dialog>
               <Button variant="outline">{t('select_alternatives.alternative_recipes')}</Button>
               <Dialog>
                 <DialogTrigger asChild>
