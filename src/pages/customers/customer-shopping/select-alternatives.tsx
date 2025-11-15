@@ -1,6 +1,3 @@
-import { useTranslation } from 'react-i18next';
-import { useState } from 'react';
-import { Header } from '@/pages/customers/components/Header/Header.tsx';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -9,17 +6,31 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb.tsx';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import SupermarketMap from '../components/SupermarketMap';
+import { firestore, useQuery } from '@/lib/firebase';
+import type { Order } from '@/pages/aimo/picking-dashboard';
+import { Header } from '@/pages/customers/components/Header/Header.tsx';
+import { productService } from '@/services/ProductService';
+import { collection } from 'firebase/firestore';
+import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ProductCard } from '../components/ProductCard/ProductCard';
-import SelectAlternativesDialogue from './select-alternatives-dialogue';
+import { SearchForAlternativeProductDialog } from '../components/SearchForAlternativeProductDialog';
+import SupermarketMap from '../components/SupermarketMap';
 
 export default function SelectAlternativesPage() {
   const { t } = useTranslation();
-  const [selectedIds, setSelectedIds] = useState<string[]>([]);
-  
+
+  const orders = useQuery<Order>(useMemo(() => collection(firestore, 'orders'), []));
+  const unfulfilledItmes = useMemo(
+    () =>
+      Object.values(orders)
+        .flatMap((order) => order.products)
+        .filter((p) => p.pickEvent && p.pickEvent.quantity < p.orderedQuantity),
+    [orders],
+  );
 
   return (
     <div>
@@ -40,82 +51,74 @@ export default function SelectAlternativesPage() {
       </div>
       <div className="m-8 flex flex-col gap-4">
         <h1>{t('select_alternatives.title')}</h1>
-        <Card>
-          <CardHeader>
-            <div className="flex flex-row gap-4 items-center">
-              <img
-                src="https://api.valioaimo.fi/medias/96Wx96H-1200Wx1200H-null?context=bWFzdGVyfHJvb3R8MTA3OTZ8aW1hZ2Uvd2VicHxhR1JpTDJoaE55ODRPRGMxT0RVd09UZzVOVGs0THprMlYzZzVOa2hmTVRJd01GZDRNVEl3TUVoZmJuVnNiQXw0NWNmYTkyYWEyMTQwNmQxZGE5YmEwMzlhMjY5MjFlZTNmMTZjNGM3ODA1MTBjNmY4N2M0NjExNTRmMzI2NTBi"
-                className="h-16"
-              />
-              2 crt (80 pcs) Dafgårds sourdough bread dark 40x110g
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-6">
-              {[
-                '9042d0eb-a792-4b2f-9770-dac62f894148',
-                '10b64381-9d0d-4077-bfa7-2b1f3eefb7bc',
-                'ce5509b2-3148-49e2-b83c-7c636e38dfbf',
-              ].map((id) => {
-                const selected = selectedIds.includes(id);
-                return (
-                  <div
-                    key={id}
-                    role="button"
-                    tabIndex={0}
-                    onClick={() => {
-                      setSelectedIds((prev) =>
-                        prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
-                      );
-                    }}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' || e.key === ' ') {
-                        e.preventDefault();
-                        setSelectedIds((prev) =>
-                          prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
-                        );
-                      }
-                    }}
-                    className={`cursor-pointer relative rounded ${selected ? 'ring-2 ring-blue-500' : ''}`}
-                  >
-                    <ProductCard id={id} />
-                    {selected && (
-                      <div className="absolute top-2 right-2 bg-blue-600 text-white text-xs px-2 py-0.5 rounded">Selected</div>
+        {unfulfilledItmes.map((item) => {
+          const product = productService.getProductById(item.id)!;
+          return (
+            <Card key={item.id}>
+              <CardHeader>
+                <div className="flex flex-row justify-between items-center">
+                  <div className="flex flex-row gap-4 items-center">
+                    {product.imageUrl && (
+                      <img
+                        src={product.imageUrl}
+                        className="h-16 object-contain"
+                      />
                     )}
+                    {product.name}
                   </div>
-                );
-              })}
-            </div>
-          </CardContent>
-          <CardContent>
-            <div className="flex flex-col sm:flex-row gap-2">
-              <div className="w-full sm:w-auto">
-                <SelectAlternativesDialogue selectedIds={selectedIds} />
-              </div>
-
-              <div className="w-full sm:w-auto">
-                <Dialog>
-                  <DialogTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className="cursor-pointer w-full sm:w-auto"
-                      disabled={selectedIds.length === 0}
-                      title={selectedIds.length === 0 ? t('select_alternatives.select_some_first', 'Select at least one product to search nearby') : undefined}
-                    >
-                      {t('select_alternatives.supermarket')}
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="flex flex-col w-[90vw]! max-w-full!">
-                    <DialogHeader className="flex-auto">
-                      <DialogTitle>{t('select_alternatives.supermarket')}</DialogTitle>
-                    </DialogHeader>
-                    <SupermarketMap />
-                  </DialogContent>
-                </Dialog>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+                  <div>
+                    {item.orderedQuantity - item.pickEvent!.quantity}/{item.orderedQuantity}{' '}
+                    {t('select_alternatives.not_deliverable')}
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-6">
+                  <ProductCard id="9042d0eb-a792-4b2f-9770-dac62f894148" />
+                  <ProductCard id="10b64381-9d0d-4077-bfa7-2b1f3eefb7bc" />
+                  <ProductCard id="ce5509b2-3148-49e2-b83c-7c636e38dfbf" />
+                </div>
+              </CardContent>
+              <CardContent>
+                <div className="flex flex-row gap-2">
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className="cursor-pointer">
+                        {t('select_alternatives.alternative_products')}
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="flex flex-col w-[90vw]! max-w-full!">
+                      <DialogHeader className="flex-auto">
+                        <DialogTitle>
+                          {t('search_for_alternative_product_dialog.title')} {product.name}
+                        </DialogTitle>
+                      </DialogHeader>
+                      <SearchForAlternativeProductDialog />
+                    </DialogContent>
+                  </Dialog>
+                  {/* <SearchForAlternativeRecipeDialog item={'TODO'} /> */}
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className="cursor-pointer">
+                        {t('select_alternatives.supermarket')}
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="flex flex-col w-[90vw]! max-w-full!">
+                      <DialogHeader className="flex-auto">
+                        <DialogTitle>{t('select_alternatives.supermarket')}</DialogTitle>
+                      </DialogHeader>
+                      <SupermarketMap />
+                    </DialogContent>
+                  </Dialog>
+                </div>
+              </CardContent>
+            </Card>
+          );
+        })}
       </div>
     </div>
   );

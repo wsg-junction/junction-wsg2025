@@ -22,14 +22,14 @@ export default function CustomerShoppingPage() {
   const navigate = useNavigate();
 
   const [page, setPage] = useState(0);
-  const [products, setProducts] = useState<Product[]>([]);;
+  const [products, setProducts] = useState<Product[]>([]);
   const [_, setFetchedPages] = useState([]);
   const [isLoading, setIsLoading] = useState(false); // for initial load and page load
   const [totalProducts, setTotalProducts] = useState(0);
 
   const [cart, setCart] = useState(() => {
     const stored = localStorage.getItem('cart');
-    return stored ? JSON.parse(stored) : [];
+    return stored ? (JSON.parse(stored) as CartItem[]) : [];
   });
 
   useEffect(() => {
@@ -63,31 +63,20 @@ export default function CustomerShoppingPage() {
     setPage((prev) => prev + 1);
   };
 
-  const onAddToCart = (product) => {
-    const existingItem = cart.find((item) => item.id === product.id);
-    if (existingItem) {
-      onUpdateItem(existingItem, { ...existingItem, quantity: existingItem.quantity + 1 });
+  const onUpdateItem = (product: Product, quantity: number) => {
+    if (quantity <= 0) {
+      setCart(cart.filter((item) => item.id !== product.id));
       return;
     }
-    setCart([...cart, { ...product, quantity: 1 }]);
-  };
 
-  const onUpdateItem = (product, newProduct) => {
-    setCart(cart.map((item) => (item.id === product.id ? newProduct : item)));
+    const existingItem = cart.find((item) => item.id === product.id);
+    if (existingItem) {
+      setCart(cart.map((item) => (item.id === product.id ? { ...product, quantity } : item)));
+      return;
+    }
+    setCart([...cart, { ...product, quantity }]);
   };
-
-  const onRemoveItem = (product) => {
-    setCart(cart.filter((item) => item.id !== product.id));
-  };
-
-  const updateQuantity = (item, quantity) => {
-    onUpdateItem(item, {
-      ...item,
-      quantity: quantity,
-    });
-  };
-
-  const getQuantityInCart = (cart, product) => {
+  const getQuantityInCart = (cart: CartItem[], product: Product) => {
     const item = cart.find((item) => item.id === product.id);
     return item ? item.quantity : 0;
   };
@@ -115,20 +104,15 @@ export default function CustomerShoppingPage() {
       ) : (
         <>
           <div className="px-8 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-6">
-            {products.map((product, index) => {
+            {products.map((product) => {
               return (
                 <ProductCard
+                  key={product.id}
                   id={product.id}
                   onUpdateCartQuantity={(newQuantity) => {
-                    if (newQuantity === 0) {
-                      onRemoveItem(product);
-                      return;
-                    }
-                    updateQuantity(product, newQuantity);
+                    onUpdateItem(product, newQuantity);
                   }}
                   currentQuantity={getQuantityInCart(cart, product)}
-                  key={index}
-                  onAddToCart={() => onAddToCart(product)}
                   rating={3}
                 />
               );
@@ -166,7 +150,6 @@ export default function CustomerShoppingPage() {
             showButtons={true}
             cart={cart}
             onUpdateItem={onUpdateItem}
-            onRemoveItem={onRemoveItem}
           />
         </PopoverContent>
       </Popover>
@@ -174,13 +157,12 @@ export default function CustomerShoppingPage() {
   );
 }
 
-interface CartItem {
-  [key: string]: any;
-}
+export type CartItem = Product & {
+  quantity: number;
+};
 interface ShoppingCartProps {
   cart: CartItem[];
-  onRemoveItem: (item: CartItem) => void;
-  onUpdateItem: (item: CartItem, newItem: CartItem) => void;
+  onUpdateItem: (product: Product, quantity: number) => void;
   readOnly?: boolean;
   showButtons?: boolean;
   setCart: (cart: CartItem[]) => void;
@@ -190,22 +172,15 @@ export const ShoppingCartList = ({
   readOnly = false,
   showButtons = false,
   cart,
-  onRemoveItem,
   onUpdateItem,
   setCart,
 }: ShoppingCartProps) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const updateQuantity = (item, quantity) => {
-    onUpdateItem(item, {
-      ...item,
-      quantity: quantity,
-    });
+  const updateQuantity = (product: Product, quantity: number) => {
+    onUpdateItem(product, quantity);
   };
-  const removeItem = (item) => {
-    onRemoveItem(item);
-  };
-  const totalPrice = (item) => {
+  const totalPrice = (item: CartItem) => {
     const { price } = item;
     return price.value ? price.value * item.quantity : 0;
   };
@@ -261,14 +236,14 @@ export const ShoppingCartList = ({
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={() => removeItem(item)}>
+                onClick={() => updateQuantity(item, 0)}>
                 <Trash2 className="h-4 w-4" />
               </Button>
             )}
           </div>
         );
       })}
-      <div className={'h-[1px] bg-black dark:bg-white '}></div>
+      <div className={'h-px bg-black dark:bg-white '}></div>
       <div className={'flex flex-row justify-between'}>
         <div>
           {showButtons ? (

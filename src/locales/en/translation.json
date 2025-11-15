@@ -27,24 +27,31 @@
   "enter_quantity": "Enter quantity",
   "error_quantity_greater": "The picked quantity is greater than the ordered quantity. Please select at most as many as ordered.",
   "error_quantity_smaller": "The picked quantity is smaller than the ordered quantity.",
+  "no_image": "No Image",
   "select_alternatives": {
     "title": "Select Alternatives",
     "alternative_products": "Alternative Products",
     "alternative_recipes": "Alternative Recipes",
-    "supermarket": "Look for Supermarket"
-    ,"select_some_first":"Select at least one product to search nearby"
+    "supermarket": "Look for Supermarket",
+    "select_some_first": "Select at least one product to search nearby",
+    "not_deliverable": "not deliverable"
   },
-  "select_alternatives.dialog": {
+  "search_for_alternative_product_dialog": {
+    "title": "Search for alternatives to",
+    "search_placeholder": "Search for products…",
+    "no_products_found": "No products found",
+    "no_products_found_description": "Try adjusting your search or filter to find what you're looking for."
+  },
+  "search_for_alternative_recipe_dialog": {
     "title": "Alternative Recipes",
-    "loading": "Generating recipe...",
-    "placeholder": "Type your question about alternatives...",
+    "loading": "Generating recipe…",
+    "placeholder": "Type your question about alternatives…",
     "error_fetch": "Error fetching response.",
     "error_retry": "Something went wrong — please try again later.",
-    "loading_btn": "Loading...",
+    "loading_btn": "Loading…",
     "send": "Send",
     "loaded_from_cache": "Loaded from cache",
-    "clear_cache": "Clear cache"
+    "clear_cache": "Clear cache",
+    "cache_cleared": "Cache cleared"
   }
-  ,
-  "select_alternatives.dialog.cache_cleared": "Cache cleared"
 }

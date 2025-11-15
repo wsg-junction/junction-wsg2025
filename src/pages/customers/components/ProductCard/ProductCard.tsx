@@ -1,25 +1,24 @@
 import { Card, CardContent, CardDescription, CardTitle } from '@/components/ui/card.tsx';
 import { ShoppingCart, StarIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button.tsx';
+import { useTranslation } from 'react-i18next';
 import { productService } from '@/services/ProductService';
 
 interface ProductCardProps {
     id: string;
     rating?: number;
-    onAddToCart?: () => void;
     onUpdateCartQuantity?: (quantity: number) => void;
-    onRemoveFromCart?: () => void;
     currentQuantity?: number;
 }
 
 export const ProductCard = ({
     id,
     rating,
-    onAddToCart,
     onUpdateCartQuantity,
-    onRemoveFromCart,
     currentQuantity,
 }: ProductCardProps) => {
+    const { t } = useTranslation();
+
     const product = productService.getProductById(id)!;
     return (
         <Card className={'p-0'}>
@@ -32,7 +31,7 @@ export const ProductCard = ({
                                 className={'w-full h-full object-contain'}
                             />
                         ) : (
-                            'No Image'
+                            t('no_image')
                         )}
                     </div>
                 </div>
@@ -75,7 +74,7 @@ export const ProductCard = ({
 
                     {(!currentQuantity || currentQuantity === 0) && (
                         <Button
-                            onClick={onAddToCart}
+                            onClick={() => onUpdateCartQuantity && onUpdateCartQuantity(1)}
                             variant="default"
                             size={'icon'}>
                             <ShoppingCart></ShoppingCart>
