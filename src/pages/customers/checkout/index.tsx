@@ -17,6 +17,10 @@ import { ShoppingCartList, type CartItem } from '@/pages/customers/customer-shop
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert.tsx';
 import { AlertTriangleIcon } from 'lucide-react';
 import type { Product } from '@/services/ProductService';
+import { Label } from '@/components/ui/label';
+import { Checkbox } from '@/components/ui/checkbox';
+import { getToken } from 'firebase/messaging';
+import { messaging, vapidKey } from '@/lib/firebase';
 
 export const CheckoutPage = () => {
   const { t } = useTranslation();
@@ -31,6 +35,10 @@ export const CheckoutPage = () => {
   const [email, setEmail] = useState('');
   const [telephone, setTelephone] = useState('');
   const [name, setName] = useState('');
+  const [pushNotificationToken, setPushNotificationToken] = useState<string | null>(() => {
+    const token = localStorage.getItem('pushNotificationToken');
+    return token ? token : null;
+  });
   const [cart, setCart] = useState(() => {
     const stored = localStorage.getItem('cart');
     return stored ? (JSON.parse(stored) as CartItem[]) : [];
@@ -41,7 +49,17 @@ export const CheckoutPage = () => {
   }, [cart]);
 
   const onUpdateItem = (product: Product, quantity: number) => {
-    setCart(cart.map((item) => (item.id === product.id ? { ...item, quantity } : item)));
+    if (quantity <= 0) {
+      setCart(cart.filter((item) => item.id !== product.id));
+      return;
+    }
+
+    const existingItem = cart.find((item) => item.id === product.id);
+    if (existingItem) {
+      setCart(cart.map((item) => (item.id === product.id ? { ...product, quantity } : item)));
+      return;
+    }
+    setCart([...cart, { ...product, quantity }]);
   };
 
   return (
@@ -120,6 +138,35 @@ export const CheckoutPage = () => {
                   placeholder="Telephone"
                   type={'tel'}
                 />
+                <div className="mt-4 flex items-start gap-3">
+                  <Checkbox
+                    id="push-notifications"
+                    checked={!!pushNotificationToken}
+                    onCheckedChange={async (checked) => {
+                      if (!checked) {
+                        setPushNotificationToken(null);
+                        return;
+                      }
+
+                      try {
+                        const token = await getToken(messaging, { vapidKey });
+                        console.log('Push notification token:', token);
+                        setPushNotificationToken(token);
+                        localStorage.setItem('pushNotificationToken', token);
+                      } catch (error) {
+                        console.error('Error getting push notification token:', error);
+                      }
+                    }}
+                  />
+                  <Label htmlFor="push-notifications">
+                    <div className="grid gap-2">
+                      Receive push notifications
+                      <p className="text-muted-foreground text-sm">
+                        Get notified if there are any issues while fulfilling your order.
+                      </p>
+                    </div>
+                  </Label>
+                </div>
               </div>
             )}
 

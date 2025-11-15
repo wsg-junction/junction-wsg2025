@@ -31,6 +31,7 @@ export type Item = {
 export type Order = {
 	id: string;
 	products: Item[];
+	pushNotificationToken?: string;
 };
 
 export default function AimoPickingDashboard() {
