@@ -28,7 +28,7 @@ export default function CustomerShoppingPage() {
   const [isLoading, setIsLoading] = useState(false); // for initial load and page load
   const [totalProducts, setTotalProducts] = useState(0);
 
-  const [cart, setCart]: [CartItem[], (items: CartItem[]) => void] = useState(() => {
+  const [cart, setCart] = useState(() => {
     const stored = localStorage.getItem('cart');
     return stored ? (JSON.parse(stored) as CartItem[]) : [];
   });
@@ -189,37 +189,6 @@ export const ShoppingCartList = ({
     return price ? price * item.quantity : 0;
   };
 
-  const calculateWarnings = (item: CartItem) => {
-    const warnings: Warning[] = [];
-    if (Math.random() < 0.2) {
-      warnings.push({
-        title: "Frequent Disruptions",
-        description: "This item has been disrupted more frequently than usual.",
-      });
-    }
-    if (Math.random() < 0.2) {
-      warnings.push({
-        title: "Unreliable Supplier",
-        description: "This supplier's reliability is below average.",
-      });
-    }
-    if (Math.random() < 0.2) {
-      warnings.push({
-        title: "Unreliable Supplier",
-        description: "This supplier's reliability is below average.",
-      });
-    }
-    if (Math.random() < 0.2) {
-      warnings.push({
-        title: "Seasonality Issues",
-        description: "This item is prone to seasonal availability issues.",
-      });
-    }
-    return warnings;
-  }
-
-  const allWarnings = useMemo(() => cart.map(item => calculateWarnings(item)), []);
-
   return (
     <div className={'space-y-4 mt-2'}>
       {cart.map((item, index) => {
@@ -237,9 +206,9 @@ export const ShoppingCartList = ({
               <p className="text-sm text-muted-foreground">
                 {formattedPrice}€<span className="text-sm text-muted-foreground font-light"> / pcs</span>
               </p>
-              {allWarnings[index].length > 0 && (
+              {item.warnings.length > 0 && (
                 <div className="mt-1 space-y-1">
-                  {allWarnings[index].map((warnings, wIndex) => (
+                  {item.warnings.map((warnings, wIndex) => (
                     <div
                       key={wIndex}
                       className="p-2 border border-yellow-400 bg-yellow-100 rounded-lg">

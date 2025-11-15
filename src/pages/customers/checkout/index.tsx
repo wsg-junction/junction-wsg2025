@@ -22,7 +22,8 @@ import { useNavigate } from 'react-router';
 import { doc, setDoc } from 'firebase/firestore';
 import { firestore } from '@/lib/firebase';
 import { v4 } from "uuid";
-import type { Item } from '@/pages/aimo/picking-dashboard';
+import type { Item, Order } from '@/pages/aimo/picking-dashboard';
+import type { Warning } from '@/pages/aimo/warnings';
 
 export const CheckoutPage = () => {
   const { t } = useTranslation();
@@ -32,10 +33,48 @@ export const CheckoutPage = () => {
   const maxSteps = 3;
   const navigate = useNavigate();
 
+  const calculateWarnings = (item: CartItem) => {
+    const warnings: Warning[] = [];
+    if (Math.random() < 0.2) {
+      warnings.push({
+        title: "Frequent Disruptions",
+        description: "This item has been disrupted more frequently than usual.",
+      });
+    }
+    if (Math.random() < 0.2) {
+      warnings.push({
+        title: "Unreliable Supplier",
+        description: "This supplier's reliability is below average.",
+      });
+    }
+    if (Math.random() < 0.2) {
+      warnings.push({
+        title: "Unreliable Supplier",
+        description: "This supplier's reliability is below average.",
+      });
+    }
+    if (Math.random() < 0.2) {
+      warnings.push({
+        title: "Seasonality Issues",
+        description: "This item is prone to seasonal availability issues.",
+      });
+    }
+    return warnings;
+  }
+
   const [cart, setCart] = useState(() => {
     const stored = localStorage.getItem('cart');
-    return stored ? (JSON.parse(stored) as CartItem[]) : [];
+    const cart = stored ? (JSON.parse(stored) as CartItem[]) : [];
+    for (const item of cart) {
+      item.warnings = calculateWarnings(item);
+    }
+    return cart;
   });
+
+  function cartItemToItem(item: CartItem): Item {
+    const new_item = { id: item.id, ean: item.ean, names: item.names, orderedQuantity: item.quantity, pickEvent: null };
+    return new_item;
+  }
 
   const next = () => setStep((s) => {
     if (s === maxSteps) {
@@ -45,10 +84,16 @@ export const CheckoutPage = () => {
         for (const warning of item.warnings) {
           warning.orderId = orderId;
           warning.itemId = item.id;
-          const d = doc(firestore, "warnings");
+          const d = doc(firestore, "warnings", v4());
           setDoc(d, warning);
         }
       }
+      const order = {
+        id: orderId,
+        products: cart.map(cartItemToItem)
+      } satisfies Order;
+      const d = doc(firestore, "orders", orderId);
+      setDoc(d, order);
       navigate('/customer');
       return;
     }
@@ -317,8 +362,7 @@ export const CheckoutPage = () => {
               Back
             </Button>
             <Button
-              onClick={next}
-              disabled={step === maxSteps}>
+              onClick={next}>
               {step === maxSteps - 1 ? 'Review' : step === maxSteps ? 'Done' : 'Next'}
             </Button>
           </div>
