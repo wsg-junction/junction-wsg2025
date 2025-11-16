@@ -66,7 +66,7 @@ export default function AimoPickingDashboardConfirmPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          language: order.lang,
+          language: order.lang.split('-')[0],
           phone_number: order.telephone,
           order_id: order.id,
         }),

@@ -23,6 +23,7 @@ async function handleUpdateOrder(args: {
       throw Error(`Order ${order_id} not found`);
     }
     const order = orderSnap.data();
+    // @ts-expect-error: Missing in types
     const newProducts = order.products.filter((p) => p.id !== unavailable_product);
     const newProd = productService.getProductById(replacement_product);
     if (!newProd) {
