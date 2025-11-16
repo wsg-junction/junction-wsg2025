@@ -12,6 +12,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input.tsx';
 import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress.tsx';
+import { Spinner } from '@/components/ui/spinner';
 import { useProductName } from '@/hooks/use-product-name';
 import { firestore, messaging, vapidKey } from '@/lib/firebase';
 import type { Item, Order } from '@/pages/aimo/picking-dashboard';
@@ -83,6 +84,7 @@ export const CheckoutPage = () => {
     const token = localStorage.getItem('pushNotificationToken');
     return token ? token : null;
   });
+  const [isEnablingPushNotifications, setIsEnablingPushNotifications] = useState(false);
   const next = () =>
     setStep((s) => {
       if (s === maxSteps) {
@@ -283,25 +285,32 @@ export const CheckoutPage = () => {
                   type={'tel'}
                 />
                 <div className="mt-4 flex items-start gap-3">
-                  <Checkbox
-                    id="push-notifications"
-                    checked={!!pushNotificationToken}
-                    onCheckedChange={async (checked) => {
-                      if (!checked) {
-                        setPushNotificationToken(null);
-                        return;
-                      }
+                  {isEnablingPushNotifications ? (
+                    <Spinner />
+                  ) : (
+                    <Checkbox
+                      id="push-notifications"
+                      checked={!!pushNotificationToken}
+                      onCheckedChange={async (checked) => {
+                        if (!checked) {
+                          setPushNotificationToken(null);
+                          return;
+                        }
 
-                      try {
-                        const token = await getToken(messaging, { vapidKey });
-                        console.log('Push notification token:', token);
-                        setPushNotificationToken(token);
-                        localStorage.setItem('pushNotificationToken', token);
-                      } catch (error) {
-                        console.error('Error getting push notification token:', error);
-                      }
-                    }}
-                  />
+                        setIsEnablingPushNotifications(true);
+                        try {
+                          const token = await getToken(messaging, { vapidKey });
+                          console.log('Push notification token:', token);
+                          setPushNotificationToken(token);
+                          localStorage.setItem('pushNotificationToken', token);
+                        } catch (error) {
+                          console.error('Error getting push notification token:', error);
+                        } finally {
+                          setIsEnablingPushNotifications(false);
+                        }
+                      }}
+                    />
+                  )}
                   <Label htmlFor="push-notifications">
                     <div className="grid gap-2">
                       Receive push notifications
