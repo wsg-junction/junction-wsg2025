@@ -81,11 +81,9 @@ const steps: TourStep[] = [
     id: 'customer_shop',
     title: 'Customer Shop',
     content: (
-      <div>
-        This is the Customer Shopping page where customers can browse products and add them to their cart.
-      </div>
+      <div>This is the Shop Catalog page where customers can browse products and add them to their cart.</div>
     ),
-    route: '/customer',
+    route: '/customer/browse',
     targetSelector: 'global',
     nextOnAction: false,
   },
@@ -99,7 +97,7 @@ const steps: TourStep[] = [
         You can add as many products as you like, to proceed, click on the Cart icon at the bottom right.
       </div>
     ),
-    route: '/customer',
+    route: '/customer/browse',
     targetSelector: '[data-tour-id="select_products"]',
     nextOnAction: true,
   },
@@ -111,7 +109,7 @@ const steps: TourStep[] = [
         You can proceed to the checkout by clicking the 'Checkout'-Button. <br />
       </div>
     ),
-    route: '/customer',
+    route: '/customer/browse',
     targetSelector: '[data-tour-id="cart_button"]',
     nextOnAction: true,
   },

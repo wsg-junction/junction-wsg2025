@@ -75,7 +75,7 @@ export const NotificationsPopover = () => {
         </Button>
       </PopoverTrigger>
       <PopoverContent>
-        <div className="w-64">
+        <div className="w-64 max-h-[80vh] overflow-y-auto">
           {notifications && notifications.length > 0 ? (
             <div className="flex flex-col gap-2">
               {notifications?.map((notification) => (
