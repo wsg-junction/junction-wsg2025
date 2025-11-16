@@ -1,5 +1,5 @@
 import { Card, CardContent, CardTitle } from '@/components/ui/card.tsx';
-import { ShoppingCart, StarIcon } from 'lucide-react';
+import { ArrowRightIcon, ShoppingCart, StarIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button.tsx';
 import { productService } from '@/services/ProductService';
 import { useTranslation } from 'react-i18next';
@@ -11,9 +11,16 @@ interface ProductCardProps {
   rating?: number;
   onUpdateCartQuantity?: (quantity: number) => void;
   currentQuantity?: number;
+  onSelect?: () => void;
 }
 
-export const ProductCard = ({ id, rating, onUpdateCartQuantity, currentQuantity }: ProductCardProps) => {
+export const ProductCard = ({
+  id,
+  rating,
+  onUpdateCartQuantity,
+  currentQuantity,
+  onSelect,
+}: ProductCardProps) => {
   const { t, i18n } = useTranslation();
   const getTranslatedProductName = useProductName(i18n);
 
@@ -30,7 +37,7 @@ export const ProductCard = ({ id, rating, onUpdateCartQuantity, currentQuantity 
                 className={'w-full h-full object-contain'}
               />
             ) : (
-              'No Image'
+              t('no_image')
             )}
           </div>
         </div>
@@ -71,13 +78,22 @@ export const ProductCard = ({ id, rating, onUpdateCartQuantity, currentQuantity 
             <span className="text-sm text-muted-foreground font-light"> / pcs</span>
           </span>
 
-          {(!currentQuantity || currentQuantity === 0) && (
+          {onSelect ? (
             <Button
-              onClick={() => onUpdateCartQuantity && onUpdateCartQuantity(1)}
+              onClick={onSelect}
               variant="default"
-              size={'icon'}>
-              <ShoppingCart></ShoppingCart>
+              size="icon">
+              <ArrowRightIcon />
             </Button>
+          ) : (
+            (!currentQuantity || currentQuantity === 0) && (
+              <Button
+                onClick={() => onUpdateCartQuantity && onUpdateCartQuantity(1)}
+                variant="default"
+                size="icon">
+                <ShoppingCart />
+              </Button>
+            )
           )}
 
           {currentQuantity && currentQuantity > 0 ? (

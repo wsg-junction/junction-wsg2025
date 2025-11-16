@@ -7,6 +7,20 @@
   "add_to_cart": "Add to Cart",
   "view_cart": "View Cart",
   "checkout": "Checkout",
+  "checkout_page": {
+    "form": {
+      "name_required": "Name is required",
+      "telephone_invalid": "Please enter a valid telephone number",
+      "address_required": "Please enter your address",
+      "address_invalid": "Please select a valid address from the suggestions"
+    },
+    "fallbacks": {
+      "fallback": "Fallback: ",
+      "select": "Select Fallback",
+      "change": "Change Fallback",
+      "dialog_title": "Search for fallbacks for {{productName}}"
+    }
+  },
   "order_confirmation": "Order Confirmation",
   "order_summary": "Order Summary",
   "thank_you_for_your_order": "Thank you for your order!",
@@ -88,7 +102,7 @@
   "check_order": "Please check your order and contact information.",
   "fallbacks": "Fallbacks",
   "no_fallback": "No fallback",
-  "alternative_product": "Choose an alternative product to use if an item is unavailable.",
+  "alternative_product": "Choose an alternative product to use if an item becomes unavailable.",
   "get_notified": "Get notified if there are any issues while fulfilling your order.",
   "receive_notifications": "Receive push notifications",
   "automatic_contact": "Kevin will only be able to contact you automatically if you enter contact information!",
