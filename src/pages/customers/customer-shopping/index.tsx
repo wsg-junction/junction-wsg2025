@@ -1,5 +1,3 @@
-import { useTranslation } from 'react-i18next';
-import { Header } from '@/pages/customers/components/Header/Header.tsx';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -8,18 +6,20 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb.tsx';
-import { ProductCard } from '@/pages/customers/components/ProductCard/ProductCard.tsx';
-import { useEffect, useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button.tsx';
-import { ShoppingCart, Trash2 } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover.tsx';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select.tsx';
-import { useNavigate } from 'react-router';
-import { productService, type Product } from '@/services/ProductService';
+import { useLocalStorage } from '@/hooks/use-local-storage';
 import { useProductName } from '@/hooks/use-product-name.ts';
 import type { Warning } from '@/pages/aimo/warnings';
+import { Header } from '@/pages/customers/components/Header/Header.tsx';
+import { ProductCard } from '@/pages/customers/components/ProductCard/ProductCard.tsx';
 import { useTour } from '@/pages/tour/TourController.tsx';
-import { defaultFilter } from 'cmdk';
+import { productService, type Product } from '@/services/ProductService';
+import { ShoppingCart, Trash2 } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router';
 
 export default function CustomerShoppingPage() {
   const { t } = useTranslation();
@@ -31,14 +31,7 @@ export default function CustomerShoppingPage() {
   const [isLoading, setIsLoading] = useState(false); // for initial load and page load
   const [totalProducts, setTotalProducts] = useState(0);
 
-  const [cart, setCart] = useState(() => {
-    const stored = localStorage.getItem('cart');
-    return stored ? (JSON.parse(stored) as CartItem[]) : [];
-  });
-
-  useEffect(() => {
-    localStorage.setItem('cart', JSON.stringify(cart));
-  }, [cart]);
+  const [cart, setCart] = useLocalStorage<CartItem[]>('cart', []);
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -213,7 +206,7 @@ export const ShoppingCartList = ({
               <p className="font-medium line-clamp-2 overflow-hidden text-ellipsis me-2">
                 {getTranslatedProductName(item)}
               </p>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm text-muted-foreground tabular-nums">
                 {formattedPrice}€<span className="text-sm text-muted-foreground font-light"> / pcs</span>
               </p>
               {item.warnings.length > 0 && (
@@ -253,11 +246,11 @@ export const ShoppingCartList = ({
               </div>
             ) : (
               <div>
-                <p className="font-medium">Qty: {item.quantity}</p>
+                <p className="font-medium tabular-nums">Qty: {item.quantity}</p>
               </div>
             )}
 
-            <p className="w-20 text-right font-medium">{totalPrice(item).toFixed(2)}€</p>
+            <p className="w-20 text-right font-medium tabular-nums">{totalPrice(item).toFixed(2)}€</p>
 
             {!readOnly && (
               <Button
@@ -296,14 +289,7 @@ export const ShoppingCartList = ({
         </div>
         <div className={'flex justify-end items-center gap-2 '}>
           <span>Total: </span>
-          <span className="font-bold text-lg">
-            {cart
-              .reduce((a, b) => {
-                return a + totalPrice(b);
-              }, 0)
-              .toFixed(2)}
-            €
-          </span>
+          <span className="font-bold text-lg">{cart.reduce((a, b) => a + totalPrice(b), 0).toFixed(2)}€</span>
         </div>
       </div>
     </div>

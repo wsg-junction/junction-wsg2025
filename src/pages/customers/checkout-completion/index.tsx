@@ -1,6 +1,3 @@
-import { useDocument } from '@/lib/firebase.ts';
-import type { Order } from '@/pages/aimo/picking-dashboard';
-import { Header } from '@/pages/customers/components/Header/Header.tsx';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -9,8 +6,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb.tsx';
-import { useTranslation } from 'react-i18next';
-import { useProductName } from '@/hooks/use-product-name.ts';
+import { Button } from '@/components/ui/button.tsx';
 import {
   Table,
   TableBody,
@@ -21,8 +17,12 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table.tsx';
+import { useProductName } from '@/hooks/use-product-name.ts';
+import { useDocument } from '@/lib/firebase.ts';
+import type { Order } from '@/pages/aimo/orders/picking-dashboard';
+import { Header } from '@/pages/customers/components/Header/Header.tsx';
+import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
-import { Button } from '@/components/ui/button.tsx';
 
 export interface CheckoutCompletionPageProps {
   orderId: string;

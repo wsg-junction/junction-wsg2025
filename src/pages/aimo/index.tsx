@@ -28,10 +28,8 @@ export default function AimoHomePage() {
           <CardFooter>
             <Button
               asChild
-              onClick={() => {
-                fulfillStep('select_warehouse_orders');
-              }}>
-              <Link to="/aimo/dashboard">Open</Link>
+              onClick={() => fulfillStep('select_warehouse_orders')}>
+              <Link to="/aimo/orders">Open</Link>
             </Button>
           </CardFooter>
         </Card>

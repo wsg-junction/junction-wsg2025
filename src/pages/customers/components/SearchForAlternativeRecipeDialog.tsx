@@ -6,7 +6,7 @@ import { Send } from 'lucide-react';
 import { toast } from 'sonner';
 import { productService } from '@/services/ProductService';
 import { generateGeminiRecipe, generateGeminiContent } from '@/pages/gemini/gemini-functions';
-import type { Item } from '@/pages/aimo/picking-dashboard';
+import type { Item } from '@/pages/aimo/orders/picking-dashboard';
 import { useProductName } from '@/hooks/use-product-name.ts';
 
 type Message = { role: 'user' | 'assistant'; text: string };

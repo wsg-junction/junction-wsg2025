@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { firestore, useQuery } from '@/lib/firebase';
-import type { Order } from '@/pages/aimo/picking-dashboard';
+import type { Order } from '@/pages/aimo/orders/picking-dashboard';
 import { Header } from '@/pages/customers/components/Header/Header.tsx';
 import { type Product, productService } from '@/services/ProductService';
 import { collection } from 'firebase/firestore';
@@ -109,13 +109,13 @@ export default function SelectAlternativesPage() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-6">
                   {similarProducts[item.id]
                     ? similarProducts[item.id].map((product) => {
-                        return (
-                          <ProductCard
-                            key={product.id}
-                            id={product.id}
-                          />
-                        );
-                      })
+                      return (
+                        <ProductCard
+                          key={product.id}
+                          id={product.id}
+                        />
+                      );
+                    })
                     : null}
                 </div>
               </CardContent>

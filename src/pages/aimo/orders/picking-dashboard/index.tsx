@@ -1,18 +1,16 @@
 import { Button } from '@/components/ui/button';
+import { ButtonGroup } from '@/components/ui/button-group';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useProductName } from '@/hooks/use-product-name';
-import { firestore, useQuery } from '@/lib/firebase';
+import { firestore, useOrder } from '@/lib/firebase';
 import type { TranslatedName } from '@/services/ProductService';
-import { collection, doc, updateDoc } from '@firebase/firestore';
+import { doc, Timestamp, updateDoc } from '@firebase/firestore';
 import { t } from 'i18next';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router';
-import { Header } from '../components/Header';
-import { ButtonGroup } from '@/components/ui/button-group';
-import { ToggleGroup } from '@/components/ui/toggle-group';
-import { ToggleGroupItem } from '@radix-ui/react-toggle-group';
+import { useNavigate, useParams } from 'react-router';
+import { Header } from '../../components/Header';
 
 export type PickEvent = {
   quantity: number;
@@ -29,6 +27,7 @@ export type Item = {
 
 export type Order = {
   id: string;
+  createdAt: Timestamp;
   products: Item[];
   pushNotificationToken: string | null;
 };
@@ -36,7 +35,8 @@ export type Order = {
 export default function AimoPickingDashboard() {
   const { t } = useTranslation();
 
-  const orders = useQuery<Order>(useMemo(() => collection(firestore, 'orders'), []));
+  const { orderId } = useParams();
+  const order = useOrder(orderId);
 
   async function updateOrder(order: Order) {
     const ref = doc(firestore, 'orders', order.id);
@@ -44,79 +44,62 @@ export default function AimoPickingDashboard() {
   }
 
   const navigate = useNavigate();
-  function getOrdersToConfirm() {
-    const ret = [];
-    const ordersCopy = structuredClone(orders);
-    for (const order of Object.values(ordersCopy)) {
-      order.products = Object.values(order.products).filter(
-        (it) => it.orderedQuantity !== it.pickEvent?.quantity,
-      );
-      if (Object.entries(order.products).length > 0) {
-        ret.push(order);
-      }
-    }
-    return ret;
+  function getOrderToConfirm() {
+    const orderCopy = structuredClone(order!);
+    orderCopy.products = Object.values(orderCopy.products).filter(
+      (it) => it.orderedQuantity !== it.pickEvent?.quantity,
+    );
+    return orderCopy.products.length ? orderCopy : null;
   }
 
   const isSubmitDisabled = useMemo(() => {
-    for (const order of Object.values(orders)) {
-      for (const product of Object.values(order.products)) {
-        if (product.pickEvent == null) {
-          return true;
-        }
-        if (product.pickEvent!.quantity > product.orderedQuantity) {
-          return true;
-        }
-      }
-    }
-    return false;
-  }, [orders]);
+    if (!order) return true;
 
-  const onPickEvent = (pickEvent: PickEvent | null, orderId: string, productId: string) => {
-    const order = orders.find((o) => o.id === orderId)!;
-    const product = order.products.find((p) => p.id === productId)!;
+    return order.products.some(
+      (product) => !product.pickEvent || product.pickEvent.quantity > product.orderedQuantity,
+    );
+  }, [order]);
+
+  const onPickEvent = (pickEvent: PickEvent | null, productId: string) => {
+    const product = order!.products.find((p) => p.id === productId)!;
     if (pickEvent && pickEvent.quantity > product.orderedQuantity) return;
     product.pickEvent = pickEvent;
-    updateOrder(order);
+    updateOrder(order!);
   };
   function sendConfirmationNotifications() {
-    for (const order of orders) {
-      if (!order.pushNotificationToken) continue;
+    if (!order!.pushNotificationToken) return;
 
-      const hasMissingItems = order.products.some(
-        (product) => product.pickEvent && product.pickEvent.quantity < product.orderedQuantity,
-      );
-      if (hasMissingItems) continue;
+    const hasMissingItems = order!.products.some(
+      (product) => product.pickEvent && product.pickEvent.quantity < product.orderedQuantity,
+    );
+    if (hasMissingItems) return;
 
-      console.log('Sending notification to', order.pushNotificationToken, 'for order', order.id);
+    console.log('Sending notification to', order!.pushNotificationToken, 'for order', order!.id);
 
-      fetch('https://sendpushnotification-3avmwyjhaq-uc.a.run.app', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          token: order.pushNotificationToken,
-          notification: {
-            title: 'Your order has been packed',
-            body: 'Your order was packed successfully and is now on its way to you.',
-          },
-          data: { orderId: order.id, hasMissingItems: 'false' },
-          webpush: { notification: { requireInteraction: true } },
-        }),
-      });
-    }
+    fetch('https://sendpushnotification-3avmwyjhaq-uc.a.run.app', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        token: order!.pushNotificationToken,
+        notification: {
+          title: 'Your order has been packed',
+          body: 'Your order was packed successfully and is now on its way to you.',
+        },
+        data: { orderId: order!.id, hasMissingItems: 'false' },
+        webpush: { notification: { requireInteraction: true } },
+      }),
+    });
   }
-  const getSubmitAction = () => {
-    if (getOrdersToConfirm().length > 0) {
-      return () => {
-        sendConfirmationNotifications();
-        navigate('/aimo/dashboard/confirm', { state: getOrdersToConfirm() });
-      };
-    }
-    return () => {
+  function submit() {
+    const orderToConfirm = getOrderToConfirm();
+    if (orderToConfirm) {
       sendConfirmationNotifications();
-      navigate('/aimo');
-    };
-  };
+      navigate(`/aimo/orders/${orderId}/picking-dashboard/confirm`, { state: orderToConfirm });
+      return;
+    }
+    sendConfirmationNotifications();
+    navigate('/aimo/orders');
+  }
   return (
     <>
       <Header />
@@ -124,29 +107,25 @@ export default function AimoPickingDashboard() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead style={{ width: '10%' }}>{t('order_id')}</TableHead>
               <TableHead>{t('product_name')}</TableHead>
               <TableHead>{t('ordered_quantity')}</TableHead>
               <TableHead style={{ width: '50%' }}>{t('picked_quantity')}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {Object.values(orders).flatMap((order) =>
-              Object.values(order.products).map((item) => (
-                <PickingRow
-                  key={order.id + '.' + item.id}
-                  order={order}
-                  item={item}
-                  setPickEvent={(e) => onPickEvent(e, order.id, item.id)}
-                />
-              )),
-            )}
+            {Object.values(order?.products ?? {}).map((item) => (
+              <PickingRow
+                key={item.id}
+                item={item}
+                setPickEvent={(e) => onPickEvent(e, item.id)}
+              />
+            ))}
           </TableBody>
         </Table>
         <Button
           className="w-32 self-end"
           disabled={isSubmitDisabled}
-          onClick={getSubmitAction()}>
+          onClick={submit}>
           {t('submit')}
         </Button>
       </div>
@@ -154,15 +133,7 @@ export default function AimoPickingDashboard() {
   );
 }
 
-function PickingRow({
-  order,
-  item,
-  setPickEvent,
-}: {
-  order: Order;
-  item: Item;
-  setPickEvent: (event: PickEvent | null) => void;
-}) {
+function PickingRow({ item, setPickEvent }: { item: Item; setPickEvent: (event: PickEvent | null) => void }) {
   const getTranslatedProductName = useProductName();
 
   const quantity = item.pickEvent?.quantity;
@@ -200,15 +171,14 @@ function PickingRow({
       isNaN(value)
         ? null
         : {
-          quantity: value,
-          datetime: new Date(),
-        },
+            quantity: value,
+            datetime: new Date(),
+          },
     );
   }
 
   return (
     <TableRow>
-      {item.id === order.products[0].id && <TableCell rowSpan={order.products.length}>{order.id}</TableCell>}
       <TableCell>{getTranslatedProductName(item)}</TableCell>
       <TableCell>{item.orderedQuantity}</TableCell>
       <TableCell>

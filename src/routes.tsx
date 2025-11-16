@@ -1,18 +1,19 @@
-import { createBrowserRouter, useParams } from 'react-router';
 import App from '@/App.tsx';
-import DashboardPage from '@/pages/dashboard';
 import { ThemeProvider } from '@/components/core/theme-provider.tsx';
-import { NotFoundErrorPage } from '@/pages/error-pages/not-found.page.tsx';
-import AimoPickingDashboardPage from './pages/aimo/picking-dashboard';
-import AimoPickingDashboardConfirmPage from './pages/aimo/picking-dashboard/confirm';
-import CustomerShoppingPage from '@/pages/customers/customer-shopping';
 import { CheckoutPage } from '@/pages/customers/checkout';
-import SelectAlternativesPage from './pages/customers/customer-shopping/select-alternatives';
-import AimoWarningsPage from './pages/aimo/warnings';
-import AimoHomePage from './pages/aimo';
-import GeminiPage from './pages/gemini/gemini';
-import CommunicationPreferencesPage from './pages/customers/communication';
 import { CheckoutCompletionPage } from '@/pages/customers/checkout-completion';
+import CustomerShoppingPage from '@/pages/customers/customer-shopping';
+import DashboardPage from '@/pages/dashboard';
+import { NotFoundErrorPage } from '@/pages/error-pages/not-found.page.tsx';
+import { createBrowserRouter, useParams } from 'react-router';
+import AimoHomePage from './pages/aimo';
+import OrdersPage from './pages/aimo/orders';
+import AimoPickingDashboardPage from './pages/aimo/orders/picking-dashboard';
+import AimoPickingDashboardConfirmPage from './pages/aimo/orders/picking-dashboard/confirm';
+import AimoWarningsPage from './pages/aimo/warnings';
+import CommunicationPreferencesPage from './pages/customers/communication';
+import SelectAlternativesPage from './pages/customers/customer-shopping/select-alternatives';
+import GeminiPage from './pages/gemini/gemini';
 
 const BUSINESS_ROUTES = [
   {
@@ -38,7 +39,7 @@ const BUSINESS_ROUTES = [
         path: 'checkout/complete/:orderId',
         Component: () => {
           const { orderId } = useParams();
-          return <CheckoutCompletionPage orderId={orderId} />;
+          return <CheckoutCompletionPage orderId={orderId!} />;
         },
       },
       {
@@ -59,15 +60,24 @@ const BUSINESS_ROUTES = [
         Component: AimoHomePage,
       },
       {
-        path: 'dashboard',
+        path: 'orders',
         children: [
           {
             index: true,
-            Component: AimoPickingDashboardPage,
+            Component: OrdersPage,
           },
           {
-            path: 'confirm',
-            Component: AimoPickingDashboardConfirmPage,
+            path: ':orderId/picking-dashboard',
+            children: [
+              {
+                index: true,
+                Component: AimoPickingDashboardPage,
+              },
+              {
+                path: 'confirm',
+                Component: AimoPickingDashboardConfirmPage,
+              },
+            ],
           },
         ],
       },
