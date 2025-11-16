@@ -1,73 +1,18 @@
-import { VapiClient } from '@vapi-ai/server-sdk';
+import { credential } from 'firebase-admin';
 import { initializeApp } from 'firebase-admin/app';
 import { getMessaging } from 'firebase-admin/messaging';
 import { setGlobalOptions } from 'firebase-functions';
 import { onRequest } from 'firebase-functions/https';
-import { defineString } from 'firebase-functions/params';
-import { z } from 'zod';
+import { callFunction } from './call';
+import { toolsFunction } from './tools';
+
+initializeApp({
+  credential: credential.applicationDefault(), // or cert(...)
+});
 
 setGlobalOptions({ maxInstances: 10 });
 
 initializeApp();
-
-const VAPI_API_KEY = defineString('VAPI_API_KEY');
-
-const vapi = new VapiClient({
-  token: VAPI_API_KEY.value(),
-});
-
-const callSchema = z.object({
-  phone_number: z.string(),
-  language: z.enum(['en', 'fi', 'sv', 'de']),
-  mode: z.enum(['inbound', 'outbound']),
-});
-
-const voices = {
-  en: 'scOwDtmlUjD3prqpp97I',
-  fi: 'F9w7aaEjfT09qV89OdY8',
-  sv: '1k39YpzqXZn52BgyLyGO',
-  de: 'fzqS9sNPYJhLlhsfDm0l',
-} as const;
-
-const languageName = {
-  en: 'english',
-  fi: 'finnish',
-  sv: 'swedish',
-  de: 'german',
-} as const;
-
-export const helloWorld = onRequest(async (req, res) => {
-  try {
-    console.log(req.body);
-    const data = callSchema.parse(req.body);
-    await vapi.calls.create({
-      assistantId:
-        data.mode === 'inbound'
-          ? 'cadd9b50-f036-4b7b-8915-eb11b0ba7f09'
-          : '5b2b2220-7f9a-4e57-a03e-cc7d1826a392',
-      customer: { number: data.phone_number },
-      phoneNumberId: '915f242b-9027-4389-9a9b-9866b5e9ca2b',
-      assistantOverrides: {
-        voice: {
-          provider: '11labs',
-          model: 'eleven_flash_v2_5',
-          voiceId: voices[data.language],
-        },
-        transcriber: {
-          provider: '11labs',
-          language: data.language,
-        },
-        variableValues: {
-          language: languageName[data.language],
-        },
-      },
-    });
-
-    res.json({ success: true });
-  } catch (err: unknown) {
-    res.status(400).json({ error: (err as Error).message });
-  }
-});
 
 export const sendPushNotification = onRequest(async (req, res) => {
   res.set('Access-Control-Allow-Origin', '*');
@@ -103,3 +48,5 @@ export const sendPushNotification = onRequest(async (req, res) => {
     res.status(400).json({ error: (err as Error).message });
   }
 });
+export const helloWorld = onRequest(callFunction);
+export const tools = onRequest(toolsFunction);
