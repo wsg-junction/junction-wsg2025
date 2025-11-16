@@ -41,3 +41,5 @@ next-env.d.ts
 
 .idea
 data/products_old.json
+
+firebase-debug.log

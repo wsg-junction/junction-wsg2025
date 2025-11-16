@@ -177,8 +177,8 @@ export const toolsFunction: Parameters<typeof onRequest>[0] = async (req, res) =
       const { name, arguments: toolArgs } = toolCall.function;
       const orderId = body.assistant.variableValues?.order_id ?? 'unknown_order';
       const missing_ingredients = body.assistant.variableValues?.missing_ingredients ?? 'none';
-      const languageCode = body.assistant.variableValues?.language ?? 'english';
-      const language = body.assistant.variableValues?.language_code ?? 'en';
+      const language = body.assistant.variableValues?.language ?? 'english';
+      const languageCode = body.assistant.variableValues?.language_code ?? 'en';
 
       let result: unknown;
 
