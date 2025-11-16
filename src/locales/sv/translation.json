@@ -71,6 +71,7 @@
   "telephone_placeholder": "Telefon (optionak)",
   "order_summary": "orderöversikt",
   "contact_information": "Kontaktuppgifter",
+  "contact_information_sub": "Vänligen ange dina fullständiga kontaktuppgifter så att vi snabbt kan nå dig vid eventuella leveransproblem.",
   "review_and_confirm": "Granska och bekräfta",
   "check_order": "Vänligen kontrollera din order och kontaktinformation.",
   "fallbacks": "Fallbacks",
@@ -81,5 +82,6 @@
   "automatic_contact": "Kevin kommer bara att kunna kontakta dig automatiskt om du anger kontaktinformation!",
   "add_information": "Demo-information: Please add Information",
   "your_cart": "Din kundvagn",
+  "your_cart_sub": "Granska din varukorg",
   "step": "Steg"
 }

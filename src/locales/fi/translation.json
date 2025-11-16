@@ -71,6 +71,7 @@
   "telephone_placeholder": "Puhelinnumero (optionak)",
   "order_summary": "Order Summary",
   "contact_information": "Yhteystiedot",
+  "contact_information_sub": "Anna täydelliset yhteystietosi, jotta voimme ottaa sinuun nopeasti yhteyttä mahdollisten toimitusongelmien sattuessa.",
   "review_and_confirm": "Review & Confirm",
   "check_order": "Please check your order and contact information.",
   "fallbacks": "Fallbacks",
@@ -81,5 +82,6 @@
   "automatic_contact": "Kevin voi ottaa sinuun yhteyttä automaattisesti vain, jos annat yhteystiedot!",
   "add_information": "Demo Info: Please add Information",
   "your_cart": "Ostoskori",
+  "your_cart_sub": "Tarkista ostoskorisi",
   "step": "Step"
 }

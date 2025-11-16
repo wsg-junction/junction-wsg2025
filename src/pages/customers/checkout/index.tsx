@@ -366,7 +366,8 @@ export const CheckoutPage = () => {
             className="space-y-4">
             {step === 1 && (
               <div>
-                <h2 className="text-xl font-semibold mb-4">{t('your_cart')}</h2>
+                <h2 className="text-xl font-semibold mb-1">{t('your_cart')}</h2>
+                <p className="text-sm text-gray-600 mb-3">{t('your_cart_sub')}</p>
                 <ShoppingCartList
                   readOnly={false}
                   cart={cart}
@@ -377,7 +378,8 @@ export const CheckoutPage = () => {
             )}
             {step === 2 && (
               <div>
-                <h2 className="text-xl font-semibold mb-4">{t('contact_information')}</h2>
+                <h2 className="text-xl font-semibold mb-1">{t('contact_information')}</h2>
+                <p className="text-sm text-gray-600 mb-3">{t('contact_information_sub')}</p>
                 <Alert className="my-2 border-yellow-200 bg-yellow-50 text-yellow-800 dark:border-yellow-800 dark:bg-yellow-950/30 dark:text-yellow-200 [&>svg]:text-yellow-600 dark:[&>svg]:text-yellow-400">
                   <AlertTriangleIcon />
                   <AlertTitle>{t('add_information')}</AlertTitle>
@@ -473,7 +475,7 @@ export const CheckoutPage = () => {
 
             {step === 3 && (
               <div>
-                <h2 className="text-xl font-semibold mb-4">Fallback items</h2>
+                <h2 className="text-xl font-semibold mb-1">Fallback items</h2>
                 <p className="text-sm text-gray-600 mb-3">{t('alternative_product')}</p>
                 <div className="space-y-3">
                   {cart.length === 0 && <p className="text-sm">Your cart is empty.</p>}
