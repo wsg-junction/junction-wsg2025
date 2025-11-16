@@ -18,6 +18,7 @@ import { useNavigate } from 'react-router';
 import { productService, type Product } from '@/services/ProductService';
 import { useProductName } from '@/hooks/use-product-name.ts';
 import type { Warning } from '@/pages/aimo/warnings';
+import { useLocalStorage } from '@/hooks/use-local-storage';
 
 export default function CustomerShoppingPage() {
   const { t } = useTranslation();
@@ -28,14 +29,7 @@ export default function CustomerShoppingPage() {
   const [isLoading, setIsLoading] = useState(false); // for initial load and page load
   const [totalProducts, setTotalProducts] = useState(0);
 
-  const [cart, setCart] = useState(() => {
-    const stored = localStorage.getItem('cart');
-    return stored ? (JSON.parse(stored) as CartItem[]) : [];
-  });
-
-  useEffect(() => {
-    localStorage.setItem('cart', JSON.stringify(cart));
-  }, [cart]);
+  const [cart, setCart] = useLocalStorage<CartItem[]>('cart', []);
 
   useEffect(() => {
     const fetchProducts = async () => {
