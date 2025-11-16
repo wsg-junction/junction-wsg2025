@@ -111,6 +111,7 @@ export const CheckoutPage = () => {
         console.log('Order placed:', order);
         setMyOrderIds([...myOrderIds, orderId]);
         navigate('/customer');
+        setCart([]);
         return;
       }
       return Math.min(maxSteps, s + 1);
@@ -255,7 +256,7 @@ export const CheckoutPage = () => {
                   readOnly={false}
                   cart={cart}
                   onUpdateItem={onUpdateItem}
-                  setCart={() => { }}
+                  setCart={() => {}}
                 />
               </div>
             )}
@@ -393,7 +394,7 @@ export const CheckoutPage = () => {
                     readOnly={true}
                     cart={cart}
                     onUpdateItem={onUpdateItem}
-                    setCart={() => { }}
+                    setCart={() => {}}
                   />
 
                   {/* Show selected fallbacks for review */}
