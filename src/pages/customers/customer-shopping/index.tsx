@@ -289,12 +289,7 @@ export const ShoppingCartList = ({
         </div>
         <div className={'flex justify-end items-center gap-2 '}>
           <span>Total: </span>
-          <span className="font-bold text-lg">
-            {cart
-              .reduce((a, b) => a + totalPrice(b), 0)
-              .toFixed(2)}
-            €
-          </span>
+          <span className="font-bold text-lg">{cart.reduce((a, b) => a + totalPrice(b), 0).toFixed(2)}€</span>
         </div>
       </div>
     </div>
