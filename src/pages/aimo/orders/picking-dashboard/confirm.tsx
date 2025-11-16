@@ -39,7 +39,7 @@ export default function AimoPickingDashboardConfirmPage() {
           token: order.pushNotificationToken,
           notification: {
             title: t('push_notifications.missing_items.title'),
-            body: t('push_notifications.missing_items.body'),
+            body: t('push_notifications.missing_items.body', { orderId: order.id }),
           },
           data: { orderId: order.id, hasMissingItems: 'true' },
           webpush: {

@@ -46,7 +46,7 @@ export default function CustomerOrdersPage() {
           myOrders.map((order) => (
             <Card
               key={order.id}
-              className="w-4xl">
+              className="max-w-4xl">
               <CardHeader>
                 <CardTitle>Order {order.id}</CardTitle>
                 <CardDescription>{order.createdAt.toDate().toLocaleString()}</CardDescription>
@@ -73,6 +73,19 @@ export default function CustomerOrdersPage() {
                   <span className="font-bold text-lg">{formatPrice(order.totalPrice)}</span>
                 </div>
               </CardContent>
+              {order.products[0].pickEvent !== null &&
+                order.products.some((it) => (it.pickEvent?.quantity ?? 0) < it.orderedQuantity) && (
+                  <CardFooter>
+                    <div className="flex justify-between items-center gap-4">
+                      <div className="flex-1">Unfortunately, some of these items are not available.</div>
+                      <Button asChild>
+                        <Link to={`/customer/orders/${order.id}/select-alternatives`}>
+                          Select alternatives
+                        </Link>
+                      </Button>
+                    </div>
+                  </CardFooter>
+                )}
             </Card>
           ))
         ) : (
