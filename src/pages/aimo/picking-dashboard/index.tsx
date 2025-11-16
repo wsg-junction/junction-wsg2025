@@ -30,7 +30,7 @@ export type Item = {
 export type Order = {
   id: string;
   products: Item[];
-  pushNotificationToken?: string;
+  pushNotificationToken: string | null;
 };
 
 export default function AimoPickingDashboard() {
@@ -200,9 +200,9 @@ function PickingRow({
       isNaN(value)
         ? null
         : {
-            quantity: value,
-            datetime: new Date(),
-          },
+          quantity: value,
+          datetime: new Date(),
+        },
     );
   }
 

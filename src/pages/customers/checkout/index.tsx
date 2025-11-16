@@ -101,7 +101,7 @@ export const CheckoutPage = () => {
         const order = {
           id: orderId,
           products: cart.map(cartItemToItem),
-          pushNotificationToken: pushNotificationToken || undefined,
+          pushNotificationToken: pushNotificationToken || null,
         } satisfies Order;
         const d = doc(firestore, 'orders', orderId);
         setDoc(d, order);
@@ -251,7 +251,7 @@ export const CheckoutPage = () => {
                   readOnly={false}
                   cart={cart}
                   onUpdateItem={onUpdateItem}
-                  setCart={() => {}}
+                  setCart={() => { }}
                 />
               </div>
             )}
@@ -389,7 +389,7 @@ export const CheckoutPage = () => {
                     readOnly={true}
                     cart={cart}
                     onUpdateItem={onUpdateItem}
-                    setCart={() => {}}
+                    setCart={() => { }}
                   />
 
                   {/* Show selected fallbacks for review */}
