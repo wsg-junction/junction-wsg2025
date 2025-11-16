@@ -15,6 +15,7 @@ import CommunicationPreferencesPage from './pages/customers/communication';
 import SelectAlternativesPage from './pages/customers/customer-shopping/select-alternatives';
 import GeminiPage from './pages/gemini/gemini';
 import CustomerOrdersPage from './pages/customers/customer-shopping/orders';
+import { CustomerDashboardPage } from '@/pages/customers/dashboard';
 
 const BUSINESS_ROUTES = [
   {
@@ -48,12 +49,16 @@ const BUSINESS_ROUTES = [
         Component: CommunicationPreferencesPage,
       },
       {
+        path: 'browse',
+        Component: CustomerShoppingPage,
+      },
+      {
         path: 'orders',
         Component: CustomerOrdersPage,
       },
       {
         index: true,
-        Component: CustomerShoppingPage,
+        Component: CustomerDashboardPage,
       },
     ],
   },
