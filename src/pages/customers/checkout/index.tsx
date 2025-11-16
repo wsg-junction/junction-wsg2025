@@ -312,11 +312,11 @@ export const CheckoutPage = () => {
   const setFallbackForItem = (itemId: string, fallbackId: string | null) => {
     if (!itemId) return;
     if (fallbackId === itemId) return; // disallow same-product fallback
-    setFallbacks((prev) => {
-      return fallbackId
-        ? { ...prev, [itemId]: fallbackId }
-        : Object.fromEntries(Object.entries(prev).filter(([key]) => key !== itemId));
-    });
+    setFallbacks(
+      fallbackId
+        ? { ...fallbacks, [itemId]: fallbackId }
+        : Object.fromEntries(Object.entries(fallbacks).filter(([key]) => key !== itemId)),
+    );
   };
 
   return (
