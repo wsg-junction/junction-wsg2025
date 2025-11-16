@@ -112,7 +112,7 @@
   "done": "Done",
   "review": "Review",
   "name": "Name",
-  "telephone": "Telephone",
+  "telephone": "Telephone - required to talk to Kevin",
   "telephone_placeholder": "Telephone (optional)",
   "address": "Address",
   "contact_information": "Contact Information",
