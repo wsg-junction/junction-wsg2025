@@ -394,7 +394,7 @@ export const CheckoutPage = () => {
               className="h-2"
             />
             <p className="text-sm mt-2">
-              Step {step} of {maxSteps}
+              {t('step')} {step} / {maxSteps}
             </p>
           </div>
 
@@ -406,7 +406,7 @@ export const CheckoutPage = () => {
             className="space-y-4">
             {step === 1 && (
               <div>
-                <h2 className="text-xl font-semibold mb-4">Your cart</h2>
+                <h2 className="text-xl font-semibold mb-4">{t('your_cart')}</h2>
                 <ShoppingCartList
                   readOnly={false}
                   cart={cart}
@@ -417,17 +417,17 @@ export const CheckoutPage = () => {
             )}
             {step === 2 && (
               <div>
-                <h2 className="text-xl font-semibold mb-4">Contact Information</h2>
+                <h2 className="text-xl font-semibold mb-4">{t('contact_information')}</h2>
                 <Alert className="my-2 border-yellow-200 bg-yellow-50 text-yellow-800 dark:border-yellow-800 dark:bg-yellow-950/30 dark:text-yellow-200 [&>svg]:text-yellow-600 dark:[&>svg]:text-yellow-400">
                   <AlertTriangleIcon />
-                  <AlertTitle>Demo Info: Please add Information</AlertTitle>
+                  <AlertTitle>{t('add_information')}</AlertTitle>
                   <AlertDescription className="text-yellow-700 dark:text-yellow-300">
-                    Kevin will only be able to contact you automatically if you enter contact information!
+                    {t('automatic_contact')}
                   </AlertDescription>
                 </Alert>
                 <Input
                   {...form.register('name')}
-                  placeholder="Name"
+                  placeholder={t('name')}
                   className="mb-1"
                 />
                 {form.formState.errors.name && (
@@ -445,7 +445,7 @@ export const CheckoutPage = () => {
                       });
                     },
                   })}
-                  placeholder="Telephone"
+                  placeholder={t('telephone')}
                   type="tel"
                   className="mb-1"
                 />
@@ -503,10 +503,8 @@ export const CheckoutPage = () => {
                   )}
                   <Label htmlFor="push-notifications">
                     <div className="grid gap-2">
-                      Receive push notifications
-                      <p className="text-muted-foreground text-sm">
-                        Get notified if there are any issues while fulfilling your order.
-                      </p>
+                      {t('receive_notifications')}
+                      <p className="text-muted-foreground text-sm">{t('get_notified')}</p>
                     </div>
                   </Label>
                 </div>
@@ -516,9 +514,7 @@ export const CheckoutPage = () => {
             {step === 3 && (
               <div>
                 <h2 className="text-xl font-semibold mb-4">Fallback items</h2>
-                <p className="text-sm text-gray-600 mb-3">
-                  Choose an alternative product to use if an item is unavailable.
-                </p>
+                <p className="text-sm text-gray-600 mb-3">{t('alternative_product')}</p>
                 <div className="space-y-3">
                   {cart.length === 0 && <p className="text-sm">Your cart is empty.</p>}
                   {cart.map((item, idx) => (
@@ -535,7 +531,7 @@ export const CheckoutPage = () => {
                             className="border rounded p-1"
                             value={fallbacks[item.id] ?? ''}
                             onChange={(e) => setFallbackForItem(item.id, e.target.value || null)}>
-                            <option value="">No fallback</option>
+                            <option value="">{t('no_fallback')}</option>
                             {products
                               .filter((p) => p.id !== item.id)
                               .map((p) => (
@@ -563,39 +559,30 @@ export const CheckoutPage = () => {
 
             {step === maxSteps && (
               <div>
-                <h2 className="text-xl font-semibold mb-4">Review & Confirm</h2>
-                <p className="text-sm text-gray-600">Please check your order and contact information.</p>
+                <h2 className="text-xl font-semibold mb-4">{t('review_and_confirm')}</h2>
+                <p className="text-sm text-gray-600">{t('check_rder')}</p>
 
                 <div className="mt-4">
-                  <h3 className="font-medium">Contact Information</h3>
-                  <p>Name: {form.getValues('name') || 'N/A'}</p>
-                  <p>Telephone: {form.getValues('telephone') || 'N/A'}</p>
-                  <p>Address: {form.getValues('address').formatted || 'N/A'}</p>
+                  <h3 className="font-medium">{t('contact_information')}</h3>
+                  <p>
+                    {t('name')}: {form.getValues('name') || 'N/A'}
+                  </p>
+                  <p>
+                    {t('telephone')}: {form.getValues('telephone') || 'N/A'}
+                  </p>
+                  <p>
+                    {t('address')}: {form.getValues('address').formatted || 'N/A'}
+                  </p>
                 </div>
 
                 <div className="mt-4">
-                  <h3 className="font-medium">Order Summary</h3>
+                  <h3 className="font-medium">{t('order_summary')}</h3>
                   <ShoppingCartList
                     readOnly={true}
                     cart={cart}
                     onUpdateItem={onUpdateItem}
                     setCart={() => {}}
                   />
-
-                  {/* Show selected fallbacks for review */}
-                  <div className="mt-3">
-                    <h4 className="font-medium">Fallbacks</h4>
-                    {cart.map((item) => {
-                      const fb = fallbacks[item.id];
-                      return (
-                        <div
-                          key={item.id}
-                          className="text-sm">
-                          {getTranslatedProductName(item)}: {fb ? getProductName(fb) : 'No fallback selected'}
-                        </div>
-                      );
-                    })}
-                  </div>
                 </div>
               </div>
             )}
@@ -606,10 +593,10 @@ export const CheckoutPage = () => {
               variant="outline"
               onClick={prev}
               disabled={step === 1}>
-              Back
+              {t('back')}
             </Button>
             <Button onClick={next}>
-              {step === maxSteps - 1 ? 'Review' : step === maxSteps ? 'Done' : 'Next'}
+              {step === maxSteps - 1 ? t('review') : step === maxSteps ? t('done') : t('next')}
             </Button>
           </div>
         </div>
