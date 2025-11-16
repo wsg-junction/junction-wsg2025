@@ -33,6 +33,15 @@ const languageName = {
 } as const;
 
 export const callFunction: Parameters<typeof onRequest>[0] = async (req, res) => {
+  res.set('Access-Control-Allow-Origin', '*');
+  res.set('Access-Control-Allow-Methods', 'POST');
+  res.set('Access-Control-Allow-Headers', 'Content-Type');
+
+  if (req.method === 'OPTIONS') {
+    res.status(204).send('');
+    return;
+  }
+
   try {
     const data = callSchema.parse(req.body);
 

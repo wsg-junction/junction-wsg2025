@@ -12,7 +12,7 @@
   "engines": {
     "node": "22"
   },
-  "main": "lib/index.js",
+  "main": "lib/src/index.js",
   "dependencies": {
     "@google/genai": "^1.29.1",
     "@vapi-ai/server-sdk": "^0.10.2",
