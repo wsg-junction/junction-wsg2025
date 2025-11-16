@@ -1,16 +1,52 @@
-import { useTranslation } from "react-i18next";
-import { useLocation, useNavigate } from "react-router";
-import type { Order } from ".";
-import { Button } from "@/components/ui/button";
-import { Header } from "../components/Header";
+import { Button } from '@/components/ui/button';
 import { useProductName } from '@/hooks/use-product-name.ts';
+import { useLocation, useNavigate } from 'react-router';
+import type { Order } from '.';
+import { Header } from '../components/Header';
 
 export default function AimoPickingDashboardConfirmPage() {
-  const { i18n } = useTranslation()
   const { state } = useLocation();
   const ordersToConfirm = state as Record<number, Order>;
   const navigate = useNavigate();
-  const getTranslatedProductName = useProductName(i18n);
+  const getTranslatedProductName = useProductName();
+
+  async function confirm() {
+    const orders = Object.values(ordersToConfirm);
+    for (const order of orders) {
+      if (!order.pushNotificationToken) continue;
+
+      console.log('Sending notification to', order.pushNotificationToken, 'for order', order.id);
+
+      await fetch('https://sendpushnotification-3avmwyjhaq-uc.a.run.app', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          token: order.pushNotificationToken,
+          notification: {
+            title: 'Your order has missing items',
+            body: 'Some items were not available. Click on this notification to select alternatives.',
+          },
+          data: { orderId: order.id, hasMissingItems: 'true' },
+          webpush: {
+            notification: {
+              // actions: [
+              //   {
+              //     action: 'view_order',
+              //     title: 'View Order',
+              //   },
+              //   {
+              //     action: 'select_alternatives',
+              //     title: 'Select Alternatives',
+              //   },
+              // ],
+              requireInteraction: true,
+            },
+          },
+        }),
+      });
+    }
+    navigate('/aimo');
+  }
 
   return (
     <div className="p-8">
@@ -31,7 +67,7 @@ export default function AimoPickingDashboardConfirmPage() {
           )),
         )}
         <Button
-          onClick={() => navigate('/aimo')}
+          onClick={confirm}
           className="w-64 self-end">
           Confirm and notify clients
         </Button>

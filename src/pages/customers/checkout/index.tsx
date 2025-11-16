@@ -26,7 +26,7 @@ import { AlertTriangleIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
-import { v4 } from "uuid";
+import { v4 } from 'uuid';
 
 export const CheckoutPage = () => {
   const { t } = useTranslation();
@@ -40,24 +40,24 @@ export const CheckoutPage = () => {
     const warnings: Warning[] = [];
     if (Math.random() < 0.2) {
       warnings.push({
-        title: "Frequent Disruptions",
-        description: "This item has been disrupted more frequently than usual.",
+        title: 'Frequent Disruptions',
+        description: 'This item has been disrupted more frequently than usual.',
       });
     }
     if (Math.random() < 0.2) {
       warnings.push({
-        title: "Unreliable Supplier",
+        title: 'Unreliable Supplier',
         description: "This supplier's reliability is poor.",
       });
     }
     if (Math.random() < 0.2) {
       warnings.push({
-        title: "Seasonality Issues",
-        description: "This item is prone to seasonal availability issues.",
+        title: 'Seasonality Issues',
+        description: 'This item is prone to seasonal availability issues.',
       });
     }
     return warnings;
-  }
+  };
 
   const [cart, setCart] = useState(() => {
     const stored = localStorage.getItem('cart');
@@ -69,7 +69,13 @@ export const CheckoutPage = () => {
   });
 
   function cartItemToItem(item: CartItem): Item {
-    const newItem = { id: item.id, ean: item.ean, names: item.names, orderedQuantity: item.quantity, pickEvent: null };
+    const newItem = {
+      id: item.id,
+      ean: item.ean,
+      names: item.names,
+      orderedQuantity: item.quantity,
+      pickEvent: null,
+    };
     return newItem;
   }
 
@@ -77,30 +83,32 @@ export const CheckoutPage = () => {
     const token = localStorage.getItem('pushNotificationToken');
     return token ? token : null;
   });
-  const next = () => setStep((s) => {
-    if (s === maxSteps) {
-      const orderId = v4();
-      for (const item of cart) {
-        console.log(item);
-        for (const warning of item.warnings) {
-          warning.orderId = orderId;
-          warning.itemId = item.id;
-          const d = doc(firestore, "warnings", v4());
-          setDoc(d, warning);
+  const next = () =>
+    setStep((s) => {
+      if (s === maxSteps) {
+        const orderId = v4();
+        for (const item of cart) {
+          console.log(item);
+          for (const warning of item.warnings) {
+            warning.orderId = orderId;
+            warning.itemId = item.id;
+            const d = doc(firestore, 'warnings', v4());
+            setDoc(d, warning);
+          }
         }
+        const order = {
+          id: orderId,
+          products: cart.map(cartItemToItem),
+          pushNotificationToken: pushNotificationToken || undefined,
+        } satisfies Order;
+        const d = doc(firestore, 'orders', orderId);
+        setDoc(d, order);
+        console.log('Order placed:', order);
+        navigate('/customer');
+        return;
       }
-      const order = {
-        id: orderId,
-        products: cart.map(cartItemToItem),
-        pushNotificationToken: pushNotificationToken || undefined,
-      } satisfies Order;
-      const d = doc(firestore, "orders", orderId);
-      setDoc(d, order);
-      navigate('/customer');
-      return;
-    }
-    return Math.min(maxSteps, s + 1);
-  });
+      return Math.min(maxSteps, s + 1);
+    });
   const prev = () => setStep((s) => Math.max(1, s - 1));
 
   const progressValue = (step / maxSteps) * 100;
@@ -108,7 +116,6 @@ export const CheckoutPage = () => {
   const [email, setEmail] = useState('');
   const [telephone, setTelephone] = useState('');
   const [name, setName] = useState('');
-
 
   // --- fallback state: map from cartItemId -> fallbackProductId | null
   const LOCALSTORAGE_FALLBACKS_KEY = 'checkout_fallbacks_v1';
@@ -242,7 +249,7 @@ export const CheckoutPage = () => {
                   readOnly={false}
                   cart={cart}
                   onUpdateItem={onUpdateItem}
-                  setCart={() => { }}
+                  setCart={() => {}}
                 />
               </div>
             )}
@@ -373,7 +380,7 @@ export const CheckoutPage = () => {
                     readOnly={true}
                     cart={cart}
                     onUpdateItem={onUpdateItem}
-                    setCart={() => { }}
+                    setCart={() => {}}
                   />
 
                   {/* Show selected fallbacks for review */}
@@ -402,8 +409,7 @@ export const CheckoutPage = () => {
               disabled={step === 1}>
               Back
             </Button>
-            <Button
-              onClick={next}>
+            <Button onClick={next}>
               {step === maxSteps - 1 ? 'Review' : step === maxSteps ? 'Done' : 'Next'}
             </Button>
           </div>
