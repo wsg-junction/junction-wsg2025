@@ -31,6 +31,13 @@ export type Order = {
   products: Item[];
   totalPrice: number;
   pushNotificationToken: string | null;
+  email: string;
+  telephone: string;
+  address: {
+    formatted: string;
+    lat: number;
+    lng: number;
+  };
 };
 
 export default function AimoPickingDashboard() {
