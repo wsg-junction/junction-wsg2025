@@ -1,14 +1,10 @@
-import { getTime } from "date-fns";
-import { Header } from "../components/Header/Header";
-import { TimePicker } from "react-time-picker";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@radix-ui/react-checkbox";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
-import { json } from "stream/consumers";
+import { Header } from "../components/Header/Header";
 
 const days = [
     "Monday",

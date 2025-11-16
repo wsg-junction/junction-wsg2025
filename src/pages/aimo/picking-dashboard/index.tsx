@@ -30,7 +30,7 @@ export type Item = {
 export type Order = {
   id: string;
   products: Item[];
-  pushNotificationToken?: string;
+  pushNotificationToken: string | null;
 };
 
 export default function AimoPickingDashboard() {
@@ -79,11 +79,43 @@ export default function AimoPickingDashboard() {
     product.pickEvent = pickEvent;
     updateOrder(order);
   };
+  function sendConfirmationNotifications() {
+    for (const order of orders) {
+      if (!order.pushNotificationToken) continue;
+
+      const hasMissingItems = order.products.some(
+        (product) => product.pickEvent && product.pickEvent.quantity < product.orderedQuantity,
+      );
+      if (hasMissingItems) continue;
+
+      console.log('Sending notification to', order.pushNotificationToken, 'for order', order.id);
+
+      fetch('https://sendpushnotification-3avmwyjhaq-uc.a.run.app', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          token: order.pushNotificationToken,
+          notification: {
+            title: 'Your order has been packed',
+            body: 'Your order was packed successfully and is now on its way to you.',
+          },
+          data: { orderId: order.id, hasMissingItems: 'false' },
+          webpush: { notification: { requireInteraction: true } },
+        }),
+      });
+    }
+  }
   const getSubmitAction = () => {
     if (getOrdersToConfirm().length > 0) {
-      return () => navigate('/aimo/dashboard/confirm', { state: getOrdersToConfirm() });
+      return () => {
+        sendConfirmationNotifications();
+        navigate('/aimo/dashboard/confirm', { state: getOrdersToConfirm() });
+      };
     }
-    return () => navigate('/aimo');
+    return () => {
+      sendConfirmationNotifications();
+      navigate('/aimo');
+    };
   };
   return (
     <>
@@ -102,6 +134,7 @@ export default function AimoPickingDashboard() {
             {Object.values(orders).flatMap((order) =>
               Object.values(order.products).map((item) => (
                 <PickingRow
+                  key={order.id + '.' + item.id}
                   order={order}
                   item={item}
                   setPickEvent={(e) => onPickEvent(e, order.id, item.id)}
@@ -167,9 +200,9 @@ function PickingRow({
       isNaN(value)
         ? null
         : {
-            quantity: value,
-            datetime: new Date(),
-          },
+          quantity: value,
+          datetime: new Date(),
+        },
     );
   }
 
