@@ -106,11 +106,13 @@ export default function SelectAlternativesPage() {
               <BreadcrumbPage>{t('select_alternatives.title')}</BreadcrumbPage>
             </BreadcrumbItem>
           </BreadcrumbList>
-        </Breadcrumb>
-        <div className="hero"></div>
+        </Breadcrumb>{' '}
+        <div className="hero mt-4">
+          <h1 className={'text-lg font-bold'}>{t('customer_alternatives')}</h1>
+          <h3 className={'text-gray-800 dark:text-gray-400'}>{t('customer_alternatives_subtitle')}</h3>
+        </div>
       </div>
-      <div className="m-8 flex flex-col gap-8">
-        <h1>{t('select_alternatives.title')}</h1>
+      <div className="m-4 flex flex-col gap-4 mt-2">
         {unfulfilledItems.map((item) => {
           const product = productService.getProductById(item.id)!;
           return (

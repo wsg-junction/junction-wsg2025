@@ -43,7 +43,7 @@ export const useTour = () => {
 };
 
 export let TOUR_STATE = {
-  LAST_ORDER_ID: 'f9720b9b-a5be-4022-8498-6113de931587',
+  LAST_ORDER_ID: '1de4c21e-65dd-41da-aefb-7ee10bebd6af',
 };
 
 const steps: TourStep[] = [
