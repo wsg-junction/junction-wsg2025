@@ -3,6 +3,9 @@ import { useProductName } from '@/hooks/use-product-name.ts';
 import { useLocation, useNavigate } from 'react-router';
 import type { Order } from '.';
 import { Header } from '../../components/Header';
+import { collection, addDoc } from 'firebase/firestore';
+import { firestore } from '@/lib/firebase.ts';
+import type { Notification } from '@/pages/customers/components/NotificationsPopover/NotificationsPopover.tsx';
 
 export default function AimoPickingDashboardConfirmPage() {
   const { state } = useLocation();
@@ -14,6 +17,19 @@ export default function AimoPickingDashboardConfirmPage() {
     if (!order.pushNotificationToken) return;
 
     console.log('Sending notification to', order.pushNotificationToken, 'for order', order.id);
+
+    try {
+      const docRef = await addDoc(collection(firestore, 'notifications'), {
+        title: 'Your order has missing items',
+        message: 'Some items were not available. Click on this notification to select alternatives.',
+        createdAt: Date.now(),
+        read: false,
+        orderId: order.id,
+      } as Omit<Notification, 'id'>);
+      console.log('Document written with ID: ', docRef.id);
+    } catch (error) {
+      console.error('Error adding document: ', error);
+    }
 
     fetch('https://sendpushnotification-3avmwyjhaq-uc.a.run.app', {
       method: 'POST',
