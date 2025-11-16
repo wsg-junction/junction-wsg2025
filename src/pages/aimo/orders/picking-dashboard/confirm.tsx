@@ -29,7 +29,7 @@ export default function AimoPickingDashboardConfirmPage() {
     try {
       const docRef = await addDoc(collection(firestore, 'notifications'), {
         title: 'Your order has missing items',
-        message: 'Some items were not available. Click on this notification to select alternatives.',
+        message: 'Some items were not available. Go to My Orders to select alternatives.',
         createdAt: Date.now(),
         read: false,
         orderId: order.id,
