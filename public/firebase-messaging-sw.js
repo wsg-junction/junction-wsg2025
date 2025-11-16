@@ -21,8 +21,8 @@ self.addEventListener('notificationclick', function (event) {
   event.waitUntil(
     clients.openWindow(
       event.notification.data.hasMissingItems === 'true'
-        ? `/customer/orders/${orderId}/alternatives`
-        : `/customer/orders/${orderId}`,
+        ? `/customer/orders/${orderId}/select-alternatives`
+        : `/customer/orders`,
     ),
   );
 });

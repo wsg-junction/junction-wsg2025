@@ -9,7 +9,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { firestore, useQuery } from '@/lib/firebase';
+import { firestore, useOrder, useQuery } from '@/lib/firebase';
 import type { Order } from '@/pages/aimo/orders/picking-dashboard';
 import { Header } from '@/pages/customers/components/Header/Header.tsx';
 import { type Product, productService } from '@/services/ProductService';
@@ -23,17 +23,18 @@ import { useProductName } from '@/hooks/use-product-name.ts';
 import { productCategoryService } from '@/services/ProductCategoryService.ts';
 import { useLocalStorage } from '@/hooks/use-local-storage';
 import type { CartItem } from '.';
+import { useParams } from 'react-router';
 
 export default function SelectAlternativesPage() {
   const { t, i18n } = useTranslation();
   const getTranslatedProductName = useProductName(i18n);
 
-  const orders = useQuery<Order>(useMemo(() => collection(firestore, 'orders'), []));
+  const { orderId } = useParams();
+  const order = useOrder(orderId);
+
   const unfulfilledItems = useMemo(() => {
-    return Object.values(orders)
-      .flatMap((order) => order.products)
-      .filter((p) => p.pickEvent && p.pickEvent.quantity < p.orderedQuantity);
-  }, [orders]);
+    return order?.products.filter((p) => p.pickEvent && p.pickEvent.quantity < p.orderedQuantity) ?? [];
+  }, [order]);
 
   const [similarProducts, setSimilarProducts] = useState<Record<string, Product[]>>({});
 
@@ -98,13 +99,17 @@ export default function SelectAlternativesPage() {
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
+              <BreadcrumbLink href="/customer/orders">{t('my_orders')}</BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
               <BreadcrumbPage>{t('select_alternatives.title')}</BreadcrumbPage>
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
         <div className="hero"></div>
       </div>
-      <div className="m-8 flex flex-col gap-4">
+      <div className="m-8 flex flex-col gap-8">
         <h1>{t('select_alternatives.title')}</h1>
         {unfulfilledItems.map((item) => {
           const product = productService.getProductById(item.id)!;
@@ -135,6 +140,8 @@ export default function SelectAlternativesPage() {
                           <ProductCard
                             key={product.id}
                             id={product.id}
+                            onUpdateCartQuantity={(quantity) => onUpdateItem(product, quantity)}
+                            currentQuantity={getQuantityInCart(product.id)}
                           />
                         );
                       })

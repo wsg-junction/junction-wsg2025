@@ -29,10 +29,6 @@ const BUSINESS_ROUTES = [
     path: 'customer',
     children: [
       {
-        path: 'select-alternatives',
-        Component: SelectAlternativesPage,
-      },
-      {
         path: 'checkout',
         Component: CheckoutPage,
       },
@@ -49,7 +45,16 @@ const BUSINESS_ROUTES = [
       },
       {
         path: 'orders',
-        Component: CustomerOrdersPage,
+        children: [
+          {
+            index: true,
+            Component: CustomerOrdersPage,
+          },
+          {
+            path: ':orderId/select-alternatives',
+            Component: SelectAlternativesPage,
+          },
+        ],
       },
       {
         index: true,
