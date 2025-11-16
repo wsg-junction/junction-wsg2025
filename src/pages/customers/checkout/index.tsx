@@ -17,6 +17,7 @@ import {
   CommandItem,
   CommandList,
 } from '@/components/ui/command';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input.tsx';
 import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -36,18 +37,16 @@ import { doc, setDoc, Timestamp } from 'firebase/firestore';
 import { getToken } from 'firebase/messaging';
 import { motion } from 'framer-motion';
 import { PhoneNumberFormat, PhoneNumberUtil } from 'google-libphonenumber';
+import { type TFunction } from 'i18next';
 import { AlertTriangleIcon, ChevronsUpDown } from 'lucide-react';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
 import { v4 } from 'uuid';
 import { z } from 'zod';
-import { useAutocompleteSuggestions } from './useAutocompleteSuggestions';
-import { type TFunction } from 'i18next';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { SearchForAlternativeProductDialog } from '../components/SearchForAlternativeProductDialog';
-import React from 'react';
+import { useAutocompleteSuggestions } from './useAutocompleteSuggestions';
 
 const phoneUtil = PhoneNumberUtil.getInstance();
 
@@ -217,7 +216,6 @@ export const CheckoutPage = () => {
       telephone: '',
     },
     resolver: zodResolver(formSchema(t, i18n.language)),
-    reValidateMode: 'onBlur',
   });
 
   const [pushNotificationToken, setPushNotificationToken] = useState<string | null>(() => {
@@ -228,8 +226,11 @@ export const CheckoutPage = () => {
   const [myOrderIds, setMyOrderIds] = useLocalStorage<string[]>('myOrderIds', []);
   const next = async () => {
     if (step === 2) {
-      const isValid = await form.trigger(undefined, { shouldFocus: true });
-      if (!isValid) return;
+      await form.handleSubmit(
+        () => true,
+        () => false,
+      )();
+      if (form.formState.isValid === false) return;
     }
     if (step === maxSteps) {
       const orderId = v4();
