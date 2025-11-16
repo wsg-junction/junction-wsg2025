@@ -96,7 +96,7 @@ export default function CustomerOrdersPage() {
             </EmptyHeader>
             <EmptyContent>
               <Button asChild>
-                <Link to="/customer">Visit the Shop</Link>
+                <Link to="/customer/browse">Visit the Shop</Link>
               </Button>
             </EmptyContent>
           </Empty>
