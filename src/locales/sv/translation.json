@@ -21,5 +21,37 @@
   "submit": "Skicka",
   "enter_quantity": "Ange kvantitet",
   "error_quantity_greater": "Den plockade kvantiteten är större än den beställda kvantiteten. Välj högst lika många som beställts.",
-  "error_quantity_smaller": "Den plockade kvantiteten är mindre än den beställda kvantiteten."
+  "error_quantity_smaller": "Den plockade kvantiteten är mindre än den beställda kvantiteten.",
+  "no_image": "No Image",
+  "aimo_picking_dashboard": {
+    "picking_row": {
+      "quantity_custom": "Custom"
+    }
+  },
+  "select_alternatives": {
+    "title": "Select Alternatives",
+    "alternative_products": "Alternativa produkter",
+    "alternative_recipes": "Alternativa recept",
+    "supermarket": "Leta efter Supermarket",
+    "select_some_first": "Välj minst en produkt att söka i närheten",
+    "not_deliverable": "not deliverable"
+  },
+  "search_for_alternative_product_dialog": {
+    "title": "Sök efter alternativ till",
+    "search_placeholder": "Sök efter produkter...",
+    "no_products_found": "Inga produkter hittades",
+    "no_products_found_description": "Försök att justera din sökning eller ditt filter för att hitta det du letar efter."
+  },
+  "search_for_alternative_recipe_dialog": {
+    "title": "Alternativa recept",
+    "loading": "Genererar recept...",
+    "placeholder": "Skriv in din fråga om alternativ...",
+    "error_fetch": "Fel vid hämtning av svar.",
+    "error_retry": "Något gick fel - försök igen senare.",
+    "loading_btn": "Loading...",
+    "send": "Send",
+    "loaded_from_cache": "Laddad från cache",
+    "clear_cache": "Rensa cache",
+    "cache_cleared": "Cache cleared"
+  }
 }

@@ -21,5 +21,37 @@
   "submit": "Lähetä",
   "enter_quantity": "Syötä määrä",
   "error_quantity_greater": "Poimittu määrä on suurempi kuin tilattu määrä. Valitse enintään tilattu määrä.",
-  "error_quantity_smaller": "Poimittu määrä on pienempi kuin tilattu määrä."
+  "error_quantity_smaller": "Poimittu määrä on pienempi kuin tilattu määrä.",
+  "no_image": "Ei kuvaa",
+  "aimo_picking_dashboard": {
+    "picking_row": {
+      "quantity_custom": "Mukautettu"
+    }
+  },
+  "select_alternatives": {
+    "title": "Valitse vaihtoehtoja",
+    "alternative_products": "Vaihtoehtoiset tuotteet",
+    "alternative_recipes": "Vaihtoehtoiset reseptit",
+    "supermarket": "Etsi supermarket",
+    "select_some_first": "Valitse vähintään yksi tuote, jota haluat etsiä lähistöltä",
+    "not_deliverable": "ei toimitettavissa"
+  },
+  "search_for_alternative_product_dialog": {
+    "title": "Etsi vaihtoehtoja",
+    "search_placeholder": "Etsi tuotteita…",
+    "no_products_found": "Tuotteita ei löytynyt",
+    "no_products_found_description": "Yritä muokata hakua tai suodatinta löytääksesi etsimäsi."
+  },
+  "search_for_alternative_recipe_dialog": {
+    "title": "Vaihtoehtoiset reseptit",
+    "loading": "Luodaan reseptiä…",
+    "placeholder": "Kirjoita kysymyksesi vaihtoehdoista…",
+    "error_fetch": "Virhe vastauksen hakemisessa.",
+    "error_retry": "Jotain meni pieleen — yritä myöhemmin uudelleen.",
+    "loading_btn": "Ladataan...",
+    "send": "Lähetä",
+    "loaded_from_cache": "Ladattu välimuistista",
+    "clear_cache": "Tyhjennä välimuisti",
+    "cache_cleared": "Välimuisti tyhjennetty"
+  }
 }

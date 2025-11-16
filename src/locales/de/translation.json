@@ -21,5 +21,37 @@
   "submit": "Submit",
   "enter_quantity": "Menge eingeben",
   "error_quantity_greater": "Die ausgewählte Menge ist größer als die bestellte Menge. Bitte höchstens so viele auswählen, wie auch bestellt wurden.",
-  "error_quantity_smaller": "Die ausgewählte Menge ist kleiner als die bestellte Menge."
+  "error_quantity_smaller": "Die ausgewählte Menge ist kleiner als die bestellte Menge.",
+  "no_image": "No Image",
+  "aimo_picking_dashboard": {
+    "picking_row": {
+      "quantity_custom": "Custom"
+    }
+  },
+  "select_alternatives": {
+    "title": "Select Alternatives",
+    "alternative_products": "Alternative Produkte",
+    "alternative_recipes": "Alternative Recipes",
+    "supermarket": "Suche nach Supermarkt",
+    "select_some_first": "Wählen Sie mindestens ein Produkt aus, um in der Nähe zu suchen",
+    "not_deliverable": "nicht lieferbar"
+  },
+  "search_for_alternative_product_dialog": {
+    "title": "Suche nach Alternativen zu",
+    "search_placeholder": "Search for products...",
+    "no_products_found": "Keine Produkte gefunden",
+    "no_products_found_description": "Versuchen Sie, Ihre Suche oder Ihren Filter anzupassen, um das zu finden, was Sie suchen."
+  },
+  "search_for_alternative_recipe_dialog": {
+    "title": "Alternative Recipes",
+    "loading": "Generating recipe...",
+    "placeholder": "Geben Sie Ihre Frage zu Alternativen ein...",
+    "error_fetch": "Fehler beim Abrufen der Antwort.",
+    "error_retry": "Etwas ist schief gelaufen - bitte versuchen Sie es später noch einmal.",
+    "loading_btn": "Loading...",
+    "send": "Senden",
+    "loaded_from_cache": "Aus dem Cache geladen",
+    "clear_cache": "Cache löschen",
+    "cache_cleared": "Cache geleert"
+  }
 }
