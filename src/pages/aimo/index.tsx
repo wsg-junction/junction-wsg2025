@@ -23,7 +23,7 @@ export default function AimoHomePage() {
           <div className="flex-1 -mt-6"></div>
           <CardFooter>
             <Button asChild>
-              <Link to="/aimo/dashboard">Open</Link>
+              <Link to="/aimo/orders">Open</Link>
             </Button>
           </CardFooter>
         </Card>

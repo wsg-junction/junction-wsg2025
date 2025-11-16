@@ -197,7 +197,7 @@ export const ShoppingCartList = ({
               <p className="font-medium line-clamp-2 overflow-hidden text-ellipsis me-2">
                 {getTranslatedProductName(item)}
               </p>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm text-muted-foreground tabular-nums">
                 {formattedPrice}€<span className="text-sm text-muted-foreground font-light"> / pcs</span>
               </p>
               {item.warnings.length > 0 && (
@@ -237,11 +237,11 @@ export const ShoppingCartList = ({
               </div>
             ) : (
               <div>
-                <p className="font-medium">Qty: {item.quantity}</p>
+                <p className="font-medium tabular-nums">Qty: {item.quantity}</p>
               </div>
             )}
 
-            <p className="w-20 text-right font-medium">{totalPrice(item).toFixed(2)}€</p>
+            <p className="w-20 text-right font-medium tabular-nums">{totalPrice(item).toFixed(2)}€</p>
 
             {!readOnly && (
               <Button
@@ -281,9 +281,7 @@ export const ShoppingCartList = ({
           <span>Total: </span>
           <span className="font-bold text-lg">
             {cart
-              .reduce((a, b) => {
-                return a + totalPrice(b);
-              }, 0)
+              .reduce((a, b) => a + totalPrice(b), 0)
               .toFixed(2)}
             €
           </span>

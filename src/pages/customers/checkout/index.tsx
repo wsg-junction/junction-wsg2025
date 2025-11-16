@@ -13,14 +13,15 @@ import { Input } from '@/components/ui/input.tsx';
 import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress.tsx';
 import { Spinner } from '@/components/ui/spinner';
+import { useLocalStorage } from '@/hooks/use-local-storage';
 import { useProductName } from '@/hooks/use-product-name';
 import { firestore, messaging, vapidKey } from '@/lib/firebase';
-import type { Item, Order } from '@/pages/aimo/picking-dashboard';
+import type { Item, Order } from '@/pages/aimo/orders/picking-dashboard';
 import type { Warning } from '@/pages/aimo/warnings';
 import { Header } from '@/pages/customers/components/Header/Header.tsx';
 import { ShoppingCartList, type CartItem } from '@/pages/customers/customer-shopping';
 import { productService, type Product } from '@/services/ProductService';
-import { doc, setDoc } from 'firebase/firestore';
+import { doc, setDoc, Timestamp } from 'firebase/firestore';
 import { getToken } from 'firebase/messaging';
 import { motion } from 'framer-motion';
 import { AlertTriangleIcon } from 'lucide-react';
@@ -85,6 +86,7 @@ export const CheckoutPage = () => {
     return token ? token : null;
   });
   const [isEnablingPushNotifications, setIsEnablingPushNotifications] = useState(false);
+  const [myOrderIds, setMyOrderIds] = useLocalStorage<string[]>('myOrderIds', []);
   const next = () =>
     setStep((s) => {
       if (s === maxSteps) {
@@ -100,12 +102,14 @@ export const CheckoutPage = () => {
         }
         const order = {
           id: orderId,
+          createdAt: Timestamp.now(),
           products: cart.map(cartItemToItem),
           pushNotificationToken: pushNotificationToken || null,
         } satisfies Order;
         const d = doc(firestore, 'orders', orderId);
         setDoc(d, order);
         console.log('Order placed:', order);
+        setMyOrderIds([...myOrderIds, orderId]);
         navigate('/customer');
         return;
       }
