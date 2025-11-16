@@ -37,7 +37,7 @@ export default function GeminiPage() {
                 onClick={handleClick}
                 disabled={loading}
             >
-                {loading ? "Loading..." : "Ask Gemini"}
+                {loading ? "Loading…" : "Ask Gemini"}
             </button>
             <textarea
                 ref={textareaRef}
