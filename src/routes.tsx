@@ -1,19 +1,19 @@
-import { createBrowserRouter } from 'react-router';
 import App from '@/App.tsx';
-import DashboardPage from '@/pages/dashboard';
 import { ThemeProvider } from '@/components/core/theme-provider.tsx';
+import { CheckoutPage } from '@/pages/customers/checkout';
+import { CheckoutCompletionPage } from '@/pages/customers/checkout-completion';
+import CustomerShoppingPage from '@/pages/customers/customer-shopping';
+import DashboardPage from '@/pages/dashboard';
 import { NotFoundErrorPage } from '@/pages/error-pages/not-found.page.tsx';
+import { createBrowserRouter, useParams } from 'react-router';
+import AimoHomePage from './pages/aimo';
+import OrdersPage from './pages/aimo/orders';
 import AimoPickingDashboardPage from './pages/aimo/orders/picking-dashboard';
 import AimoPickingDashboardConfirmPage from './pages/aimo/orders/picking-dashboard/confirm';
-import CustomerShoppingPage from '@/pages/customers/customer-shopping';
-import { CheckoutPage } from '@/pages/customers/checkout';
+import AimoWarningsPage from './pages/aimo/warnings';
+import CommunicationPreferencesPage from './pages/customers/communication';
 import SelectAlternativesPage from './pages/customers/customer-shopping/select-alternatives';
-import AimoWarningsPage from "./pages/aimo/warnings";
-import AimoHomePage from "./pages/aimo";
-import GeminiPage from "./pages/gemini/gemini";
-import CommunicationPreferencesPage from "./pages/customers/communication";
-import TourController from './pages/tour/TourController';
-import OrdersPage from './pages/aimo/orders';
+import GeminiPage from './pages/gemini/gemini';
 
 const BUSINESS_ROUTES = [
   {
@@ -34,6 +34,13 @@ const BUSINESS_ROUTES = [
       {
         path: 'checkout',
         Component: CheckoutPage,
+      },
+      {
+        path: 'checkout/complete/:orderId',
+        Component: () => {
+          const { orderId } = useParams();
+          return <CheckoutCompletionPage orderId={orderId!} />;
+        },
       },
       {
         path: 'communication',
@@ -70,9 +77,9 @@ const BUSINESS_ROUTES = [
                 path: 'confirm',
                 Component: AimoPickingDashboardConfirmPage,
               },
-            ]
-          }
-        ]
+            ],
+          },
+        ],
       },
       {
         path: 'warnings',

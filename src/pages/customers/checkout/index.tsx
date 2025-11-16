@@ -29,10 +29,12 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
 import { v4 } from 'uuid';
+import { TOUR_STATE, useTour } from '@/pages/tour/TourController.tsx';
 
 export const CheckoutPage = () => {
   const { t } = useTranslation();
   const { i18n } = useTranslation();
+  const { fulfillStep } = useTour();
   const getTranslatedProductName = useProductName(i18n);
   const [step, setStep] = useState(1);
   const maxSteps = 3;
@@ -107,11 +109,16 @@ export const CheckoutPage = () => {
           pushNotificationToken: pushNotificationToken || null,
         } satisfies Order;
         const d = doc(firestore, 'orders', orderId);
-        setDoc(d, order);
-        console.log('Order placed:', order);
-        setMyOrderIds([...myOrderIds, orderId]);
-        navigate('/customer');
-        setCart([]);
+        setDoc(d, order).then(() => {
+          console.log('Order saved:', order);
+          console.log(order.id);
+          TOUR_STATE.LAST_ORDER_ID = order.id;
+          setMyOrderIds([...myOrderIds, orderId]);
+          navigate('/customer/checkout/complete/' + order.id);
+          fulfillStep('customer_checkout_place_order');
+          setCart([]);
+        });
+
         return;
       }
       return Math.min(maxSteps, s + 1);

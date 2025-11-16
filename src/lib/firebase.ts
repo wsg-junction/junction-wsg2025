@@ -17,6 +17,9 @@ import {
 } from 'firebase/firestore';
 import { getMessaging } from 'firebase/messaging';
 import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
+import firebase from 'firebase/compat/app';
+import { doc } from '@firebase/firestore';
 const app = initializeApp(firebaseConfig);
 
 export const firestore = getFirestore(app);
@@ -53,6 +56,26 @@ export function useDoc<T>(query: DocumentReference<DocumentData, DocumentData>):
   const [doc, setDoc] = useState<T | undefined>(undefined);
   useEffect(() => streamDoc(query, setDoc), [query]);
   return doc;
+}
+export function useDocument<T>(collectionPath: string, docId: string): T | null {
+  const [document, setDocument] = useState<T | null>(null);
+
+  useEffect(() => {
+    if (!docId) return;
+
+    const docRef = doc(firestore, collectionPath, docId);
+    const unsubscribe = onSnapshot(docRef, (snapshot) => {
+      if (snapshot.exists()) {
+        setDocument({ ...snapshot.data(), id: snapshot.id } as T);
+      } else {
+        setDocument(null); // doc doesn't exist
+      }
+    });
+
+    return () => unsubscribe();
+  }, [collectionPath, docId]);
+
+  return document;
 }
 
 export function useMyOrders(): Order[] {
