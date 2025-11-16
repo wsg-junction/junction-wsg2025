@@ -59,11 +59,11 @@ async function handleFindNearbySupermarkets(args: { languageCode: string; orderI
     }
 
     const orderData = orderSnap.data();
-    if (!orderData?.deliveryLocation?.lat || !orderData?.deliveryLocation?.lng) {
+    if (!orderData?.address?.lat || !orderData?.address?.lng) {
       throw new Error('Order does not contain a valid delivery location.');
     }
 
-    const { lat, lng } = orderData.deliveryLocation;
+    const { lat, lng } = orderData.address;
 
     // 2. Call Google Places Nearby Search API
     const res = await fetch('https://places.googleapis.com/v1/places:searchNearby', {
