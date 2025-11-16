@@ -11,8 +11,67 @@ import SelectAlternativesPage from './pages/customers/customer-shopping/select-a
 import AimoWarningsPage from "./pages/aimo/warnings";
 import AimoHomePage from "./pages/aimo";
 import GeminiPage from "./pages/gemini/gemini";
-import path from "path";
 import CommunicationPreferencesPage from "./pages/customers/communication";
+import TourController from './pages/tour/TourController';
+
+const BUSINESS_ROUTES = [
+  {
+    index: true,
+    Component: DashboardPage,
+  },
+  {
+    path: 'gemini',
+    Component: GeminiPage,
+  },
+  {
+    path: 'customer',
+    children: [
+      {
+        path: 'select-alternatives',
+        Component: SelectAlternativesPage,
+      },
+      {
+        path: 'checkout',
+        Component: CheckoutPage,
+      },
+      {
+        path: 'communication',
+        Component: CommunicationPreferencesPage,
+      },
+      {
+        index: true,
+        Component: CustomerShoppingPage,
+      },
+    ],
+  },
+  {
+    path: 'aimo',
+    children: [
+      {
+        index: true,
+        Component: AimoHomePage,
+      },
+      {
+        path: 'dashboard',
+        children: [
+          {
+            index: true,
+            Component: AimoPickingDashboardPage,
+          },
+          {
+            path: 'confirm',
+            Component: AimoPickingDashboardConfirmPage,
+          },
+        ],
+      },
+      {
+        path: 'warnings',
+        index: true,
+        Component: AimoWarningsPage,
+      },
+    ],
+  },
+];
 
 export const ROUTES = createBrowserRouter([
   {
@@ -31,58 +90,7 @@ export const ROUTES = createBrowserRouter([
         element: <TourController />,
         children: BUSINESS_ROUTES,
       },
-      {
-        path: "gemini",
-        Component: GeminiPage,
-      },
-      {
-        path: 'customer',
-        children: [
-          {
-            path: 'select-alternatives',
-            Component: SelectAlternativesPage,
-          },
-          {
-            path: 'checkout',
-            Component: CheckoutPage,
-          },
-          {
-            path: 'communication',
-            Component: CommunicationPreferencesPage,
-          },
-          {
-            index: true,
-            Component: CustomerShoppingPage,
-          },
-        ],
-      },
-      {
-        path: 'aimo',
-        children: [
-          {
-            index: true,
-            Component: AimoHomePage,
-          },
-          {
-            path: 'dashboard',
-            children: [
-              {
-                index: true,
-                Component: AimoPickingDashboardPage,
-              },
-              {
-                path: 'confirm',
-                Component: AimoPickingDashboardConfirmPage,
-              }
-            ],
-          },
-          {
-            path: 'warnings',
-            index: true,
-            Component: AimoWarningsPage,
-          }
-        ]
-      }
+      ...BUSINESS_ROUTES,
     ],
   },
 ]);
