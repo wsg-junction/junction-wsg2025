@@ -18,9 +18,12 @@ import { useNavigate } from 'react-router';
 import { productService, type Product } from '@/services/ProductService';
 import { useProductName } from '@/hooks/use-product-name.ts';
 import type { Warning } from '@/pages/aimo/warnings';
+import { useTour } from '@/pages/tour/TourController.tsx';
+import { defaultFilter } from 'cmdk';
 
 export default function CustomerShoppingPage() {
   const { t } = useTranslation();
+  const { fulfillStep } = useTour();
 
   const [page, setPage] = useState(0);
   const [products, setProducts] = useState<Product[]>([]);
@@ -104,7 +107,9 @@ export default function CustomerShoppingPage() {
         <div className="p-8 text-center">{t('loading_products')}</div>
       ) : (
         <>
-          <div className="px-8 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-6">
+          <div
+            className="px-8 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-6"
+            data-tour-id="select_products">
             {products.map((product) => {
               return (
                 <ProductCard
@@ -136,6 +141,10 @@ export default function CustomerShoppingPage() {
           className="fixed bottom-3 right-3"
           asChild>
           <Button
+            onClick={() => {
+              fulfillStep('customer_shop_select_products');
+            }}
+            data-tour-id="cart_button"
             className="h-[50px] w-[50px] rounded-full flex justify-center items-center"
             variant="default"
             size="lg">
@@ -179,6 +188,7 @@ export const ShoppingCartList = ({
   setCart,
 }: ShoppingCartProps) => {
   const { t, i18n } = useTranslation();
+  const { fulfillStep } = useTour();
   const getTranslatedProductName = useProductName(i18n);
   const navigate = useNavigate();
   const updateQuantity = (product: Product, quantity: number) => {
@@ -267,6 +277,7 @@ export const ShoppingCartList = ({
             <div className={'flex flex-row gap-2'}>
               <Button
                 onClick={() => {
+                  fulfillStep('customer_shop_checkout');
                   navigate('/customer/checkout');
                 }}
                 disabled={cart.length === 0}>
