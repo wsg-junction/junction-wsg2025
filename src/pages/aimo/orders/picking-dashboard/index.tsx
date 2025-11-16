@@ -29,6 +29,7 @@ export type Order = {
   id: string;
   createdAt: Timestamp;
   products: Item[];
+  totalPrice: number;
   pushNotificationToken: string | null;
 };
 

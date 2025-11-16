@@ -11,6 +11,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select.tsx';
 import { useLocalStorage } from '@/hooks/use-local-storage';
 import { useProductName } from '@/hooks/use-product-name.ts';
+import { formatPrice } from '@/lib/utils';
 import type { Warning } from '@/pages/aimo/warnings';
 import { Header } from '@/pages/customers/components/Header/Header.tsx';
 import { ProductCard } from '@/pages/customers/components/ProductCard/ProductCard.tsx';
@@ -195,9 +196,6 @@ export const ShoppingCartList = ({
   return (
     <div className={'space-y-4 mt-2'}>
       {cart.map((item, index) => {
-        const { price } = item;
-        const formattedPrice = price ? price.toFixed(2) : '0.00';
-
         return (
           <div
             key={index}
@@ -207,7 +205,8 @@ export const ShoppingCartList = ({
                 {getTranslatedProductName(item)}
               </p>
               <p className="text-sm text-muted-foreground tabular-nums">
-                {formattedPrice}€<span className="text-sm text-muted-foreground font-light"> / pcs</span>
+                {formatPrice(item.price)}
+                <span className="text-sm text-muted-foreground font-light"> / pcs</span>
               </p>
               {item.warnings.length > 0 && (
                 <div className="mt-1 space-y-1">
@@ -250,7 +249,7 @@ export const ShoppingCartList = ({
               </div>
             )}
 
-            <p className="w-20 text-right font-medium tabular-nums">{totalPrice(item).toFixed(2)}€</p>
+            <p className="w-20 text-right font-medium tabular-nums">{formatPrice(totalPrice(item))}</p>
 
             {!readOnly && (
               <Button
@@ -289,7 +288,9 @@ export const ShoppingCartList = ({
         </div>
         <div className={'flex justify-end items-center gap-2 '}>
           <span>Total: </span>
-          <span className="font-bold text-lg">{cart.reduce((a, b) => a + totalPrice(b), 0).toFixed(2)}€</span>
+          <span className="font-bold text-lg">
+            {formatPrice(cart.reduce((a, b) => a + totalPrice(b), 0))}
+          </span>
         </div>
       </div>
     </div>

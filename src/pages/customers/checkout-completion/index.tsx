@@ -19,8 +19,10 @@ import {
 } from '@/components/ui/table.tsx';
 import { useProductName } from '@/hooks/use-product-name.ts';
 import { useDocument } from '@/lib/firebase.ts';
+import { formatPrice } from '@/lib/utils';
 import type { Order } from '@/pages/aimo/orders/picking-dashboard';
 import { Header } from '@/pages/customers/components/Header/Header.tsx';
+import { productService } from '@/services/ProductService';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 
@@ -66,21 +68,25 @@ export const CheckoutCompletionPage = ({ orderId }: CheckoutCompletionPageProps)
                   <TableHead>EAN</TableHead>
                   <TableHead>Quantity</TableHead>
                   <TableHead>Product</TableHead>
+                  <TableHead>Price</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {doc.products.map((product) => (
-                  <TableRow key={product.id}>
-                    <TableCell className="bold">{product.ean}</TableCell>
-                    <TableCell>{product.orderedQuantity}</TableCell>
-                    <TableCell>{getTranslatedProductName(product)}</TableCell>
+                {doc.products.map((item) => (
+                  <TableRow key={item.id}>
+                    <TableCell className="bold">{item.ean}</TableCell>
+                    <TableCell>{item.orderedQuantity}</TableCell>
+                    <TableCell>{getTranslatedProductName(item)}</TableCell>
+                    <TableCell className="text-right">
+                      {formatPrice(productService.getProductById(item.id)!.price * item.orderedQuantity)}
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
               <TableFooter>
                 <TableRow>
                   <TableCell colSpan={3}>Total</TableCell>
-                  <TableCell className="text-right">$2,500.00</TableCell>
+                  <TableCell className="text-right">{formatPrice(doc.totalPrice)}</TableCell>
                 </TableRow>
               </TableFooter>
             </Table>
