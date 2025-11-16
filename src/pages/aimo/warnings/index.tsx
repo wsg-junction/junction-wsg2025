@@ -6,6 +6,19 @@ import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Header } from '../components/Header';
 import type { Order } from '../orders/picking-dashboard';
+import {
+  Breadcrumb,
+  BreadcrumbList,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbSeparator,
+  BreadcrumbPage,
+} from '@/components/ui/breadcrumb';
+import i18n from '@/i18n';
+import orders from '../orders';
+import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyTitle } from '@/components/ui/empty';
+import type { Button } from 'react-day-picker';
+import type { Link } from 'react-router';
 
 export type Warning = {
   orderId?: string;
@@ -23,9 +36,34 @@ export default function AimoWarningsPage() {
   return (
     <div>
       <Header />
-      <div className="flex flex-col gap-4 p-4">
-        {warningsWidget}
-        {warningsWidget.length === 0 && <div>No warnings</div>}
+      <div className="hero-container p-4">
+        <Breadcrumb>
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink href="/aimo">{t('warehouse_application')}</BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage>{t('warehouse_warnings')}</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+        <div className="hero mt-4">
+          <h1 className={'text-lg font-bold'}>{t('warehouse_warnings')}</h1>
+          <h3 className={'text-gray-800 dark:text-gray-400'}>{t('warehouse_warnings_subtitle')}</h3>
+        </div>
+
+        <div className="flex flex-col gap-4 mt-6">
+          {warningsWidget}
+          {warningsWidget.length === 0 && (
+            <Empty>
+              <EmptyHeader>
+                <EmptyTitle>{t('warnings_empty')}</EmptyTitle>
+                <EmptyDescription>{t('warnings_empty_subtitle')}</EmptyDescription>
+              </EmptyHeader>
+            </Empty>
+          )}
+        </div>
       </div>
     </div>
   );

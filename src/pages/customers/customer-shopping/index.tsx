@@ -142,10 +142,10 @@ export default function CustomerShoppingPage() {
                 fulfillStep('customer_shop_select_products');
               }}
               data-tour-id="cart_button"
-              className="h-[50px] w-[50px] rounded-full flex justify-center items-center"
+              className="h-16 px-8! rounded-full flex justify-center items-center text-lg gap-4"
               variant="default"
               size="lg">
-              <ShoppingCart />
+              <ShoppingCart className="w-6! h-6!" /> Cart
             </Button>
           </PopoverTrigger>
           <PopoverContent className="-translate-x-3 w-full max-w-[90vw] min-w-auto md:max-w-[600px] min-w-[300px] max-h-[80vh] overflow-y-auto">
@@ -201,80 +201,84 @@ export const ShoppingCartList = ({
 
   return (
     <div className={'space-y-4 mt-2'}>
-      {cart.map((item, index) => {
-        return (
-          <div
-            key={index}
-            className="flex items-center justify-between border-t pt-2 gap-1  ">
-            <div className="flex-1">
-              <p className="font-medium line-clamp-2 overflow-hidden text-ellipsis me-2">
-                {getTranslatedProductName(item)}
-              </p>
-              <p className="text-sm text-muted-foreground tabular-nums">
-                {formatPrice(item.price)}
-                <span className="font-light"> / pcs</span>
-              </p>
-              {fallbacks && fallbacks[item.id] && (
-                <p className="text-sm text-muted-foreground">
-                  {t('checkout_page.fallbacks.fallback')}{' '}
-                  {getTranslatedProductName(productService.getProductById(fallbacks[item.id]))}
+      {cart.length ? (
+        cart.map((item, index) => {
+          return (
+            <div
+              key={index}
+              className="flex items-center justify-between border-t pt-2 gap-2 ">
+              <div className="flex-1">
+                <p className="font-medium line-clamp-2 overflow-hidden text-ellipsis me-2">
+                  {getTranslatedProductName(item)}
                 </p>
-              )}
-              {item.warnings.length > 0 && (
-                <div className="mt-1 space-y-1">
-                  {item.warnings.map((warnings, wIndex) => (
-                    <div
-                      key={wIndex}
-                      className="p-2 border  border-yellow-200 bg-yellow-50 text-yellow-800 dark:border-yellow-800 dark:bg-yellow-950/30 dark:text-yellow-200 [&>svg]:text-yellow-600 dark:[&>svg]:text-yellow-400 rounded-lg">
-                      <div className="text-sm font-bold">{warnings.title}</div>
-                      <div className="text-sm">{warnings.description}</div>
-                    </div>
-                  ))}
+                <p className="text-sm text-muted-foreground tabular-nums">
+                  {formatPrice(item.price)}
+                  <span className="font-light"> / pcs</span>
+                </p>
+                {fallbacks && fallbacks[item.id] && (
+                  <p className="text-sm text-muted-foreground">
+                    {t('checkout_page.fallbacks.fallback')}{' '}
+                    {getTranslatedProductName(productService.getProductById(fallbacks[item.id]))}
+                  </p>
+                )}
+                {item.warnings.length > 0 && (
+                  <div className="mt-1 space-y-1">
+                    {item.warnings.map((warnings, wIndex) => (
+                      <div
+                        key={wIndex}
+                        className="p-2 border border-yellow-400 bg-yellow-100 rounded-lg">
+                        <div className="text-sm font-bold">{warnings.title}</div>
+                        <div className="text-sm">{warnings.description}</div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+              <div className="w-2" />
+
+              {!readOnly ? (
+                <div className={'flex items-center gap-2'}>
+                  <span>Qty:</span>
+                  <Select
+                    value={String(item.quantity)}
+                    onValueChange={(val) => updateQuantity(item, Number(val))}>
+                    <SelectTrigger className="w-16">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {[...Array(10)].map((_, i) => (
+                        <SelectItem
+                          key={i + 1}
+                          value={String(i + 1)}>
+                          {i + 1}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              ) : (
+                <div>
+                  <p className="font-medium tabular-nums">Qty: {item.quantity}</p>
                 </div>
               )}
+
+              <p className="w-20 text-right font-medium tabular-nums">{formatPrice(totalPrice(item))}</p>
+
+              {!readOnly && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => updateQuantity(item, 0)}>
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              )}
             </div>
-            <div className="flex-1" />
-
-            {!readOnly ? (
-              <div className={'flex items-center gap-2'}>
-                <span>Qty:</span>
-                <Select
-                  value={String(item.quantity)}
-                  onValueChange={(val) => updateQuantity(item, Number(val))}>
-                  <SelectTrigger className="w-16">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {[...Array(10)].map((_, i) => (
-                      <SelectItem
-                        key={i + 1}
-                        value={String(i + 1)}>
-                        {i + 1}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            ) : (
-              <div>
-                <p className="font-medium tabular-nums">Qty: {item.quantity}</p>
-              </div>
-            )}
-
-            <p className="w-20 text-right font-medium tabular-nums">{formatPrice(totalPrice(item))}</p>
-
-            {!readOnly && (
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => updateQuantity(item, 0)}>
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            )}
-          </div>
-        );
-      })}
-      <div className={'h-px bg-black dark:bg-white '}></div>
+          );
+        })
+      ) : (
+        <p className="text-center text-muted-foreground">{t('shopping_cart_empty')}</p>
+      )}
+      <div className={'h-px bg-black dark:bg-white'}></div>
       <div className={'flex flex-row justify-between'}>
         <div>
           {showButtons ? (

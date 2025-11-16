@@ -14,13 +14,6 @@ export const CustomerDashboardPage = () => {
     <div>
       <Header />
       <div className="hero-container p-4">
-        <Breadcrumb>
-          <BreadcrumbList>
-            <BreadcrumbItem>
-              <BreadcrumbPage>{t('shop')}</BreadcrumbPage>
-            </BreadcrumbItem>
-          </BreadcrumbList>
-        </Breadcrumb>
         <div className="hero mt-4">
           <h1 className={'text-lg font-bold'}>{t('customer_dashboard')}</h1>
           <h3 className={'text-gray-800 dark:text-gray-400'}>{t('customer_dashboard_welcome_message')}</h3>

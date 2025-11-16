@@ -71,9 +71,6 @@
       "quantity_custom": "Custom"
     }
   },
-  "aimo_picking_dashboard_confirm": {
-    "description": "You have picked less than the client ordered for these products. Please confirm to automatically notify the client, based on their communication preference."
-  },
   "select_alternatives": {
     "title": "Select Alternatives",
     "alternative_products": "Alternative Products",
@@ -107,6 +104,7 @@
   "clear": "Clear",
   "total": "Total",
   "shopping_cart": "Shopping Cart",
+  "shopping_cart_empty": "Your shopping cart is empty.",
   "back": "Back",
   "next": "Next",
   "done": "Place Order",
@@ -136,5 +134,21 @@
       "title": "Your order has missing items",
       "body": "Some items were not available for your order {{orderId}}. Click on this notification to select alternatives."
     }
-  }
+  },
+  "warehouse_application": "Warehouse Application",
+  "warehouse_dashboard": "Warehouse Dashboard",
+  "warehouse_dashboard_welcome_message": "This application accompanies warehouse staff while picking products to fulfill customer orders. It also shows them warnings about customer orders that need attention.",
+  "warehouse_orders": "Warehouse Orders",
+  "warehouse_orders_subtitle": "This overview shows warehouse staff which products to pick so they can fulfill customer orders. While picking, they need to enter information about missing items.",
+  "warehouse_order_picking": "Order Picking",
+  "warehouse_order_picking_subtitle": "Pick items for the selected order and confirm availabilities.",
+  "warehouse_order_picking_confirmation": "Order Picking Confirmation",
+  "warehouse_order_picking_confirmation_short": "Confirmation",
+  "warehouse_order_picking_confirmation_subtitle": "You have picked less than the customer ordered for these products. Please confirm to automatically notify the customer, based on their communication preference.",
+  "warehouse_warnings": "Order Warnings",
+  "warehouse_warnings_subtitle": "View warnings about product availabilities and other issues that need attention.",
+  "warehouse_go_to_orders": "Go to Orders",
+  "warehouse_go_to_warnings_overview": "Go to Warnings Overview",
+  "warnings_empty": "No Warnings",
+  "warnings_empty_subtitle": "Everything is fine, no warnings were reported."
 }

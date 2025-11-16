@@ -11,6 +11,15 @@ import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router';
 import { Header } from '../../components/Header';
+import {
+  Breadcrumb,
+  BreadcrumbList,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbSeparator,
+  BreadcrumbPage,
+} from '@/components/ui/breadcrumb';
+import { error } from 'console';
 
 export type PickEvent = {
   quantity: number;
@@ -112,31 +121,53 @@ export default function AimoPickingDashboard() {
   return (
     <>
       <Header />
-      <div className="flex flex-col gap-4 p-8">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>{t('product_name')}</TableHead>
-              <TableHead>{t('ordered_quantity')}</TableHead>
-              <TableHead style={{ width: '50%' }}>{t('picked_quantity')}</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {Object.values(order?.products ?? {}).map((item) => (
-              <PickingRow
-                key={item.id}
-                item={item}
-                setPickEvent={(e) => onPickEvent(e, item.id)}
-              />
-            ))}
-          </TableBody>
-        </Table>
-        <Button
-          className="w-32 self-end"
-          disabled={isSubmitDisabled}
-          onClick={submit}>
-          {t('submit')}
-        </Button>
+      <div className="hero-container p-4">
+        <Breadcrumb>
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink href="/aimo">{t('warehouse_application')}</BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbLink href="/aimo/orders">{t('warehouse_orders')}</BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage>{t('warehouse_order_picking')}</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+        <div className="hero mt-4">
+          <h1 className={'text-lg font-bold'}>{t('warehouse_order_picking')}</h1>
+          <h3 className={'text-gray-800 dark:text-gray-400'}>{t('warehouse_order_picking_subtitle')}</h3>
+        </div>
+
+        <div className="flex flex-col gap-4 mt-6">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>{t('product_name')}</TableHead>
+                <TableHead>{t('ordered_quantity')}</TableHead>
+                <TableHead style={{ width: '50%' }}>{t('picked_quantity')}</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {Object.values(order?.products ?? {}).map((item) => (
+                <PickingRow
+                  key={item.id}
+                  item={item}
+                  setPickEvent={(e) => onPickEvent(e, item.id)}
+                />
+              ))}
+            </TableBody>
+          </Table>
+          <Button
+            className="w-32 self-end"
+            disabled={isSubmitDisabled}
+            onClick={submit}>
+            {t('submit')}
+          </Button>
+        </div>
       </div>
     </>
   );

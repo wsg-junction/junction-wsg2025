@@ -83,7 +83,7 @@ export const CheckoutCompletionPage = ({ orderId }: CheckoutCompletionPageProps)
                 </TableBody>
                 <TableFooter>
                   <TableRow>
-                    <TableCell colSpan={3}>Total</TableCell>
+                    <TableCell colSpan={3}>{t('total')}</TableCell>
                     <TableCell className="text-right">{formatPrice(doc.totalPrice)}</TableCell>
                   </TableRow>
                 </TableFooter>
