@@ -51,8 +51,6 @@ const formSchema = (region: string) =>
   z.object({
     name: z.string().min(1, 'Name is required'),
 
-    email: z.string().min(1, 'Email is required').email('Invalid email address'),
-
     telephone: z
       .string()
       .min(1, 'Telephone is required')
@@ -208,7 +206,6 @@ export const CheckoutPage = () => {
   const form = useForm({
     defaultValues: {
       name: '',
-      email: '',
       telephone: '',
     },
     resolver: zodResolver(formSchema(i18n.language)),
@@ -245,7 +242,6 @@ export const CheckoutPage = () => {
         products: cart.map(cartItemToItem),
         totalPrice: cart.reduce((sum, item) => sum + item.price * item.quantity, 0),
         pushNotificationToken: pushNotificationToken || null,
-        email: form.getValues('email'),
         telephone: form.getValues('telephone'),
         address: form.getValues('address'),
         lang: i18n.language,
@@ -435,16 +431,6 @@ export const CheckoutPage = () => {
                 )}
 
                 <Input
-                  {...form.register('email')}
-                  placeholder="Email"
-                  type="email"
-                  className="mb-1"
-                />
-                {form.formState.errors.email && (
-                  <p className="text-red-500 text-sm mb-3">{form.formState.errors.email.message}</p>
-                )}
-
-                <Input
                   {...form.register('telephone', {
                     onBlur: (e) => {
                       const normalized = normalizePhone(e.target.value);
@@ -579,7 +565,6 @@ export const CheckoutPage = () => {
                 <div className="mt-4">
                   <h3 className="font-medium">Contact Information</h3>
                   <p>Name: {form.getValues('name') || 'N/A'}</p>
-                  <p>Email: {form.getValues('email') || 'N/A'}</p>
                   <p>Telephone: {form.getValues('telephone') || 'N/A'}</p>
                   <p>Address: {form.getValues('address').formatted || 'N/A'}</p>
                 </div>
@@ -632,4 +617,3 @@ export const CheckoutPage = () => {
 // TODO: Do not create new order when updated in GUI
 
 // TODO: Verify if fields are optional
-// TODO: Remove email if not supported
