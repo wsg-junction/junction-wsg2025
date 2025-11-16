@@ -10,6 +10,9 @@ import {
   useState,
 } from 'react';
 import { Button } from '@/components/ui/button.tsx';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert.tsx';
+import { AlertTriangleIcon, InfoIcon } from 'lucide-react';
+import { Badge } from '@/components/ui/badge.tsx';
 
 export interface TourStep {
   id: string;
@@ -19,6 +22,8 @@ export interface TourStep {
   route: To;
   afterAction?: (navigate: NavigateFunction) => void;
   nextOnAction?: boolean;
+  overwritePosition?: string;
+  isWarehouseView?: boolean;
 }
 export interface TourContextType {
   currentStep: TourStep | null;
@@ -35,6 +40,10 @@ export const useTour = () => {
       fulfillStep: () => {},
     }
   );
+};
+
+export let TOUR_STATE = {
+  LAST_ORDER_ID: 'f9720b9b-a5be-4022-8498-6113de931587',
 };
 
 const steps: TourStep[] = [
@@ -119,7 +128,7 @@ const steps: TourStep[] = [
     nextOnAction: false,
   },
   {
-    id: 'customer_checkout_2',
+    id: 'customer_checkout_place_order',
     title: 'Customer Checkout - Place Order',
     content: (
       <div>
@@ -129,6 +138,96 @@ const steps: TourStep[] = [
     route: '/customer/checkout',
     targetSelector: 'body',
     nextOnAction: false,
+  },
+  {
+    id: 'customer_checkout_complete',
+    title: 'Customer Checkout - Confirmation',
+    content: (
+      <div>
+        You have now ordered your products. <br />
+      </div>
+    ),
+    route: '/customer/checkout/complete/' + TOUR_STATE.LAST_ORDER_ID,
+    targetSelector: 'body',
+    nextOnAction: false,
+  },
+  {
+    id: 'switch_back_to_warehouse',
+    title: 'Switch Back to Warehouse App',
+    content: (
+      <div>
+        <Alert className="my-2 border-yellow-200 bg-yellow-50 text-yellow-800 dark:border-yellow-800 dark:bg-yellow-950/30 dark:text-yellow-200 [&>svg]:text-yellow-600 dark:[&>svg]:text-yellow-400">
+          <AlertTriangleIcon />
+          <AlertTitle>Switching to Warehouse Staff Point of View.</AlertTitle>
+          <AlertDescription className="text-yellow-700 dark:text-yellow-300">
+            We will now proceed to the Warehouse Application to manage and fulfill the orders placed by
+            customers.
+          </AlertDescription>
+        </Alert>
+      </div>
+    ),
+    route: '/customer/checkout/complete/' + TOUR_STATE.LAST_ORDER_ID,
+    targetSelector: 'global',
+    nextOnAction: false,
+  },
+  {
+    id: 'select_warehouse_app',
+    title: 'Switch to Warehouse Application',
+    content: (
+      <div>
+        Now, switch back to the Warehouse Application. <br />
+        <br />
+        <b>Click on the Warehouse App button to continue.</b>
+      </div>
+    ),
+    route: '/',
+    targetSelector: '[data-tour-id="select_warehouse_app"]',
+    nextOnAction: true,
+    isWarehouseView: true,
+  },
+  {
+    id: 'warehouse_dashboard',
+    title: 'Warehouse Dashboard',
+    content: (
+      <div>
+        This is the Warehouse Dashboard where staff can navigate to different sections of the application.
+      </div>
+    ),
+    route: '/aimo',
+    targetSelector: 'body',
+    nextOnAction: false,
+    isWarehouseView: true,
+    overwritePosition: 'bottom-8',
+  },
+  {
+    id: 'select_warehouse_orders',
+    title: 'Warehouse - Orders',
+    content: (
+      <div>Select the Orders section to view and manage customer orders that need to be fulfilled.</div>
+    ),
+    route: '/aimo',
+    targetSelector: '[data-tour-id="nav_orders"]',
+    nextOnAction: true,
+    isWarehouseView: true,
+    overwritePosition: 'bottom-8',
+  },
+  {
+    id: 'warehouse_orders',
+    title: 'Warehouse - Orders',
+    content: (
+      <div>
+        This is the Orders Dashboard where warehouse staff can see which products need to be picked to fulfill
+        customer orders.
+        <br />
+        <br />
+        <b>Select the first order in the list to start the picking process.</b>
+      </div>
+    ),
+    route: '/aimo/dashboard',
+    targetSelector: 'global',
+    nextOnAction: true,
+    isWarehouseView: true,
+    overwritePosition: 'bottom-8',
   },
   {
     id: 'thanks',
@@ -251,15 +350,25 @@ export default function TourController() {
     }
   }, [currentStepIndex, currentStep, location.pathname, navigate]);
 
-  const handleNextStep = useCallback(() => {
+  const handleNextStep = useCallback((stepId?: string) => {
+    if (stepId) {
+      const stepIndex = steps.findIndex((step) => step.id === stepId);
+      console.log('Next step requested for stepId:', stepId, 'found at index', stepIndex);
+      if (stepIndex !== -1) {
+        setStepIndex(stepIndex + 1);
+        return;
+      }
+    }
     setStepIndex((prev) => Math.min(prev + 1, steps.length - 1));
   }, []);
 
   const handleFulfillStep = useCallback(
     (stepId: string) => {
       const stepIndex = steps.findIndex((step) => step.id === stepId);
-      if (stepIndex !== -1 && stepIndex === currentStepIndex) {
-        handleNextStep();
+      const step = steps[stepIndex];
+      console.log('Fulfilling step:', stepId, 'at index', stepIndex);
+      if (stepIndex !== -1 && stepIndex === currentStepIndex && step.id === stepId) {
+        handleNextStep(stepId);
       }
     },
     [currentStepIndex, handleNextStep],
@@ -295,8 +404,21 @@ export default function TourController() {
       <Outlet />
       {currentStep && (
         <>
-          <div className="fixed top-8 left-1/2 transform -translate-x-1/2 bg-white border border-gray-300 rounded-lg shadow-lg p-4 w-96 z-50">
-            <h3 className="text-lg font-semibold mb-2">{currentStep?.title}</h3>
+          <div
+            className={
+              'fixed left-1/2 transform -translate-x-1/2 dark:bg-gray-950 dark:border-gray-800 bg-white border border-gray-300 rounded-lg shadow-lg p-4 w-96 z-50' +
+              (currentStep?.overwritePosition ? ' ' + currentStep.overwritePosition : ' top-8 ')
+            }>
+            <div className={'flex flex-row justify-between  mb-2'}>
+              <h3 className="text-lg font-semibold mb-2">{currentStep?.title}</h3>
+              <span>
+                {currentStep?.isWarehouseView ? (
+                  <Badge variant="destructive">Warehouse View</Badge>
+                ) : (
+                  <Badge variant={'secondary'}>Customer View</Badge>
+                )}
+              </span>
+            </div>
             <div className="mb-4">{currentStep?.content}</div>
             <div className={'flex justify-between gap-2 '}>
               <Button
@@ -308,7 +430,14 @@ export default function TourController() {
                 Exit Early
               </Button>
               <div className={'flex gap-2'}>
-                {currentStepIndex < steps.length - 1 ? <Button onClick={handleNextStep}>Next</Button> : null}
+                {currentStepIndex < steps.length - 1 ? (
+                  <Button
+                    onClick={() => {
+                      handleNextStep();
+                    }}>
+                    Next
+                  </Button>
+                ) : null}
                 {currentStepIndex === steps.length - 1 ? (
                   <Button
                     onClick={() => {

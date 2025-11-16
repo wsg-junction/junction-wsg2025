@@ -1,4 +1,4 @@
-import { createBrowserRouter } from 'react-router';
+import { createBrowserRouter, useParams } from 'react-router';
 import App from '@/App.tsx';
 import DashboardPage from '@/pages/dashboard';
 import { ThemeProvider } from '@/components/core/theme-provider.tsx';
@@ -8,11 +8,11 @@ import AimoPickingDashboardConfirmPage from './pages/aimo/picking-dashboard/conf
 import CustomerShoppingPage from '@/pages/customers/customer-shopping';
 import { CheckoutPage } from '@/pages/customers/checkout';
 import SelectAlternativesPage from './pages/customers/customer-shopping/select-alternatives';
-import AimoWarningsPage from "./pages/aimo/warnings";
-import AimoHomePage from "./pages/aimo";
-import GeminiPage from "./pages/gemini/gemini";
-import CommunicationPreferencesPage from "./pages/customers/communication";
-import TourController from './pages/tour/TourController';
+import AimoWarningsPage from './pages/aimo/warnings';
+import AimoHomePage from './pages/aimo';
+import GeminiPage from './pages/gemini/gemini';
+import CommunicationPreferencesPage from './pages/customers/communication';
+import { CheckoutCompletionPage } from '@/pages/customers/checkout-completion';
 
 const BUSINESS_ROUTES = [
   {
@@ -33,6 +33,13 @@ const BUSINESS_ROUTES = [
       {
         path: 'checkout',
         Component: CheckoutPage,
+      },
+      {
+        path: 'checkout/complete/:orderId',
+        Component: () => {
+          const { orderId } = useParams();
+          return <CheckoutCompletionPage orderId={orderId} />;
+        },
       },
       {
         path: 'communication',

@@ -38,7 +38,7 @@ export default function DashboardPage() {
           className={'mt-2'}>
           Start Tour
         </Button>
-        <Alert className="border-blue-200 bg-blue-50 text-blue-800 dark:border-blue-800 dark:bg-yellow-950/30 dark:blue [&>svg]:text-blue-600 dark:[&>svg]:text-blue-400">
+        <Alert className="border-blue-200 bg-blue-50 text-blue-800 dark:border-blue-800 dark:bg-blue-950/30 dark:text-blue-200 [&>svg]:text-blue-600 dark:[&>svg]:text-blue-400">
           <InfoIcon />
           <AlertTitle>We suggest using the Tour!</AlertTitle>
           <AlertDescription className="text-blue-700 dark:text-blue-300">
