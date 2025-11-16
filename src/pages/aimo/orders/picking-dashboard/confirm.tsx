@@ -42,7 +42,7 @@ export default function AimoPickingDashboardConfirmPage() {
         },
       }),
     });
-    navigate('/aimo');
+    navigate('/aimo/orders');
   }
 
   return (

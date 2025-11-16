@@ -55,7 +55,9 @@ export default function AimoPickingDashboard() {
   const isSubmitDisabled = useMemo(() => {
     if (!order) return true;
 
-    return order.products.some((product) => !product.pickEvent || product.pickEvent.quantity > product.orderedQuantity);
+    return order.products.some(
+      (product) => !product.pickEvent || product.pickEvent.quantity > product.orderedQuantity,
+    );
   }, [order]);
 
   const onPickEvent = (pickEvent: PickEvent | null, productId: string) => {
@@ -96,8 +98,8 @@ export default function AimoPickingDashboard() {
       return;
     }
     sendConfirmationNotifications();
-    navigate('/aimo');
-  };
+    navigate('/aimo/orders');
+  }
   return (
     <>
       <Header />
@@ -117,8 +119,7 @@ export default function AimoPickingDashboard() {
                 item={item}
                 setPickEvent={(e) => onPickEvent(e, item.id)}
               />
-            ))
-            }
+            ))}
           </TableBody>
         </Table>
         <Button
@@ -132,13 +133,7 @@ export default function AimoPickingDashboard() {
   );
 }
 
-function PickingRow({
-  item,
-  setPickEvent,
-}: {
-  item: Item;
-  setPickEvent: (event: PickEvent | null) => void;
-}) {
+function PickingRow({ item, setPickEvent }: { item: Item; setPickEvent: (event: PickEvent | null) => void }) {
   const getTranslatedProductName = useProductName();
 
   const quantity = item.pickEvent?.quantity;
@@ -176,9 +171,9 @@ function PickingRow({
       isNaN(value)
         ? null
         : {
-          quantity: value,
-          datetime: new Date(),
-        },
+            quantity: value,
+            datetime: new Date(),
+          },
     );
   }
 

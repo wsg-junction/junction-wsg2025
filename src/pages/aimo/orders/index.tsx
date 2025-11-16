@@ -14,40 +14,49 @@ export default function OrdersPage() {
   const myOrders = useMyOrders();
 
   return (
-    <>
+    <div className="flex flex-col">
       <Header />
-      <div className="flex flex-col gap-4 p-8">
+      <div className="self-center max-w-4xl flex flex-col gap-4 items-stretch p-8">
         {myOrders.length ? (
-          myOrders.map((order) => (
-            <Card key={order.id}>
-              <CardHeader>
-                <CardTitle>Order {order.id}</CardTitle>
-                <CardDescription>{order.createdAt.toDate().toLocaleString()}</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className={'space-y-4 mt-2'}>
-                  {order.products.map((item, index) => {
-                    return (
-                      <div
-                        key={index}
-                        className="flex items-center justify-between border-t pt-2 gap-1  ">
-                        <p className="font-medium line-clamp-2 overflow-hidden text-ellipsis me-2">
-                          {getTranslatedProductName(item)}
-                        </p>
+          myOrders.map((order) => {
+            const wasPicked = order.products.some((it) => it.pickEvent !== null);
+            return (
+              <Card
+                key={order.id}
+                className="max-w-4xl">
+                <CardHeader>
+                  <CardTitle>Order {order.id}</CardTitle>
+                  <CardDescription>{order.createdAt.toDate().toLocaleString()}</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className={'space-y-4 mt-2'}>
+                    {order.products.map((item, index) => {
+                      return (
+                        <div
+                          key={index}
+                          className="flex items-center justify-between border-t pt-2 gap-8">
+                          <p className="font-medium line-clamp-2 overflow-hidden text-ellipsis me-2">
+                            {getTranslatedProductName(item)}
+                          </p>
 
-                        <p className="font-medium tabular-nums">Qty: {item.orderedQuantity}</p>
-                      </div>
-                    );
-                  })}
-                </div>
-              </CardContent>
-              <CardFooter>
-                <Button asChild>
-                  <Link to={`/aimo/orders/${order.id}/picking-dashboard`}>Start Picking</Link>
-                </Button>
-              </CardFooter>
-            </Card>
-          ))
+                          <p className="font-medium tabular-nums">Qty: {item.orderedQuantity}</p>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </CardContent>
+                <CardFooter>
+                  <Button
+                    variant={wasPicked ? 'secondary' : 'default'}
+                    asChild>
+                    <Link to={`/aimo/orders/${order.id}/picking-dashboard`}>
+                      {wasPicked ? 'Pick again' : 'Start Picking'}
+                    </Link>
+                  </Button>
+                </CardFooter>
+              </Card>
+            );
+          })
         ) : (
           <Empty>
             <EmptyHeader>
@@ -62,6 +71,6 @@ export default function OrdersPage() {
           </Empty>
         )}
       </div>
-    </>
+    </div>
   );
 }

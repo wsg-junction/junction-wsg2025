@@ -17,9 +17,7 @@ import {
 } from 'firebase/firestore';
 import { getMessaging } from 'firebase/messaging';
 import { useEffect, useMemo, useState } from 'react';
-import { useEffect, useState } from 'react';
-import firebase from 'firebase/compat/app';
-import { doc } from '@firebase/firestore';
+
 const app = initializeApp(firebaseConfig);
 
 export const firestore = getFirestore(app);
