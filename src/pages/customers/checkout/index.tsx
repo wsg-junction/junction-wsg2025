@@ -9,8 +9,17 @@ import {
 } from '@/components/ui/breadcrumb.tsx';
 import { Button } from '@/components/ui/button.tsx';
 import { Checkbox } from '@/components/ui/checkbox';
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from '@/components/ui/command';
 import { Input } from '@/components/ui/input.tsx';
 import { Label } from '@/components/ui/label';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Progress } from '@/components/ui/progress.tsx';
 import { Spinner } from '@/components/ui/spinner';
 import { useLocalStorage } from '@/hooks/use-local-storage';
@@ -20,16 +29,128 @@ import type { Item, Order } from '@/pages/aimo/orders/picking-dashboard';
 import type { Warning } from '@/pages/aimo/warnings';
 import { Header } from '@/pages/customers/components/Header/Header.tsx';
 import { ShoppingCartList, type CartItem } from '@/pages/customers/customer-shopping';
+import { TOUR_STATE, useTour } from '@/pages/tour/TourController.tsx';
 import { productService, type Product } from '@/services/ProductService';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { doc, setDoc, Timestamp } from 'firebase/firestore';
 import { getToken } from 'firebase/messaging';
 import { motion } from 'framer-motion';
-import { AlertTriangleIcon } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { PhoneNumberFormat, PhoneNumberUtil } from 'google-libphonenumber';
+import { AlertTriangleIcon, ChevronsUpDown } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
+import { Controller, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
 import { v4 } from 'uuid';
-import { TOUR_STATE, useTour } from '@/pages/tour/TourController.tsx';
+import { z } from 'zod';
+import { useAutocompleteSuggestions } from './useAutocompleteSuggestions';
+
+const phoneUtil = PhoneNumberUtil.getInstance();
+
+const formSchema = (region: string) =>
+  z.object({
+    name: z.string().min(1, 'Name is required'),
+
+    telephone: z
+      .string()
+      .optional()
+      .refine((value) => {
+        if (!value || value.trim() === '') return true; // optional field
+        try {
+          const number = phoneUtil.parse(value, region.split('-')[0].toUpperCase());
+          console.log('Parsed phone number:', number, phoneUtil.isValidNumber(number));
+          return phoneUtil.isValidNumber(number);
+        } catch (e) {
+          console.log(e);
+          return false;
+        }
+      }, 'Invalid phone number'),
+
+    address: z
+      .object({
+        formatted: z.string(), // normalized
+        lat: z.number(),
+        lng: z.number(),
+      })
+      .refine((addr) => !!addr.formatted, 'Please select a valid address from suggestions'),
+  });
+
+type PlaceAutocompleteProps = {
+  onPlaceSelect: (place: google.maps.places.Place | null) => void;
+  onBlur: () => void;
+};
+const PlaceAutocomplete = ({ onPlaceSelect }: PlaceAutocompleteProps) => {
+  const [open, setOpen] = useState(false);
+  const [selectedPlace, setSelectedPlace] = useState('');
+  const [inputValue, setInputValue] = useState('');
+
+  const { suggestions, resetSession, isLoading } = useAutocompleteSuggestions(inputValue);
+
+  const predictions = useMemo(
+    () => suggestions.filter((s) => s.placePrediction).map(({ placePrediction }) => placePrediction!),
+    [suggestions],
+  );
+
+  const handleSelect = async (prediction: google.maps.places.PlacePrediction) => {
+    if (!prediction) return;
+    const place = prediction.toPlace();
+
+    await place.fetchFields({
+      fields: ['viewport', 'location', 'formattedAddress', 'displayName'],
+    });
+
+    resetSession();
+    onPlaceSelect(place);
+    setInputValue('');
+    setOpen(false);
+    setSelectedPlace(prediction.text.text);
+  };
+
+  return (
+    <Popover
+      open={open}
+      onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button
+          variant="outline"
+          role="combobox"
+          aria-expanded={open}
+          className="w-full justify-between font-normal mb-1">
+          {selectedPlace ? selectedPlace : 'Select address...'}
+          <ChevronsUpDown className="opacity-50" />
+        </Button>
+      </PopoverTrigger>
+
+      <PopoverContent align="start">
+        <Command shouldFilter={false}>
+          <CommandInput
+            placeholder="Search for a place"
+            value={inputValue}
+            onValueChange={(value) => {
+              setInputValue(value);
+              setOpen(true);
+            }}
+          />
+
+          <CommandList>
+            {!isLoading && predictions.length === 0 && <CommandEmpty>No results found.</CommandEmpty>}
+
+            <CommandGroup>
+              {predictions.map((prediction) => (
+                <CommandItem
+                  key={prediction.placeId}
+                  value={prediction.placeId}
+                  onSelect={() => handleSelect(prediction)}>
+                  {prediction.text.text}
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          </CommandList>
+        </Command>
+      </PopoverContent>
+    </Popover>
+  );
+};
 
 export const CheckoutPage = () => {
   const { t } = useTranslation();
@@ -83,54 +204,80 @@ export const CheckoutPage = () => {
     return newItem;
   }
 
+  const form = useForm({
+    defaultValues: {
+      name: '',
+      telephone: '',
+    },
+    resolver: zodResolver(formSchema(i18n.language)),
+    reValidateMode: 'onBlur',
+  });
+
   const [pushNotificationToken, setPushNotificationToken] = useState<string | null>(() => {
     const token = localStorage.getItem('pushNotificationToken');
     return token ? token : null;
   });
   const [isEnablingPushNotifications, setIsEnablingPushNotifications] = useState(false);
   const [myOrderIds, setMyOrderIds] = useLocalStorage<string[]>('myOrderIds', []);
-  const next = () =>
-    setStep((s) => {
-      if (s === maxSteps) {
-        const orderId = v4();
-        for (const item of cart) {
-          console.log(item);
-          for (const warning of item.warnings) {
-            warning.orderId = orderId;
-            warning.itemId = item.id;
-            const d = doc(firestore, 'warnings', v4());
-            setDoc(d, warning);
-          }
+  const next = async () => {
+    if (step === 2) {
+      const isValid = await form.trigger(undefined, { shouldFocus: true });
+      if (!isValid) return;
+    }
+    if (step === maxSteps) {
+      const orderId = v4();
+      for (const item of cart) {
+        console.log(item);
+        for (const warning of item.warnings) {
+          const d = doc(firestore, 'warnings', v4());
+          setDoc(d, {
+            ...warning,
+            orderId: orderId,
+            itemId: item.id,
+          });
         }
-        const order = {
-          id: orderId,
-          createdAt: Timestamp.now(),
-          products: cart.map(cartItemToItem),
-          totalPrice: cart.reduce((sum, item) => sum + item.price * item.quantity, 0),
-          pushNotificationToken: pushNotificationToken || null,
-        } satisfies Order;
-        const d = doc(firestore, 'orders', orderId);
-        setDoc(d, order).then(() => {
-          console.log('Order saved:', order);
-          console.log(order.id);
-          TOUR_STATE.LAST_ORDER_ID = order.id;
-          setMyOrderIds([...myOrderIds, orderId]);
-          navigate('/customer/checkout/complete/' + order.id);
-          fulfillStep('customer_checkout_place_order');
-          setCart([]);
-        });
-
-        return;
       }
+      const phone = form.getValues('telephone');
+      const order = {
+        id: orderId,
+        createdAt: Timestamp.now(),
+        products: cart.map(cartItemToItem),
+        totalPrice: cart.reduce((sum, item) => sum + item.price * item.quantity, 0),
+        pushNotificationToken: pushNotificationToken || null,
+        telephone: !phone || phone.trim() === '' ? null : phone,
+        address: form.getValues('address'),
+        lang: i18n.language,
+      } satisfies Order;
+      const d = doc(firestore, 'orders', orderId);
+      setDoc(d, order).then(() => {
+        console.log('Order saved:', order);
+        console.log(order.id);
+        TOUR_STATE.LAST_ORDER_ID = order.id;
+        setMyOrderIds([...myOrderIds, orderId]);
+        navigate('/customer/checkout/complete/' + order.id);
+        fulfillStep('customer_checkout_place_order');
+        setCart([]);
+      });
+    }
+    setStep((s) => {
       return Math.min(maxSteps, s + 1);
     });
+  };
   const prev = () => setStep((s) => Math.max(1, s - 1));
 
   const progressValue = (step / maxSteps) * 100;
 
-  const [email, setEmail] = useState('');
-  const [telephone, setTelephone] = useState('');
-  const [name, setName] = useState('');
+  const normalizePhone = (value: string) => {
+    try {
+      if (!value || value.trim() === '') return ''; // optional field
+
+      const parsed = phoneUtil.parse(value, i18n.language.split('-')[0].toUpperCase());
+      if (!phoneUtil.isValidNumber(parsed)) return value;
+      return phoneUtil.format(parsed, PhoneNumberFormat.E164);
+    } catch {
+      return value; // leave unchanged if parsing failed
+    }
+  };
 
   // --- fallback state: map from cartItemId -> fallbackProductId | null
   const LOCALSTORAGE_FALLBACKS_KEY = 'checkout_fallbacks_v1';
@@ -247,7 +394,7 @@ export const CheckoutPage = () => {
               className="h-2"
             />
             <p className="text-sm mt-2">
-              Step {step} of {maxSteps}
+              {t('step')} {step} / {maxSteps}
             </p>
           </div>
 
@@ -259,7 +406,7 @@ export const CheckoutPage = () => {
             className="space-y-4">
             {step === 1 && (
               <div>
-                <h2 className="text-xl font-semibold mb-4">Your cart</h2>
+                <h2 className="text-xl font-semibold mb-4">{t('your_cart')}</h2>
                 <ShoppingCartList
                   readOnly={false}
                   cart={cart}
@@ -270,33 +417,63 @@ export const CheckoutPage = () => {
             )}
             {step === 2 && (
               <div>
-                <h2 className="text-xl font-semibold mb-4">Contact Information</h2>
+                <h2 className="text-xl font-semibold mb-4">{t('contact_information')}</h2>
                 <Alert className="my-2 border-yellow-200 bg-yellow-50 text-yellow-800 dark:border-yellow-800 dark:bg-yellow-950/30 dark:text-yellow-200 [&>svg]:text-yellow-600 dark:[&>svg]:text-yellow-400">
                   <AlertTriangleIcon />
-                  <AlertTitle>Demo Info: Please add Information</AlertTitle>
+                  <AlertTitle>{t('add_information')}</AlertTitle>
                   <AlertDescription className="text-yellow-700 dark:text-yellow-300">
-                    Kevin will only be able to contact you automatically if you enter contact information!
+                    {t('automatic_contact')}
                   </AlertDescription>
                 </Alert>
                 <Input
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="Name"
-                  className="mb-3"
+                  {...form.register('name')}
+                  placeholder={t('name')}
+                  className="mb-1"
                 />
+                {form.formState.errors.name && (
+                  <p className="text-red-500 text-sm mb-3">{form.formState.errors.name.message}</p>
+                )}
+
                 <Input
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Email"
-                  className="mb-3"
-                  type={'email'}
+                  {...form.register('telephone', {
+                    onBlur: (e) => {
+                      const normalized = normalizePhone(e.target.value);
+
+                      form.setValue('telephone', normalized, {
+                        shouldDirty: true,
+                        shouldTouch: true,
+                      });
+                    },
+                  })}
+                  placeholder={t('telephone')}
+                  type="tel"
+                  className="mb-1"
                 />
-                <Input
-                  value={telephone}
-                  onChange={(e) => setTelephone(e.target.value)}
-                  placeholder="Telephone"
-                  type={'tel'}
-                />
+                {form.formState.errors.telephone && (
+                  <p className="text-red-500 text-sm mb-3">{form.formState.errors.telephone.message}</p>
+                )}
+
+                <Controller
+                  control={form.control}
+                  name="address"
+                  render={({ field }) => (
+                    <PlaceAutocomplete
+                      onPlaceSelect={(value) => {
+                        field.onChange(
+                          value && {
+                            formatted: value.formattedAddress || value.displayName || '',
+                            lat: value.location?.lat() || 0,
+                            lng: value.location?.lng() || 0,
+                          },
+                        );
+                      }}
+                      onBlur={field.onBlur}
+                    />
+                  )}></Controller>
+                {form.formState.errors.address && (
+                  <p className="text-red-500 text-sm mb-3">{form.formState.errors.address.message}</p>
+                )}
+
                 <div className="mt-4 flex items-start gap-3">
                   {isEnablingPushNotifications ? (
                     <Spinner />
@@ -326,10 +503,8 @@ export const CheckoutPage = () => {
                   )}
                   <Label htmlFor="push-notifications">
                     <div className="grid gap-2">
-                      Receive push notifications
-                      <p className="text-muted-foreground text-sm">
-                        Get notified if there are any issues while fulfilling your order.
-                      </p>
+                      {t('receive_notifications')}
+                      <p className="text-muted-foreground text-sm">{t('get_notified')}</p>
                     </div>
                   </Label>
                 </div>
@@ -339,9 +514,7 @@ export const CheckoutPage = () => {
             {step === 3 && (
               <div>
                 <h2 className="text-xl font-semibold mb-4">Fallback items</h2>
-                <p className="text-sm text-gray-600 mb-3">
-                  Choose an alternative product to use if an item is unavailable.
-                </p>
+                <p className="text-sm text-gray-600 mb-3">{t('alternative_product')}</p>
                 <div className="space-y-3">
                   {cart.length === 0 && <p className="text-sm">Your cart is empty.</p>}
                   {cart.map((item, idx) => (
@@ -358,7 +531,7 @@ export const CheckoutPage = () => {
                             className="border rounded p-1"
                             value={fallbacks[item.id] ?? ''}
                             onChange={(e) => setFallbackForItem(item.id, e.target.value || null)}>
-                            <option value="">No fallback</option>
+                            <option value="">{t('no_fallback')}</option>
                             {products
                               .filter((p) => p.id !== item.id)
                               .map((p) => (
@@ -386,39 +559,30 @@ export const CheckoutPage = () => {
 
             {step === maxSteps && (
               <div>
-                <h2 className="text-xl font-semibold mb-4">Review & Confirm</h2>
-                <p className="text-sm text-gray-600">Please check your order and contact information.</p>
+                <h2 className="text-xl font-semibold mb-4">{t('review_and_confirm')}</h2>
+                <p className="text-sm text-gray-600">{t('check_rder')}</p>
 
                 <div className="mt-4">
-                  <h3 className="font-medium">Contact Information</h3>
-                  <p>Name: {name || 'N/A'}</p>
-                  <p>Email: {email || 'N/A'}</p>
-                  <p>Telephone: {telephone || 'N/A'}</p>
+                  <h3 className="font-medium">{t('contact_information')}</h3>
+                  <p>
+                    {t('name')}: {form.getValues('name') || 'N/A'}
+                  </p>
+                  <p>
+                    {t('telephone')}: {form.getValues('telephone') || 'N/A'}
+                  </p>
+                  <p>
+                    {t('address')}: {form.getValues('address').formatted || 'N/A'}
+                  </p>
                 </div>
 
                 <div className="mt-4">
-                  <h3 className="font-medium">Order Summary</h3>
+                  <h3 className="font-medium">{t('order_summary')}</h3>
                   <ShoppingCartList
                     readOnly={true}
                     cart={cart}
                     onUpdateItem={onUpdateItem}
                     setCart={() => {}}
                   />
-
-                  {/* Show selected fallbacks for review */}
-                  <div className="mt-3">
-                    <h4 className="font-medium">Fallbacks</h4>
-                    {cart.map((item) => {
-                      const fb = fallbacks[item.id];
-                      return (
-                        <div
-                          key={item.id}
-                          className="text-sm">
-                          {getTranslatedProductName(item)}: {fb ? getProductName(fb) : 'No fallback selected'}
-                        </div>
-                      );
-                    })}
-                  </div>
                 </div>
               </div>
             )}
@@ -429,10 +593,10 @@ export const CheckoutPage = () => {
               variant="outline"
               onClick={prev}
               disabled={step === 1}>
-              Back
+              {t('back')}
             </Button>
             <Button onClick={next}>
-              {step === maxSteps - 1 ? 'Review' : step === maxSteps ? 'Done' : 'Next'}
+              {step === maxSteps - 1 ? t('review') : step === maxSteps ? t('done') : t('next')}
             </Button>
           </div>
         </div>
@@ -440,3 +604,5 @@ export const CheckoutPage = () => {
     </div>
   );
 };
+
+// TODO: Do not create new order when updated in GUI

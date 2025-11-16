@@ -13,10 +13,9 @@
   "your_order_number_is": "Your order number is",
   "continue_shopping": "Continue Shopping",
   "view_my_orders": "View My Orders",
-  "you_will_receive_a_confirmation_email_soon": "We will keep you up to date with your order status via email and via phone.",
-  "shop": "Shop",
-  "clear": "Clear",
   "loading_products": "Loading Products…",
+  "you_will_receive_a_confirmation_email_soon": "We will keep you up to date with your order status via push notifications and via phone.",
+  "shop": "Shop",
   "no_products_found": "No products found.",
   "loading": "Loading…",
   "show_more": "Show More",
@@ -40,6 +39,9 @@
     "picking_row": {
       "quantity_custom": "Custom"
     }
+  },
+  "aimo_picking_dashboard_confirm": {
+    "description": "You have picked less than the client ordered for these products. Please confirm to automatically notify the client, based on their communication preference."
   },
   "select_alternatives": {
     "title": "Select Alternatives",
@@ -66,5 +68,41 @@
     "loaded_from_cache": "Loaded from cache",
     "clear_cache": "Clear cache",
     "cache_cleared": "Cache cleared"
+  },
+  "all": "All",
+  "none": "None",
+  "product": "Product",
+  "order": "Order",
+  "clear": "Clear",
+  "total": "Total",
+  "shopping_cart": "Shopping Cart",
+  "back": "Back",
+  "next": "Next",
+  "done": "Done",
+  "review": "Review",
+  "name": "Name",
+  "telephone": "Telephone",
+  "address": "Address",
+  "contact_information": "Contact Information",
+  "review_and_confirm": "Review & Confirm",
+  "check_order": "Please check your order and contact information.",
+  "fallbacks": "Fallbacks",
+  "no_fallback": "No fallback",
+  "alternative_product": "Choose an alternative product to use if an item is unavailable.",
+  "get_notified": "Get notified if there are any issues while fulfilling your order.",
+  "receive_notifications": "Receive push notifications",
+  "automatic_contact": "Kevin will only be able to contact you automatically if you enter contact information!",
+  "add_information": "Demo Info: Please add Information",
+  "your_cart": "Your cart",
+  "step": "Step",
+  "push_notifications": {
+    "order_packed": {
+      "title": "Your order has been packed!",
+      "body": "Your order {orderId} was packed successfully and is now on its way to you."
+    },
+    "missing_items": {
+      "title": "Your order has missing items",
+      "body": "Some items were not available. Click on this notification to select alternatives."
+    }
   }
 }

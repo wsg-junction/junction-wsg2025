@@ -31,6 +31,13 @@ export type Order = {
   products: Item[];
   totalPrice: number;
   pushNotificationToken: string | null;
+  telephone: string | null;
+  address: {
+    formatted: string;
+    lat: number;
+    lng: number;
+  };
+  lang: string;
 };
 
 export default function AimoPickingDashboard() {
@@ -83,8 +90,8 @@ export default function AimoPickingDashboard() {
       body: JSON.stringify({
         token: order!.pushNotificationToken,
         notification: {
-          title: 'Your order has been packed',
-          body: 'Your order was packed successfully and is now on its way to you.',
+          title: t('push_notifications.order_packed.title'),
+          body: t('push_notifications.order_packed.body', { orderId: order!.id }),
         },
         data: { orderId: order!.id, hasMissingItems: 'false' },
         webpush: { notification: { requireInteraction: true } },
@@ -168,14 +175,7 @@ function PickingRow({ item, setPickEvent }: { item: Item; setPickEvent: (event: 
     setError(calculateError(rawValue));
     setErrorColor(calculateErrorColor(rawValue));
     const value = isNaN(rawValue) ? rawValue : Math.min(rawValue, item.orderedQuantity);
-    setPickEvent(
-      isNaN(value)
-        ? null
-        : {
-            quantity: value,
-            datetime: new Date(),
-          },
-    );
+    setPickEvent(isNaN(value) ? null : { quantity: value, datetime: new Date() });
   }
 
   return (

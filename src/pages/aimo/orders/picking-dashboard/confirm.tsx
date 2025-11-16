@@ -1,47 +1,80 @@
 import { Button } from '@/components/ui/button';
 import { useProductName } from '@/hooks/use-product-name.ts';
+import { firestore } from '@/lib/firebase.ts';
+import type { Notification } from '@/pages/customers/components/NotificationsPopover/NotificationsPopover.tsx';
+import { addDoc, collection } from 'firebase/firestore';
 import { useLocation, useNavigate } from 'react-router';
 import type { Order } from '.';
 import { Header } from '../../components/Header';
+import { useTranslation } from 'react-i18next';
 
 export default function AimoPickingDashboardConfirmPage() {
+  const { t } = useTranslation();
   const { state } = useLocation();
   const order = state as Order;
   const navigate = useNavigate();
   const getTranslatedProductName = useProductName();
 
   async function confirm() {
-    if (!order.pushNotificationToken) return;
+    try {
+      const docRef = await addDoc(collection(firestore, 'notifications'), {
+        title: 'Your order has missing items',
+        message: 'Some items were not available. Click on this notification to select alternatives.',
+        createdAt: Date.now(),
+        read: false,
+        orderId: order.id,
+      } as Omit<Notification, 'id'>);
+      console.log('Document written with ID: ', docRef.id);
+    } catch (error) {
+      console.error('Error adding document: ', error);
+    }
 
-    console.log('Sending notification to', order.pushNotificationToken, 'for order', order.id);
+    if (order.pushNotificationToken) {
+      console.log('Sending notification to', order.pushNotificationToken, 'for order', order.id);
 
-    fetch('https://sendpushnotification-3avmwyjhaq-uc.a.run.app', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        token: order.pushNotificationToken,
-        notification: {
-          title: 'Your order has missing items',
-          body: 'Some items were not available. Click on this notification to select alternatives.',
-        },
-        data: { orderId: order.id, hasMissingItems: 'true' },
-        webpush: {
+      fetch('https://sendpushnotification-3avmwyjhaq-uc.a.run.app', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          token: order.pushNotificationToken,
           notification: {
-            // actions: [
-            //   {
-            //     action: 'view_order',
-            //     title: 'View Order',
-            //   },
-            //   {
-            //     action: 'select_alternatives',
-            //     title: 'Select Alternatives',
-            //   },
-            // ],
-            requireInteraction: true,
+            title: t('push_notifications.missing_items.title'),
+            body: t('push_notifications.missing_items.body'),
           },
-        },
-      }),
-    });
+          data: { orderId: order.id, hasMissingItems: 'true' },
+          webpush: {
+            notification: {
+              // actions: [
+              //   {
+              //     action: 'view_order',
+              //     title: 'View Order',
+              //   },
+              //   {
+              //     action: 'select_alternatives',
+              //     title: 'Select Alternatives',
+              //   },
+              // ],
+              requireInteraction: true,
+            },
+          },
+        }),
+      });
+    }
+
+    if (order.telephone) {
+      console.log('Calling', order.telephone, 'for order', order.id);
+
+      fetch('https://helloworld-3avmwyjhaq-uc.a.run.app', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          language: order.lang,
+          phone_number: order.telephone,
+          order_id: order.id,
+        }),
+      });
+    }
+
     navigate('/aimo/orders');
   }
 
@@ -49,10 +82,7 @@ export default function AimoPickingDashboardConfirmPage() {
     <div className="p-8">
       <Header />
       <div className="flex flex-col gap-4 p-4">
-        <p>
-          You have picked less than the client ordered for these products. Please confirm to automatically
-          notify the client, based on their communication preference.
-        </p>
+        <p>{t('aimo_picking_dashboard_confirm.description')}</p>
         {Object.values(order.products).map((product) => (
           <div className="p-4 flex flex-row border rounded-lg">
             <h3 className="flex flex-2">{getTranslatedProductName(product)}</h3>
