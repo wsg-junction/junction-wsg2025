@@ -225,7 +225,7 @@ export const ShoppingCartList = ({
                   {item.warnings.map((warnings, wIndex) => (
                     <div
                       key={wIndex}
-                      className="p-2 border border-yellow-400 bg-yellow-100 rounded-lg">
+                      className="p-2 border  border-yellow-200 bg-yellow-50 text-yellow-800 dark:border-yellow-800 dark:bg-yellow-950/30 dark:text-yellow-200 [&>svg]:text-yellow-600 dark:[&>svg]:text-yellow-400 rounded-lg">
                       <div className="text-sm font-bold">{warnings.title}</div>
                       <div className="text-sm">{warnings.description}</div>
                     </div>
