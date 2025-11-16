@@ -53,8 +53,9 @@ const formSchema = (region: string) =>
 
     telephone: z
       .string()
-      .min(1, 'Telephone is required')
+      .optional()
       .refine((value) => {
+        if (!value || value.trim() === '') return true; // optional field
         try {
           const number = phoneUtil.parse(value, region.split('-')[0].toUpperCase());
           console.log('Parsed phone number:', number, phoneUtil.isValidNumber(number));
@@ -236,13 +237,14 @@ export const CheckoutPage = () => {
           });
         }
       }
+      const phone = form.getValues('telephone');
       const order = {
         id: orderId,
         createdAt: Timestamp.now(),
         products: cart.map(cartItemToItem),
         totalPrice: cart.reduce((sum, item) => sum + item.price * item.quantity, 0),
         pushNotificationToken: pushNotificationToken || null,
-        telephone: form.getValues('telephone'),
+        telephone: !phone || phone.trim() === '' ? null : phone,
         address: form.getValues('address'),
         lang: i18n.language,
       } satisfies Order;
@@ -267,6 +269,8 @@ export const CheckoutPage = () => {
 
   const normalizePhone = (value: string) => {
     try {
+      if (!value || value.trim() === '') return ''; // optional field
+
       const parsed = phoneUtil.parse(value, i18n.language.split('-')[0].toUpperCase());
       if (!phoneUtil.isValidNumber(parsed)) return value;
       return phoneUtil.format(parsed, PhoneNumberFormat.E164);
@@ -615,5 +619,3 @@ export const CheckoutPage = () => {
 };
 
 // TODO: Do not create new order when updated in GUI
-
-// TODO: Verify if fields are optional
