@@ -21,6 +21,8 @@ import { SearchForAlternativeProductDialog } from '../components/SearchForAltern
 import SupermarketMap from '../components/SupermarketMap';
 import { useProductName } from '@/hooks/use-product-name.ts';
 import { productCategoryService } from '@/services/ProductCategoryService.ts';
+import { useLocalStorage } from '@/hooks/use-local-storage';
+import type { CartItem } from '.';
 
 export default function SelectAlternativesPage() {
   const { t, i18n } = useTranslation();
@@ -64,6 +66,26 @@ export default function SelectAlternativesPage() {
       mounted = false;
     };
   }, [unfulfilledItems]);
+
+  const [cart, setCart] = useLocalStorage<CartItem[]>('cart', []);
+
+  const onUpdateItem = (product: Product, quantity: number) => {
+    if (quantity <= 0) {
+      setCart(cart.filter((item) => item.id !== product.id));
+      return;
+    }
+
+    const existingItem = cart.find((item) => item.id === product.id);
+    if (existingItem) {
+      setCart(cart.map((item) => (item.id === product.id ? { ...item, quantity } : item)));
+      return;
+    }
+    setCart([...cart, { ...product, quantity, warnings: [] }]);
+  };
+  const getQuantityInCart = (productId: string) => {
+    const item = cart.find((item) => item.id === productId);
+    return item ? item.quantity : 0;
+  };
 
   return (
     <div>
@@ -109,13 +131,13 @@ export default function SelectAlternativesPage() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-6">
                   {similarProducts[item.id]
                     ? similarProducts[item.id].map((product) => {
-                      return (
-                        <ProductCard
-                          key={product.id}
-                          id={product.id}
-                        />
-                      );
-                    })
+                        return (
+                          <ProductCard
+                            key={product.id}
+                            id={product.id}
+                          />
+                        );
+                      })
                     : null}
                 </div>
               </CardContent>
@@ -136,7 +158,10 @@ export default function SelectAlternativesPage() {
                           {getTranslatedProductName(product)}
                         </DialogTitle>
                       </DialogHeader>
-                      <SearchForAlternativeProductDialog />
+                      <SearchForAlternativeProductDialog
+                        onUpdateItem={onUpdateItem}
+                        getCurrentQuantity={(productId) => getQuantityInCart(productId)}
+                      />
                     </DialogContent>
                   </Dialog>
                   {/* <SearchForAlternativeRecipeDialog item={'TODO'} /> */}

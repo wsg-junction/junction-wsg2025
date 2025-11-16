@@ -29,6 +29,7 @@ export type Order = {
   id: string;
   createdAt: Timestamp;
   products: Item[];
+  fallbacks: Record<string, string>;
   totalPrice: number;
   pushNotificationToken: string | null;
   telephone: string | null;

@@ -37,19 +37,23 @@ import { getToken } from 'firebase/messaging';
 import { motion } from 'framer-motion';
 import { PhoneNumberFormat, PhoneNumberUtil } from 'google-libphonenumber';
 import { AlertTriangleIcon, ChevronsUpDown } from 'lucide-react';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
 import { v4 } from 'uuid';
 import { z } from 'zod';
 import { useAutocompleteSuggestions } from './useAutocompleteSuggestions';
+import { type TFunction } from 'i18next';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { SearchForAlternativeProductDialog } from '../components/SearchForAlternativeProductDialog';
+import React from 'react';
 
 const phoneUtil = PhoneNumberUtil.getInstance();
 
-const formSchema = (region: string) =>
+const formSchema = (t: TFunction<'translation', undefined>, region: string) =>
   z.object({
-    name: z.string().min(1, 'Name is required'),
+    name: z.string().min(1, t('checkout_page.form.name_required')),
 
     telephone: z
       .string()
@@ -64,15 +68,18 @@ const formSchema = (region: string) =>
           console.log(e);
           return false;
         }
-      }, 'Invalid phone number'),
+      }, t('checkout_page.form.telephone_invalid')),
 
     address: z
-      .object({
-        formatted: z.string(), // normalized
-        lat: z.number(),
-        lng: z.number(),
-      })
-      .refine((addr) => !!addr.formatted, 'Please select a valid address from suggestions'),
+      .object(
+        {
+          formatted: z.string(), // normalized
+          lat: z.number(),
+          lng: z.number(),
+        },
+        t('checkout_page.form.address_required'),
+      )
+      .refine((addr) => !!addr.formatted, t('checkout_page.form.address_invalid')),
   });
 
 type PlaceAutocompleteProps = {
@@ -158,7 +165,7 @@ export const CheckoutPage = () => {
   const { fulfillStep } = useTour();
   const getTranslatedProductName = useProductName(i18n);
   const [step, setStep] = useState(1);
-  const maxSteps = 3;
+  const maxSteps = 4;
   const navigate = useNavigate();
 
   const calculateWarnings = (item: CartItem) => {
@@ -209,7 +216,7 @@ export const CheckoutPage = () => {
       name: '',
       telephone: '',
     },
-    resolver: zodResolver(formSchema(i18n.language)),
+    resolver: zodResolver(formSchema(t, i18n.language)),
     reValidateMode: 'onBlur',
   });
 
@@ -242,6 +249,7 @@ export const CheckoutPage = () => {
         id: orderId,
         createdAt: Timestamp.now(),
         products: cart.map(cartItemToItem),
+        fallbacks,
         totalPrice: cart.reduce((sum, item) => sum + item.price * item.quantity, 0),
         pushNotificationToken: pushNotificationToken || null,
         telephone: !phone || phone.trim() === '' ? null : phone,
@@ -279,42 +287,8 @@ export const CheckoutPage = () => {
     }
   };
 
-  // --- fallback state: map from cartItemId -> fallbackProductId | null
-  const LOCALSTORAGE_FALLBACKS_KEY = 'checkout_fallbacks_v1';
-  const [fallbacks, setFallbacks] = useState<Record<string, string | null>>(() => {
-    try {
-      const raw = localStorage.getItem(LOCALSTORAGE_FALLBACKS_KEY) || '{}';
-      return JSON.parse(raw);
-    } catch {
-      return {};
-    }
-  });
-
-  // products for fallback choices
-  const [products, setProducts] = useState<Product[]>([]);
-  useEffect(() => {
-    let mounted = true;
-    (async () => {
-      try {
-        const res = await productService.getProducts(-1);
-        if (mounted) setProducts(res.data || []);
-      } catch (e) {
-        console.error('Failed to load products for fallbacks', e);
-      }
-    })();
-    return () => {
-      mounted = false;
-    };
-  }, []);
-
-  useEffect(() => {
-    try {
-      localStorage.setItem(LOCALSTORAGE_FALLBACKS_KEY, JSON.stringify(fallbacks));
-    } catch (e) {
-      // ignore storage errors
-      console.error('Failed to save fallbacks to localStorage', e);
-    }
-  }, [fallbacks]);
+  // --- fallback state: map from cartItemId -> fallbackProductId
+  const [fallbacks, setFallbacks] = useLocalStorage<Record<string, string>>('checkout_fallbacks', {});
 
   useEffect(() => {
     localStorage.setItem('cart', JSON.stringify(cart));
@@ -339,33 +313,10 @@ export const CheckoutPage = () => {
     if (!itemId) return;
     if (fallbackId === itemId) return; // disallow same-product fallback
     setFallbacks((prev) => {
-      const next = { ...prev, [itemId]: fallbackId };
-      try {
-        localStorage.setItem(LOCALSTORAGE_FALLBACKS_KEY, JSON.stringify(next));
-      } catch {
-        console.error('Failed to save fallbacks to localStorage');
-      }
-      return next;
+      return fallbackId
+        ? { ...prev, [itemId]: fallbackId }
+        : Object.fromEntries(Object.entries(prev).filter(([key]) => key !== itemId));
     });
-  };
-
-  const clearFallbackForItem = (itemId: string) => {
-    setFallbacks((prev) => {
-      const next = { ...prev };
-      delete next[itemId];
-      try {
-        localStorage.setItem(LOCALSTORAGE_FALLBACKS_KEY, JSON.stringify(next));
-      } catch {
-        console.error('Failed to save fallbacks to localStorage');
-      }
-      return next;
-    });
-  };
-
-  const getProductName = (id: string | null | undefined) => {
-    if (!id) return null;
-    const p = products.find((x) => x.id === id);
-    return getTranslatedProductName(p);
   };
 
   return (
@@ -517,36 +468,31 @@ export const CheckoutPage = () => {
                 <p className="text-sm text-gray-600 mb-3">{t('alternative_product')}</p>
                 <div className="space-y-3">
                   {cart.length === 0 && <p className="text-sm">Your cart is empty.</p>}
-                  {cart.map((item, idx) => (
+                  {cart.map((item) => (
                     <div
-                      key={item.id || idx}
+                      key={item.id}
                       className="p-3 border rounded">
                       <div className="flex justify-between items-center">
-                        <div>
-                          <div className="font-medium">{getTranslatedProductName(item)}</div>
-                          <div className="text-sm text-muted-foreground">Qty: {item.quantity}</div>
+                        <div className="font-medium tabular-nums">
+                          {item.quantity} × {getTranslatedProductName(item)}
+                          {fallbacks[item.id] && (
+                            <div>
+                              {t('checkout_page.fallbacks.fallback')}{' '}
+                              {getTranslatedProductName(productService.getProductById(fallbacks[item.id]))}
+                            </div>
+                          )}
                         </div>
                         <div className="flex items-center gap-2">
-                          <select
-                            className="border rounded p-1"
-                            value={fallbacks[item.id] ?? ''}
-                            onChange={(e) => setFallbackForItem(item.id, e.target.value || null)}>
-                            <option value="">{t('no_fallback')}</option>
-                            {products
-                              .filter((p) => p.id !== item.id)
-                              .map((p) => (
-                                <option
-                                  key={p.id}
-                                  value={p.id}>
-                                  {getTranslatedProductName(p)}
-                                </option>
-                              ))}
-                          </select>
+                          <SelectFallbackDialog
+                            productId={item.id}
+                            fallbacks={fallbacks}
+                            setFallback={(fallbackId) => setFallbackForItem(item.id, fallbackId)}
+                          />
                           {fallbacks[item.id] ? (
                             <Button
-                              variant="ghost"
-                              onClick={() => clearFallbackForItem(item.id)}>
-                              Clear
+                              variant="outline"
+                              onClick={() => setFallbackForItem(item.id, null)}>
+                              {t('clear')}
                             </Button>
                           ) : null}
                         </div>
@@ -560,7 +506,7 @@ export const CheckoutPage = () => {
             {step === maxSteps && (
               <div>
                 <h2 className="text-xl font-semibold mb-4">{t('review_and_confirm')}</h2>
-                <p className="text-sm text-gray-600">{t('check_rder')}</p>
+                <p className="text-sm text-gray-600">{t('check_order')}</p>
 
                 <div className="mt-4">
                   <h3 className="font-medium">{t('contact_information')}</h3>
@@ -582,6 +528,7 @@ export const CheckoutPage = () => {
                     cart={cart}
                     onUpdateItem={onUpdateItem}
                     setCart={() => {}}
+                    fallbacks={fallbacks}
                   />
                 </div>
               </div>
@@ -606,3 +553,45 @@ export const CheckoutPage = () => {
 };
 
 // TODO: Do not create new order when updated in GUI
+
+function SelectFallbackDialog({
+  productId,
+  fallbacks,
+  setFallback,
+}: {
+  productId: string;
+  fallbacks: Record<string, string>;
+  setFallback: (fallbackId: string | null) => void;
+}) {
+  const { t } = useTranslation();
+  const getTranslatedProductName = useProductName();
+
+  const ref = React.useRef(undefined);
+
+  return (
+    <Dialog>
+      <DialogTrigger
+        ref={ref}
+        asChild>
+        <Button variant="outline">
+          {fallbacks[productId] ? t('checkout_page.fallbacks.change') : t('checkout_page.fallbacks.select')}
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="flex flex-col w-[90vw]! max-w-full!">
+        <DialogHeader className="flex-auto">
+          <DialogTitle>
+            {t('checkout_page.fallbacks.dialog_title', {
+              productName: getTranslatedProductName(productService.getProductById(productId)!),
+            })}
+          </DialogTitle>
+        </DialogHeader>
+        <SearchForAlternativeProductDialog
+          onSelect={(fallbackId) => {
+            setFallback(fallbackId);
+            ref.current?.click();
+          }}
+        />
+      </DialogContent>
+    </Dialog>
+  );
+}

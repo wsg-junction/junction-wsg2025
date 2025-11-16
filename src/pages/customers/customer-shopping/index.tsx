@@ -172,6 +172,7 @@ interface ShoppingCartProps {
   readOnly?: boolean;
   showButtons?: boolean;
   setCart: (cart: CartItem[]) => void;
+  fallbacks?: Record<string, string>;
 }
 
 export const ShoppingCartList = ({
@@ -180,6 +181,7 @@ export const ShoppingCartList = ({
   cart,
   onUpdateItem,
   setCart,
+  fallbacks,
 }: ShoppingCartProps) => {
   const { t, i18n } = useTranslation();
   const { fulfillStep } = useTour();
@@ -206,8 +208,14 @@ export const ShoppingCartList = ({
               </p>
               <p className="text-sm text-muted-foreground tabular-nums">
                 {formatPrice(item.price)}
-                <span className="text-sm text-muted-foreground font-light"> / pcs</span>
+                <span className="font-light"> / pcs</span>
               </p>
+              {fallbacks && fallbacks[item.id] && (
+                <p className="text-sm text-muted-foreground">
+                  {t('checkout_page.fallbacks.fallback')}{' '}
+                  {getTranslatedProductName(productService.getProductById(fallbacks[item.id]))}
+                </p>
+              )}
               {item.warnings.length > 0 && (
                 <div className="mt-1 space-y-1">
                   {item.warnings.map((warnings, wIndex) => (
