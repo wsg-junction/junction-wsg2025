@@ -71,6 +71,7 @@
   "telephone_placeholder": "Telefon (optional)",
   "order_summary": "Zusammenfassung der Bestellung",
   "contact_information": "Kontaktinformationen",
+  "contact_information_sub": "Bitte geben Sie Ihre vollständigen Kontaktdaten an, damit wir Sie bei möglichen Lieferproblemen schnell erreichen können.",
   "review_and_confirm": "Überprüfen & Bestätigen",
   "check_order": "Bitte überprüfen Sie Ihre Bestellung und Kontaktinformationen.",
   "fallbacks": "Fallbacks",
@@ -81,5 +82,6 @@
   "automatic_contact": "Kevin kann Sie nur automatisch kontaktieren, wenn Sie Kontaktinformationen eingeben!",
   "add_information": "Demo Info: Bitte Informationen hinzufügen",
   "your_cart": "Ihr Einkaufswagen",
+  "your_cart_sub": "Bitte überprüfen Sie die Bestellung",
   "step": "Schritt"
 }

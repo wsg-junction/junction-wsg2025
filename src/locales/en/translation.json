@@ -114,6 +114,7 @@
   "telephone_placeholder": "Telephone (optional)",
   "address": "Address",
   "contact_information": "Contact Information",
+  "contact_information_sub": "Please provide your complete contact details so we can reach you promptly in case of any delivery issues.",
   "review_and_confirm": "Review & Confirm",
   "check_order": "Please check your order and contact information.",
   "fallbacks": "Fallbacks",
@@ -124,6 +125,7 @@
   "automatic_contact": "Kevin will only be able to contact you automatically if you enter contact information!",
   "add_information": "Demo Info: Please add Information",
   "your_cart": "Your cart",
+  "your_cart_sub": "Please check your order",
   "step": "Step",
   "push_notifications": {
     "order_packed": {
