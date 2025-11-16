@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button.tsx';
 import { productService } from '@/services/ProductService';
 import { useTranslation } from 'react-i18next';
 import { useProductName } from '@/hooks/use-product-name.ts';
+import { formatPrice } from '@/lib/utils';
 
 interface ProductCardProps {
   id: string;
@@ -64,9 +65,9 @@ export const ProductCard = ({ id, rating, onUpdateCartQuantity, currentQuantity 
           </div>
           {rating && <span className="text-xs text-muted-foreground">{rating.toFixed(1)}</span>}
         </div>
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-4">
           <span className="text-sm font-bold">
-            <span className={'text-lg'}>{product.priceString}</span>
+            <span className={'text-lg'}>{formatPrice(product.price)}</span>
             <span className="text-sm text-muted-foreground font-light"> / pcs</span>
           </span>
 
@@ -91,7 +92,7 @@ export const ProductCard = ({ id, rating, onUpdateCartQuantity, currentQuantity 
                 size={'icon'}>
                 -
               </Button>
-              <span>{currentQuantity}</span>
+              <span className="tabular-nums">{currentQuantity}</span>
               <Button
                 onClick={() => {
                   if (onUpdateCartQuantity) {

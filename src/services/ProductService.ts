@@ -7,7 +7,6 @@ export interface Product {
   vendor: Vendor;
   id: string;
   names: TranslatedName[];
-  priceString?: string;
   image?: string;
 }
 
@@ -81,14 +80,7 @@ export class ProductService {
   }
 
   getProductById(id: string): Product | undefined {
-    const product = products.find((p) => p.id === id);
-    if (!product) return undefined;
-
-    const priceString = product.price ? product.price.toFixed(2) : '0.00';
-    return {
-      ...product,
-      priceString: `${priceString} €`,
-    };
+    return products.find((p) => p.id === id);
   }
 }
 export const productService = new ProductService();

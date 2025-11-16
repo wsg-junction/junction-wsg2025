@@ -106,6 +106,7 @@ export const CheckoutPage = () => {
           id: orderId,
           createdAt: Timestamp.now(),
           products: cart.map(cartItemToItem),
+          totalPrice: cart.reduce((sum, item) => sum + item.price * item.quantity, 0),
           pushNotificationToken: pushNotificationToken || null,
         } satisfies Order;
         const d = doc(firestore, 'orders', orderId);
