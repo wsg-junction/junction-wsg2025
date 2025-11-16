@@ -68,6 +68,7 @@
   "name": "Name",
   "email": "Email",
   "telephone": "Telephone",
+  "telephone_placeholder": "Telephone (optionak)",
   "order_summary": "Order Summary",
   "contact_information": "Yhteystiedot",
   "review_and_confirm": "Review & Confirm",

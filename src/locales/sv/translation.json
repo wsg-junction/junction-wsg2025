@@ -68,6 +68,7 @@
   "name": "Name",
   "email": "Email",
   "telephone": "Telephone",
+  "telephone_placeholder": "Telephone (optionak)",
   "order_summary": "orderöversikt",
   "contact_information": "Kontaktuppgifter",
   "review_and_confirm": "Granska och bekräfta",
