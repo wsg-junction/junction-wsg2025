@@ -5,6 +5,7 @@ import { Header } from "../components/Header";
 import type { Order } from "../picking-dashboard";
 import { useTranslation } from "react-i18next";
 import { useProductName } from "@/hooks/use-product-name";
+import { t } from "i18next";
 
 export type Warning = {
     orderId?: string,
@@ -39,7 +40,7 @@ function BuildWarning({ orders, warnings }: { orders: Order[], warnings: Warning
             const orderWarnings = warnings.filter(it => it.orderId === order.id);
             return (
                 <div key={order.id} className="p-4 border rounded-lg bg-white shadow-sm">
-                    <div className="text-xl font-bold mb-2">Order: {order.id}</div>
+                    <div className="text-xl font-bold mb-2">{t('order')}: {order.id}</div>
 
                     {order
                         .products.filter(product => orderWarnings.some(it => it.itemId === product.id))
@@ -47,7 +48,7 @@ function BuildWarning({ orders, warnings }: { orders: Order[], warnings: Warning
                             const warnings = orderWarnings.filter(it => it.itemId === item.id);
                             return (
                                 <div className="mb-3 pl-4">
-                                    <div className="text-lg font-semibold mb-1">Product: {getTranslatedProductName(item)}</div>
+                                    <div className="text-lg font-semibold mb-1">{t('product')}: {getTranslatedProductName(item)}</div>
                                     <div className="space-y-2 pl-4">
                                         {warnings.map((w, idx) => (
                                             <div key={idx} className="p-3 border border-yellow-400 bg-yellow-100 rounded">

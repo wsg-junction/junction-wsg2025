@@ -225,7 +225,7 @@ export const CheckoutPage = () => {
               className="h-2"
             />
             <p className="text-sm mt-2">
-              Step {step} of {maxSteps}
+              {t('step')} {step} / {maxSteps}
             </p>
           </div>
 
@@ -237,7 +237,7 @@ export const CheckoutPage = () => {
             className="space-y-4">
             {step === 1 && (
               <div>
-                <h2 className="text-xl font-semibold mb-4">Your cart</h2>
+                <h2 className="text-xl font-semibold mb-4">{t('your_cart')}</h2>
                 <ShoppingCartList
                   readOnly={false}
                   cart={cart}
@@ -248,31 +248,31 @@ export const CheckoutPage = () => {
             )}
             {step === 2 && (
               <div>
-                <h2 className="text-xl font-semibold mb-4">Contact Information</h2>
+                <h2 className="text-xl font-semibold mb-4">{t('contact_information')}</h2>
                 <Alert className="my-2 border-yellow-200 bg-yellow-50 text-yellow-800 dark:border-yellow-800 dark:bg-yellow-950/30 dark:text-yellow-200 [&>svg]:text-yellow-600 dark:[&>svg]:text-yellow-400">
                   <AlertTriangleIcon />
-                  <AlertTitle>Demo Info: Please add Information</AlertTitle>
+                  <AlertTitle>{t('add_information')}</AlertTitle>
                   <AlertDescription className="text-yellow-700 dark:text-yellow-300">
-                    Kevin will only be able to contact you automatically if you enter contact information!
+                    {t('automatic_contact')}
                   </AlertDescription>
                 </Alert>
                 <Input
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  placeholder="Name"
+                  placeholder={t('name')}
                   className="mb-3"
                 />
                 <Input
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Email"
+                  placeholder={t('email')}
                   className="mb-3"
                   type={'email'}
                 />
                 <Input
                   value={telephone}
                   onChange={(e) => setTelephone(e.target.value)}
-                  placeholder="Telephone"
+                  placeholder={t('telephone')}
                   type={'tel'}
                 />
                 <div className="mt-4 flex items-start gap-3">
@@ -297,9 +297,9 @@ export const CheckoutPage = () => {
                   />
                   <Label htmlFor="push-notifications">
                     <div className="grid gap-2">
-                      Receive push notifications
+                      {t('receive_notifications')}
                       <p className="text-muted-foreground text-sm">
-                        Get notified if there are any issues while fulfilling your order.
+                        {t('get_notified')}
                       </p>
                     </div>
                   </Label>
@@ -311,7 +311,7 @@ export const CheckoutPage = () => {
               <div>
                 <h2 className="text-xl font-semibold mb-4">Fallback items</h2>
                 <p className="text-sm text-gray-600 mb-3">
-                  Choose an alternative product to use if an item is unavailable.
+                  {t('alternative_product')}
                 </p>
                 <div className="space-y-3">
                   {cart.length === 0 && <p className="text-sm">Your cart is empty.</p>}
@@ -329,7 +329,7 @@ export const CheckoutPage = () => {
                             className="border rounded p-1"
                             value={fallbacks[item.id] ?? ''}
                             onChange={(e) => setFallbackForItem(item.id, e.target.value || null)}>
-                            <option value="">No fallback</option>
+                            <option value="">{t('no_fallback')}</option>
                             {products
                               .filter((p) => p.id !== item.id)
                               .map((p) => (
@@ -357,39 +357,24 @@ export const CheckoutPage = () => {
 
             {step === maxSteps && (
               <div>
-                <h2 className="text-xl font-semibold mb-4">Review & Confirm</h2>
-                <p className="text-sm text-gray-600">Please check your order and contact information.</p>
+                <h2 className="text-xl font-semibold mb-4">{t('review_and_confirm')}</h2>
+                <p className="text-sm text-gray-600">{t('check_rder')}</p>
 
                 <div className="mt-4">
-                  <h3 className="font-medium">Contact Information</h3>
-                  <p>Name: {name || 'N/A'}</p>
-                  <p>Email: {email || 'N/A'}</p>
-                  <p>Telephone: {telephone || 'N/A'}</p>
+                  <h3 className="font-medium">{t('contact_infromation')}</h3>
+                  <p>{t('name')}: {name || 'N/A'}</p>
+                  <p>{t('email')}: {email || 'N/A'}</p>
+                  <p>{t('telephone')}: {telephone || 'N/A'}</p>
                 </div>
 
                 <div className="mt-4">
-                  <h3 className="font-medium">Order Summary</h3>
+                  <h3 className="font-medium">{t('order_summary')}</h3>
                   <ShoppingCartList
                     readOnly={true}
                     cart={cart}
                     onUpdateItem={onUpdateItem}
                     setCart={() => { }}
                   />
-
-                  {/* Show selected fallbacks for review */}
-                  <div className="mt-3">
-                    <h4 className="font-medium">Fallbacks</h4>
-                    {cart.map((item) => {
-                      const fb = fallbacks[item.id];
-                      return (
-                        <div
-                          key={item.id}
-                          className="text-sm">
-                          {getTranslatedProductName(item)}: {fb ? getProductName(fb) : 'No fallback selected'}
-                        </div>
-                      );
-                    })}
-                  </div>
                 </div>
               </div>
             )}
@@ -400,11 +385,11 @@ export const CheckoutPage = () => {
               variant="outline"
               onClick={prev}
               disabled={step === 1}>
-              Back
+              {t('back')}
             </Button>
             <Button
               onClick={next}>
-              {step === maxSteps - 1 ? 'Review' : step === maxSteps ? 'Done' : 'Next'}
+              {step === maxSteps - 1 ? t('review') : step === maxSteps ? t('done') : t('next')}
             </Button>
           </div>
         </div>

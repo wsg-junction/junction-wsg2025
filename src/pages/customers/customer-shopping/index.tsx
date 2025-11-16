@@ -143,7 +143,7 @@ export default function CustomerShoppingPage() {
           </Button>
         </PopoverTrigger>
         <PopoverContent className="-translate-x-3 w-full max-w-[90vw] min-w-auto md:max-w-[600px] min-w-[300px] max-h-[80vh] overflow-y-auto">
-          <b>Shopping Cart</b>
+          <b>{t('shopping_cart')}</b>
           <ShoppingCartList
             setCart={(cart) => {
               setCart(cart);
@@ -284,7 +284,7 @@ export const ShoppingCartList = ({
           ) : null}
         </div>
         <div className={'flex justify-end items-center gap-2 '}>
-          <span>Total: </span>
+          <span>{t('total')}: </span>
           <span className="font-bold text-lg">
             {cart
               .reduce((a, b) => {

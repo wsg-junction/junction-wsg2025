@@ -185,13 +185,13 @@ function PickingRow({
 							variant="outline"
 							className={quantity == item.orderedQuantity ? 'bg-[#eee8f5]' : ''}
 							onClick={() => setQuantity(item.orderedQuantity)}>
-							All
+							{t('all')}
 						</Button>
 						<Button
 							variant="outline"
 							className={quantity == 0 ? 'bg-[#eee8f5]' : ''}
 							onClick={() => setQuantity(0)}>
-							None
+							{t('none')}
 						</Button>
 						<Input
 							type="number"
