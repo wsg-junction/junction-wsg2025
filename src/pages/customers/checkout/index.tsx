@@ -231,10 +231,10 @@ export const CheckoutPage = () => {
   const next = async () => {
     if (step === 2) {
       await form.handleSubmit(
-        () => true,
+        () => setStep(3),
         () => false,
       )();
-      if (form.formState.isValid === false) return;
+      return;
     }
     if (step === maxSteps) {
       const orderId = v4();
