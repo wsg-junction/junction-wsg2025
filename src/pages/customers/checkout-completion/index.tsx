@@ -91,7 +91,7 @@ export const CheckoutCompletionPage = ({ orderId }: CheckoutCompletionPageProps)
               </TableFooter>
             </Table>
           ) : (
-            <p>{t('loading_order_details')}...</p>
+            <p>{t('loading')}</p>
           )}
 
           <div className={'flex justify-center mt-4'}>

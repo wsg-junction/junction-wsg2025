@@ -12,13 +12,6 @@ export const CustomerDashboardPage = () => {
     <div>
       <Header />
       <div className="hero-container p-4">
-        <Breadcrumb>
-          <BreadcrumbList>
-            <BreadcrumbItem>
-              <BreadcrumbPage>{t('shop')}</BreadcrumbPage>
-            </BreadcrumbItem>
-          </BreadcrumbList>
-        </Breadcrumb>
         <div className="hero"></div>
         <div className={'flex flex-wrap gap-4 mt-4'}>
           <Card

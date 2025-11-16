@@ -79,7 +79,7 @@ export default function AimoPickingDashboardConfirmPage() {
   }
 
   return (
-    <div className="p-8">
+    <div>
       <Header />
       <div className="flex flex-col gap-4 p-4">
         <p>{t('aimo_picking_dashboard_confirm.description')}</p>
