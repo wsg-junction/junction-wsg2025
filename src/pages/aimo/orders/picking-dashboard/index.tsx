@@ -38,6 +38,7 @@ export type Order = {
     lat: number;
     lng: number;
   };
+  lang: string;
 };
 
 export default function AimoPickingDashboard() {

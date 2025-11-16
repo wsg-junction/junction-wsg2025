@@ -248,6 +248,7 @@ export const CheckoutPage = () => {
         email: form.getValues('email'),
         telephone: form.getValues('telephone'),
         address: form.getValues('address'),
+        lang: i18n.language,
       } satisfies Order;
       const d = doc(firestore, 'orders', orderId);
       setDoc(d, order).then(() => {
