@@ -1,4 +1,3 @@
-import { credential } from 'firebase-admin';
 import { initializeApp } from 'firebase-admin/app';
 import { getMessaging } from 'firebase-admin/messaging';
 import { setGlobalOptions } from 'firebase-functions';
@@ -6,13 +5,9 @@ import { onRequest } from 'firebase-functions/https';
 import { callFunction } from './call';
 import { toolsFunction } from './tools';
 
-initializeApp({
-  credential: credential.applicationDefault(), // or cert(...)
-});
+initializeApp();
 
 setGlobalOptions({ maxInstances: 10 });
-
-initializeApp();
 
 export const sendPushNotification = onRequest(async (req, res) => {
   res.set('Access-Control-Allow-Origin', '*');

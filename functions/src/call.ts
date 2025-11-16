@@ -34,10 +34,9 @@ const languageName = {
 
 export const callFunction: Parameters<typeof onRequest>[0] = async (req, res) => {
   res.set('Access-Control-Allow-Origin', '*');
-  res.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.set('Access-Control-Allow-Methods', 'POST');
   res.set('Access-Control-Allow-Headers', 'Content-Type');
 
-  // Handle preflight request
   if (req.method === 'OPTIONS') {
     res.status(204).send('');
     return;
