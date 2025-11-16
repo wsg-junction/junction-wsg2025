@@ -94,69 +94,73 @@ export default function CustomerShoppingPage() {
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
-        <div className="hero"></div>
-      </div>
+        <div className="hero mt-4">
+          <h1 className={'text-lg font-bold'}>{t('customer_catalog')}</h1>
+          <h3 className={'text-gray-800 dark:text-gray-400'}>{t('customer_catalog_subtitle')}</h3>
+        </div>
 
-      {isLoading && page === 0 ? (
-        <div className="p-8 text-center">{t('loading_products')}</div>
-      ) : (
-        <>
-          <div
-            className="px-8 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-6"
-            data-tour-id="select_products">
-            {products.map((product) => {
-              return (
-                <ProductCard
-                  key={product.id}
-                  id={product.id}
-                  onUpdateCartQuantity={(newQuantity) => {
-                    onUpdateItem(product, newQuantity);
-                  }}
-                  currentQuantity={getQuantityInCart(cart, product)}
-                  rating={3}
-                />
-              );
-            })}
-          </div>
-          <div className="flex justify-center my-8">
+        <div className={'mt-6'}>
+          {isLoading && page === 0 ? (
+            <div className="p-8 text-center">{t('loading_products')}</div>
+          ) : (
+            <>
+              <div
+                className=" grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-6"
+                data-tour-id="select_products">
+                {products.map((product) => {
+                  return (
+                    <ProductCard
+                      key={product.id}
+                      id={product.id}
+                      onUpdateCartQuantity={(newQuantity) => {
+                        onUpdateItem(product, newQuantity);
+                      }}
+                      currentQuantity={getQuantityInCart(cart, product)}
+                      rating={3}
+                    />
+                  );
+                })}
+              </div>
+              <div className="flex justify-center my-8">
+                <Button
+                  onClick={onLoadMore}
+                  disabled={isLoading}>
+                  {isLoading
+                    ? t('loading')
+                    : t('show_more') + (totalProducts ? ` (${products.length}/${totalProducts})` : '')}
+                </Button>
+              </div>
+            </>
+          )}
+        </div>
+        <Popover>
+          <PopoverTrigger
+            className="fixed bottom-3 right-3"
+            asChild>
             <Button
-              onClick={onLoadMore}
-              disabled={isLoading}>
-              {isLoading
-                ? t('loading')
-                : t('show_more') + (totalProducts ? ` (${products.length}/${totalProducts})` : '')}
+              onClick={() => {
+                fulfillStep('customer_shop_select_products');
+              }}
+              data-tour-id="cart_button"
+              className="h-16 px-8! rounded-full flex justify-center items-center text-lg gap-4"
+              variant="default"
+              size="lg">
+              <ShoppingCart className="w-6! h-6!" /> Cart
             </Button>
-          </div>
-        </>
-      )}
-
-      <Popover>
-        <PopoverTrigger
-          className="fixed bottom-3 right-3"
-          asChild>
-          <Button
-            onClick={() => {
-              fulfillStep('customer_shop_select_products');
-            }}
-            data-tour-id="cart_button"
-            className="h-16 px-8! rounded-full flex justify-center items-center text-lg gap-4"
-            variant="default"
-            size="lg">
-            <ShoppingCart className="w-6! h-6!" /> Cart
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent className="-translate-x-3 w-full max-w-[90vw] min-w-auto md:max-w-[600px] min-w-[300px] max-h-[80vh] overflow-y-auto">
-          <b>{t('shopping_cart')}</b>
-          <ShoppingCartList
-            setCart={(cart) => {
-              setCart(cart);
-            }}
-            showButtons={true}
-            cart={cart}
-            onUpdateItem={onUpdateItem}
-          />
-        </PopoverContent>
-      </Popover>
+          </PopoverTrigger>
+          <PopoverContent className="-translate-x-3 w-full max-w-[90vw] min-w-auto md:max-w-[600px] min-w-[300px] max-h-[80vh] overflow-y-auto">
+            <b>{t('shopping_cart')}</b>
+            <ShoppingCartList
+              setCart={(cart) => {
+                setCart(cart);
+              }}
+              showButtons={true}
+              cart={cart}
+              onUpdateItem={onUpdateItem}
+            />
+          </PopoverContent>
+        </Popover>
+      </div>
     </div>
   );
 }

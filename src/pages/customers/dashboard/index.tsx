@@ -12,8 +12,11 @@ export const CustomerDashboardPage = () => {
     <div>
       <Header />
       <div className="hero-container p-4">
-        <div className="hero"></div>
-        <div className={'flex flex-wrap gap-4 mt-4'}>
+        <div className="hero mt-4">
+          <h1 className={'text-lg font-bold'}>{t('customer_dashboard')}</h1>
+          <h3 className={'text-gray-800 dark:text-gray-400'}>{t('customer_dashboard_welcome_message')}</h3>
+        </div>
+        <div className={'flex flex-wrap gap-4 mt-6'}>
           <Card
             className="w-xs"
             data-tour-id="select_browse_catalog">

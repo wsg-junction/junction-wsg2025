@@ -38,15 +38,18 @@ export default function CustomerOrdersPage() {
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
-        <div className="hero"></div>
+        <div className="hero mt-4">
+          <h1 className={'text-lg font-bold'}>{t('customer_orders')}</h1>
+          <h3 className={'text-gray-800 dark:text-gray-400'}>{t('customer_orders_subtitle')}</h3>
+        </div>
       </div>
 
-      <div className="self-center max-w-4xl flex flex-col gap-4 items-stretch p-8">
+      <div className="  flex flex-col gap-4 items-stretch px-4 mt-2">
         {myOrders.length ? (
           myOrders.map((order) => (
             <Card
               key={order.id}
-              className="max-w-4xl">
+              className="w-full">
               <CardHeader>
                 <CardTitle>Order {order.id}</CardTitle>
                 <CardDescription>{order.createdAt.toDate().toLocaleString()}</CardDescription>
@@ -59,7 +62,7 @@ export default function CustomerOrdersPage() {
                         key={index}
                         className="flex items-center border-t pt-2 gap-2">
                         <p className="flex-3 font-medium line-clamp-2 overflow-hidden text-ellipsis me-2 tabular-nums">
-                          {item.orderedQuantity} × {getTranslatedProductName(item)}
+                          {item.orderedQuantity} × {getTranslatedProductName(item)}
                         </p>
                         <p className="min-w-24 font-medium tabular-nums text-right">
                           {formatPrice(productService.getProductById(item.id)!.price * item.orderedQuantity)}
