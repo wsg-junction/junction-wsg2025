@@ -112,11 +112,11 @@
   "push_notifications": {
     "order_packed": {
       "title": "Your order has been packed!",
-      "body": "Your order {orderId} was packed successfully and is now on its way to you."
+      "body": "Your order {{orderId}} was packed successfully and is now on its way to you."
     },
     "missing_items": {
       "title": "Your order has missing items",
-      "body": "Some items were not available. Click on this notification to select alternatives."
+      "body": "Some items were not available for your order {{orderId}}. Click on this notification to select alternatives."
     }
   }
 }
