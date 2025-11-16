@@ -3,8 +3,10 @@ import { useProductName } from '@/hooks/use-product-name.ts';
 import { useLocation, useNavigate } from 'react-router';
 import type { Order } from '.';
 import { Header } from '../../components/Header';
+import { useTranslation } from 'react-i18next';
 
 export default function AimoPickingDashboardConfirmPage() {
+  const { t } = useTranslation();
   const { state } = useLocation();
   const order = state as Order;
   const navigate = useNavigate();
@@ -21,8 +23,8 @@ export default function AimoPickingDashboardConfirmPage() {
       body: JSON.stringify({
         token: order.pushNotificationToken,
         notification: {
-          title: 'Your order has missing items',
-          body: 'Some items were not available. Click on this notification to select alternatives.',
+          title: t('push_notifications.missing_items.title'),
+          body: t('push_notifications.missing_items.body'),
         },
         data: { orderId: order.id, hasMissingItems: 'true' },
         webpush: {
@@ -49,10 +51,7 @@ export default function AimoPickingDashboardConfirmPage() {
     <div className="p-8">
       <Header />
       <div className="flex flex-col gap-4 p-4">
-        <p>
-          You have picked less than the client ordered for these products. Please confirm to automatically
-          notify the client, based on their communication preference.
-        </p>
+        <p>{t('aimo_picking_dashboard_confirm.description')}</p>
         {Object.values(order.products).map((product) => (
           <div className="p-4 flex flex-row border rounded-lg">
             <h3 className="flex flex-2">{getTranslatedProductName(product)}</h3>
