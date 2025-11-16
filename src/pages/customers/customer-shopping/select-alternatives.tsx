@@ -166,6 +166,7 @@ export default function SelectAlternativesPage() {
                         </DialogTitle>
                       </DialogHeader>
                       <SearchForAlternativeProductDialog
+                        productId={item.id}
                         onUpdateItem={onUpdateItem}
                         getCurrentQuantity={(productId) => getQuantityInCart(productId)}
                       />
