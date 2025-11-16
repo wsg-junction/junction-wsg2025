@@ -11,12 +11,13 @@
   "order_summary": "Order Summary",
   "thank_you_for_your_order": "Thank you for your order!",
   "your_order_number_is": "Your order number is",
-  "back_to_shop": "Back to Shop",
+  "continue_shopping": "Continue Shopping",
+  "view_my_orders": "View My Orders",
+  "loading_products": "Loading Products…",
   "you_will_receive_a_confirmation_email_soon": "We will keep you up to date with your order status via push notifications and via phone.",
   "shop": "Shop",
-  "loading_products": "Load Products",
   "no_products_found": "No products found.",
-  "loading": "Loading...",
+  "loading": "Loading…",
   "show_more": "Show More",
   "about_us": "About Us",
   "terms_of_service": "Terms of Service",
@@ -33,6 +34,7 @@
   "error_quantity_greater": "The picked quantity is greater than the ordered quantity. Please select at most as many as ordered.",
   "error_quantity_smaller": "The picked quantity is smaller than the ordered quantity.",
   "no_image": "No Image",
+  "my_orders": "My Orders",
   "aimo_picking_dashboard": {
     "picking_row": {
       "quantity_custom": "Custom"

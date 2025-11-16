@@ -163,6 +163,7 @@ export const Header: React.FC<HeaderProps> = ({ user = null, className, onSearch
                 </div>
               </div>
             </DropdownMenuLabel>
+            <DropdownMenuItem onClick={() => navigate('/customer/orders')}>{t('my_orders')}</DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => navigate('/')}>
               <LogOut className="size-4" />
