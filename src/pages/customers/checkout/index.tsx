@@ -245,6 +245,9 @@ export const CheckoutPage = () => {
         products: cart.map(cartItemToItem),
         totalPrice: cart.reduce((sum, item) => sum + item.price * item.quantity, 0),
         pushNotificationToken: pushNotificationToken || null,
+        email: form.getValues('email'),
+        telephone: form.getValues('telephone'),
+        address: form.getValues('address'),
       } satisfies Order;
       const d = doc(firestore, 'orders', orderId);
       setDoc(d, order).then(() => {
@@ -577,6 +580,7 @@ export const CheckoutPage = () => {
                   <p>Name: {form.getValues('name') || 'N/A'}</p>
                   <p>Email: {form.getValues('email') || 'N/A'}</p>
                   <p>Telephone: {form.getValues('telephone') || 'N/A'}</p>
+                  <p>Address: {form.getValues('address').formatted || 'N/A'}</p>
                 </div>
 
                 <div className="mt-4">
