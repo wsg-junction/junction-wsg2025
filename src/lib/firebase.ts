@@ -3,6 +3,8 @@ import { initializeApp } from 'firebase/app';
 import { getFirestore, onSnapshot, Query, type DocumentData, type Unsubscribe } from 'firebase/firestore';
 import { getMessaging } from 'firebase/messaging';
 import { useEffect, useState } from 'react';
+import firebase from 'firebase/compat/app';
+import { doc } from '@firebase/firestore';
 const app = initializeApp(firebaseConfig);
 
 export const firestore = getFirestore(app);
@@ -24,4 +26,24 @@ export function useQuery<T>(query: Query<DocumentData, DocumentData>): T[] {
   const [docs, setDocs] = useState<T[]>([]);
   useEffect(() => streamQuery(query, setDocs), [query]);
   return docs;
+}
+export function useDocument<T>(collectionPath: string, docId: string): T | null {
+  const [document, setDocument] = useState<T | null>(null);
+
+  useEffect(() => {
+    if (!docId) return;
+
+    const docRef = doc(firestore, collectionPath, docId);
+    const unsubscribe = onSnapshot(docRef, (snapshot) => {
+      if (snapshot.exists()) {
+        setDocument({ ...snapshot.data(), id: snapshot.id } as T);
+      } else {
+        setDocument(null); // doc doesn't exist
+      }
+    });
+
+    return () => unsubscribe();
+  }, [collectionPath, docId]);
+
+  return document;
 }
