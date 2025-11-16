@@ -19,7 +19,7 @@ export interface TourStep {
   title: string;
   content: ReactNode;
   targetSelector: string;
-  route: To;
+  route?: To;
   afterAction?: (navigate: NavigateFunction) => void;
   nextOnAction?: boolean;
   overwritePosition?: string;
@@ -78,12 +78,38 @@ const steps: TourStep[] = [
     nextOnAction: true,
   },
   {
+    id: 'select_customer_browse_overview',
+    title: 'Customer - Dashboard',
+    content: (
+      <div>
+        This is the Customer Dashboard. <br />
+        <br />
+        The dashboard showcases different services for the customers. <br />
+      </div>
+    ),
+    targetSelector: 'global',
+    nextOnAction: false,
+  },
+  {
+    id: 'select_customer_browse',
+    title: 'Customer - Dashboard',
+    content: (
+      <div>
+        Please select the Store Catalog to browse products. <br />
+        <br />
+        <b>Click on the Store Catalog button to continue.</b>
+      </div>
+    ),
+    route: '/customer',
+    targetSelector: '[data-tour-id="select_browse_catalog"]',
+    nextOnAction: true,
+  },
+  {
     id: 'customer_shop',
-    title: 'Customer Shop',
+    title: 'Customer - Shop',
     content: (
       <div>This is the Shop Catalog page where customers can browse products and add them to their cart.</div>
     ),
-    route: '/customer/browse',
     targetSelector: 'global',
     nextOnAction: false,
   },
@@ -98,7 +124,7 @@ const steps: TourStep[] = [
       </div>
     ),
     route: '/customer/browse',
-    targetSelector: '[data-tour-id="select_products"]',
+    targetSelector: 'body',
     nextOnAction: true,
   },
   {
@@ -109,7 +135,6 @@ const steps: TourStep[] = [
         You can proceed to the checkout by clicking the 'Checkout'-Button. <br />
       </div>
     ),
-    route: '/customer/browse',
     targetSelector: '[data-tour-id="cart_button"]',
     nextOnAction: true,
   },
@@ -121,7 +146,6 @@ const steps: TourStep[] = [
         This is the Checkout page where customers can review their cart and place orders. <br />
       </div>
     ),
-    route: '/customer/checkout',
     targetSelector: 'global',
     nextOnAction: false,
   },
@@ -145,8 +169,7 @@ const steps: TourStep[] = [
         You have now ordered your products. <br />
       </div>
     ),
-    route: '/customer/checkout/complete/' + TOUR_STATE.LAST_ORDER_ID,
-    targetSelector: 'body',
+    targetSelector: 'global',
     nextOnAction: false,
   },
   {
@@ -192,7 +215,7 @@ const steps: TourStep[] = [
       </div>
     ),
     route: '/aimo',
-    targetSelector: 'body',
+    targetSelector: 'global',
     nextOnAction: false,
     isWarehouseView: true,
     overwritePosition: 'bottom-8',
@@ -210,33 +233,115 @@ const steps: TourStep[] = [
     overwritePosition: 'bottom-8',
   },
   {
-    id: 'warehouse_orders',
+    id: 'warehouse_orders_0',
     title: 'Warehouse - Orders',
     content: (
       <div>
         This is the Orders Dashboard where warehouse staff can see which products need to be picked to fulfill
         customer orders.
-        <br />
-        <br />
-        <b>Select the first order in the list to start the picking process.</b>
       </div>
     ),
-    route: '/aimo/dashboard',
+    route: '/aimo/orders',
     targetSelector: 'global',
     nextOnAction: true,
     isWarehouseView: true,
     overwritePosition: 'bottom-8',
   },
   {
+    id: 'warehouse_orders',
+    title: 'Warehouse - Orders',
+    content: (
+      <div>
+        <b>Select the first order in the list to start the picking process.</b>
+      </div>
+    ),
+    route: '/aimo/orders',
+    targetSelector: 'body',
+    nextOnAction: true,
+    isWarehouseView: true,
+    overwritePosition: 'bottom-8',
+  },
+  {
+    id: 'warehouse_order_picking',
+    title: 'Warehouse - Order Picking',
+    content: (
+      <div>
+        This is the Picking Dashboard where warehouse staff can see the products that need to be picked for
+        the selected order.
+        <br />
+        <br />
+        <span>
+          Follow the steps and make sure to set some items to None or less than required -{' '}
+          <b>so you can see Kevin in action!</b>.
+        </span>
+      </div>
+    ),
+    targetSelector: 'body',
+    nextOnAction: true,
+    isWarehouseView: true,
+    overwritePosition: 'bottom-8',
+  },
+  {
+    id: 'switch_back_to_customer',
+    title: 'Switch Back to Customer App',
+    content: (
+      <div>
+        <Alert className="my-2 border-yellow-200 bg-yellow-50 text-yellow-800 dark:border-yellow-800 dark:bg-yellow-950/30 dark:text-yellow-200 [&>svg]:text-yellow-600 dark:[&>svg]:text-yellow-400">
+          <AlertTriangleIcon />
+          <AlertTitle>Switching to Customer App</AlertTitle>
+          <AlertDescription className="text-yellow-700 dark:text-yellow-300">
+            We will now proceed to the Customer Application to see the order confirmation after picking.
+          </AlertDescription>
+        </Alert>
+      </div>
+    ),
+    targetSelector: 'global',
+    nextOnAction: false,
+  },
+  {
+    id: 'customer_order_select',
+    title: 'Customer - Dashboard',
+    content: <div>Back to the Customer Dashboard</div>,
+
+    route: '/customer',
+    targetSelector: 'global',
+    nextOnAction: false,
+  },
+  {
+    id: 'customer_order_select_2',
+    title: 'Customer - Orders',
+    content: (
+      <div>Please select the Orders section in the Customer Application to view your order history.</div>
+    ),
+    route: '/customer',
+    targetSelector: '[data-tour-id="select_my_orders"]',
+    nextOnAction: true,
+    overwritePosition: 'bottom-8',
+  },
+  {
     id: 'thanks',
     title: 'Thank You!',
-    content: <div>Thank you for taking the tour.</div>,
-    route: '/',
+    route: '/customer/orders',
+    content: (
+      <div>
+        <span>Thank you for taking the tour.</span>
+        <br />
+        <br />
+        <b>We want you to explore more!</b>
+        <br />
+        <span>
+          There are many more features! Like a Map with nearby stores, and a Select Alternatives for
+          unavailable items.
+        </span>
+        <br />
+        <br />
+        <b>Make sure to check them out in this order page for orders that have unavailable items.</b>
+      </div>
+    ),
     targetSelector: 'global',
     nextOnAction: false,
     afterAction: (navigate) => {
       localStorage.removeItem('tourStep');
-      navigate('/');
       window.location.reload();
     },
   },
@@ -256,6 +361,7 @@ const useTourTarget = (selector?: string) => {
     }
 
     const el = document.querySelector(selector);
+    console.log(selector, el);
     elRef.current = el;
 
     if (!el) {
@@ -336,7 +442,7 @@ export default function TourController() {
     const previousStep = steps[currentStepIndex - 1];
     if (previousStep?.afterAction) previousStep.afterAction(navigate);
 
-    if (currentStep && location.pathname !== (currentStep.route as string)) {
+    if (currentStep && currentStep.route && location.pathname !== (currentStep.route as string)) {
       navigate(currentStep.route);
     }
 
@@ -430,6 +536,7 @@ export default function TourController() {
               <div className={'flex gap-2'}>
                 {currentStepIndex < steps.length - 1 ? (
                   <Button
+                    disabled={currentStepIndex <= steps.length - 1 && !steps[currentStepIndex + 1]?.route}
                     onClick={() => {
                       handleNextStep();
                     }}>

@@ -6,9 +6,11 @@ import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 import { Header } from '../components/Header';
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyTitle } from '@/components/ui/empty';
+import { useTour } from '@/pages/tour/TourController.tsx';
 
 export default function AimoOrdersPage() {
   const { t } = useTranslation();
+  const { fulfillStep } = useTour();
   const getTranslatedProductName = useProductName();
 
   const myOrders = useMyOrders();
@@ -23,7 +25,8 @@ export default function AimoOrdersPage() {
             return (
               <Card
                 key={order.id}
-                className="max-w-4xl">
+                data-tour-id={'warehouse-order-item'}
+                className="max-w-4xl warehouse-order-item">
                 <CardHeader>
                   <CardTitle>Order {order.id}</CardTitle>
                   <CardDescription>{order.createdAt.toDate().toLocaleString()}</CardDescription>
@@ -47,6 +50,9 @@ export default function AimoOrdersPage() {
                 </CardContent>
                 <CardFooter>
                   <Button
+                    onClick={() => {
+                      fulfillStep('warehouse_orders');
+                    }}
                     variant={wasPicked ? 'secondary' : 'default'}
                     asChild>
                     <Link to={`/aimo/orders/${order.id}/picking-dashboard`}>

@@ -7,12 +7,14 @@ import { useLocation, useNavigate } from 'react-router';
 import type { Order } from '.';
 import { Header } from '../../components/Header';
 import { useTranslation } from 'react-i18next';
+import { useTour } from '@/pages/tour/TourController.tsx';
 
 export default function AimoPickingDashboardConfirmPage() {
   const { t } = useTranslation();
   const { state } = useLocation();
   const order = state as Order;
   const navigate = useNavigate();
+  const { fulfillStep } = useTour();
   const getTranslatedProductName = useProductName();
 
   async function confirm() {
@@ -76,6 +78,7 @@ export default function AimoPickingDashboardConfirmPage() {
     }
 
     navigate('/aimo/orders');
+    fulfillStep('warehouse_order_picking');
   }
 
   return (

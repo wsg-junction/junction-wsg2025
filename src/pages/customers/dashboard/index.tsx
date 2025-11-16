@@ -5,9 +5,11 @@ import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from '@/comp
 import { Settings, ShoppingBasket, ShoppingCart } from 'lucide-react';
 import { Button } from '@/components/ui/button.tsx';
 import { Link } from 'react-router';
+import { useTour } from '@/pages/tour/TourController.tsx';
 
 export const CustomerDashboardPage = () => {
   const { t } = useTranslation();
+  const { fulfillStep } = useTour();
   return (
     <div>
       <Header />
@@ -38,6 +40,9 @@ export const CustomerDashboardPage = () => {
             <div className="flex-1 -mt-6"></div>
             <CardFooter>
               <Button
+                onClick={() => {
+                  fulfillStep('select_customer_browse');
+                }}
                 asChild
                 variant={'link'}>
                 <Link to="/customer/browse">Go to Catalog</Link>
@@ -57,6 +62,9 @@ export const CustomerDashboardPage = () => {
             <div className="flex-1 -mt-6"></div>
             <CardFooter>
               <Button
+                onClick={() => {
+                  fulfillStep('customer_order_select_2');
+                }}
                 asChild
                 variant={'link'}>
                 <Link to="/customer/orders">Go to My Orders</Link>
@@ -64,9 +72,7 @@ export const CustomerDashboardPage = () => {
             </CardFooter>
           </Card>
 
-          <Card
-            className="w-xs"
-            data-tour-id="select_my_orders">
+          <Card className="w-xs">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Settings /> Notification Settings

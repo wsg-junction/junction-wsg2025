@@ -76,8 +76,8 @@ export default function CustomerOrdersPage() {
                   <span className="font-bold text-lg">{formatPrice(order.totalPrice)}</span>
                 </div>
               </CardContent>
-              {order.products[0].pickEvent !== null &&
-                order.products.some((it) => (it.pickEvent?.quantity ?? 0) < it.orderedQuantity) && (
+              {order?.products?.[0]?.pickEvent !== null &&
+                order?.products.some((it) => (it.pickEvent?.quantity ?? 0) < it.orderedQuantity) && (
                   <CardFooter>
                     <div className="flex justify-between items-center gap-4">
                       <div className="flex-1">Unfortunately, some of these items are not available.</div>
