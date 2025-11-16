@@ -79,13 +79,6 @@ export const ROUTES = createBrowserRouter([
       </ThemeProvider>
     ),
     errorElement: <NotFoundErrorPage></NotFoundErrorPage>,
-    children: [
-      {
-        path: 'tour',
-        element: <TourController />,
-        children: BUSINESS_ROUTES,
-      },
-      ...BUSINESS_ROUTES,
-    ],
+    children: [...BUSINESS_ROUTES],
   },
 ]);
