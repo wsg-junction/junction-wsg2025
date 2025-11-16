@@ -1,5 +1,8 @@
 import { Button } from '@/components/ui/button';
 import { useProductName } from '@/hooks/use-product-name.ts';
+import { firestore } from '@/lib/firebase.ts';
+import type { Notification } from '@/pages/customers/components/NotificationsPopover/NotificationsPopover.tsx';
+import { addDoc, collection } from 'firebase/firestore';
 import { useLocation, useNavigate } from 'react-router';
 import type { Order } from '.';
 import { Header } from '../../components/Header';
@@ -13,37 +16,65 @@ export default function AimoPickingDashboardConfirmPage() {
   const getTranslatedProductName = useProductName();
 
   async function confirm() {
-    if (!order.pushNotificationToken) return;
+    try {
+      const docRef = await addDoc(collection(firestore, 'notifications'), {
+        title: 'Your order has missing items',
+        message: 'Some items were not available. Click on this notification to select alternatives.',
+        createdAt: Date.now(),
+        read: false,
+        orderId: order.id,
+      } as Omit<Notification, 'id'>);
+      console.log('Document written with ID: ', docRef.id);
+    } catch (error) {
+      console.error('Error adding document: ', error);
+    }
 
-    console.log('Sending notification to', order.pushNotificationToken, 'for order', order.id);
+    if (order.pushNotificationToken) {
+      console.log('Sending notification to', order.pushNotificationToken, 'for order', order.id);
 
-    fetch('https://sendpushnotification-3avmwyjhaq-uc.a.run.app', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        token: order.pushNotificationToken,
-        notification: {
-          title: t('push_notifications.missing_items.title'),
-          body: t('push_notifications.missing_items.body'),
-        },
-        data: { orderId: order.id, hasMissingItems: 'true' },
-        webpush: {
+      fetch('https://sendpushnotification-3avmwyjhaq-uc.a.run.app', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          token: order.pushNotificationToken,
           notification: {
-            // actions: [
-            //   {
-            //     action: 'view_order',
-            //     title: 'View Order',
-            //   },
-            //   {
-            //     action: 'select_alternatives',
-            //     title: 'Select Alternatives',
-            //   },
-            // ],
-            requireInteraction: true,
+            title: t('push_notifications.missing_items.title'),
+            body: t('push_notifications.missing_items.body'),
           },
-        },
-      }),
-    });
+          data: { orderId: order.id, hasMissingItems: 'true' },
+          webpush: {
+            notification: {
+              // actions: [
+              //   {
+              //     action: 'view_order',
+              //     title: 'View Order',
+              //   },
+              //   {
+              //     action: 'select_alternatives',
+              //     title: 'Select Alternatives',
+              //   },
+              // ],
+              requireInteraction: true,
+            },
+          },
+        }),
+      });
+    }
+
+    if (order.telephone) {
+      console.log('Calling', order.telephone, 'for order', order.id);
+
+      fetch('https://helloworld-3avmwyjhaq-uc.a.run.app', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          language: order.lang,
+          phone_number: order.telephone,
+          order_id: order.id,
+        }),
+      });
+    }
+
     navigate('/aimo/orders');
   }
 

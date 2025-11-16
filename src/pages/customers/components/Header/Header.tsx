@@ -24,6 +24,7 @@ import { Link, useNavigate } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { LanguageModeToggle } from '@/components/core/language-mode-toggle.tsx';
 import { NotificationsPopover } from '@/pages/customers/components/NotificationsPopover/NotificationsPopover.tsx';
+import { AutoSearch } from '@/components/core/AutoSearch.tsx';
 
 export type HeaderUser = {
   id?: string;
@@ -96,48 +97,11 @@ export const Header: React.FC<HeaderProps> = ({ user = null, className, onSearch
 
       {/* Right: Actions */}
       <div className="flex items-center gap-3">
-        {/* Mobile search trigger */}
-        <div className="md:hidden">
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                aria-label="Open search">
-                <Search className="size-4" />
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-screen max-w-sm">
-              <div className="flex items-center gap-2">
-                <Search className="size-4 text-muted-foreground" />
-                <Input
-                  ref={inputRef}
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                  placeholder={t('search')}
-                  aria-label="Mobile search"
-                />
-                {query && (
-                  <button
-                    className="opacity-70 hover:opacity-100"
-                    onClick={() => setQuery('')}
-                    aria-label="Clear search">
-                    <X className="size-4" />
-                  </button>
-                )}
-              </div>
-            </PopoverContent>
-          </Popover>
+        {/*
+         <div className="hidden md:flex items-center">
+          <AutoSearch />
         </div>
-        <div className="hidden md:flex items-center">
-          <InputGroup>
-            <InputGroupInput placeholder={t('search')} />
-            <InputGroupAddon>
-              <Search />
-            </InputGroupAddon>
-            <InputGroupAddon align="inline-end"></InputGroupAddon>
-          </InputGroup>
-        </div>
+         */}
 
         {/* Notifications */}
         <Tooltip>

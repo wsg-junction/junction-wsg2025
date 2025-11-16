@@ -51,12 +51,11 @@ const formSchema = (region: string) =>
   z.object({
     name: z.string().min(1, 'Name is required'),
 
-    email: z.string().min(1, 'Email is required').email('Invalid email address'),
-
     telephone: z
       .string()
-      .min(1, 'Telephone is required')
+      .optional()
       .refine((value) => {
+        if (!value || value.trim() === '') return true; // optional field
         try {
           const number = phoneUtil.parse(value, region.split('-')[0].toUpperCase());
           console.log('Parsed phone number:', number, phoneUtil.isValidNumber(number));
@@ -208,7 +207,6 @@ export const CheckoutPage = () => {
   const form = useForm({
     defaultValues: {
       name: '',
-      email: '',
       telephone: '',
     },
     resolver: zodResolver(formSchema(i18n.language)),
@@ -239,15 +237,16 @@ export const CheckoutPage = () => {
           });
         }
       }
+      const phone = form.getValues('telephone');
       const order = {
         id: orderId,
         createdAt: Timestamp.now(),
         products: cart.map(cartItemToItem),
         totalPrice: cart.reduce((sum, item) => sum + item.price * item.quantity, 0),
         pushNotificationToken: pushNotificationToken || null,
-        email: form.getValues('email'),
-        telephone: form.getValues('telephone'),
+        telephone: !phone || phone.trim() === '' ? null : phone,
         address: form.getValues('address'),
+        lang: i18n.language,
       } satisfies Order;
       const d = doc(firestore, 'orders', orderId);
       setDoc(d, order).then(() => {
@@ -270,6 +269,8 @@ export const CheckoutPage = () => {
 
   const normalizePhone = (value: string) => {
     try {
+      if (!value || value.trim() === '') return ''; // optional field
+
       const parsed = phoneUtil.parse(value, i18n.language.split('-')[0].toUpperCase());
       if (!phoneUtil.isValidNumber(parsed)) return value;
       return phoneUtil.format(parsed, PhoneNumberFormat.E164);
@@ -434,16 +435,6 @@ export const CheckoutPage = () => {
                 )}
 
                 <Input
-                  {...form.register('email')}
-                  placeholder={t('email')}
-                  type="email"
-                  className="mb-1"
-                />
-                {form.formState.errors.email && (
-                  <p className="text-red-500 text-sm mb-3">{form.formState.errors.email.message}</p>
-                )}
-
-                <Input
                   {...form.register('telephone', {
                     onBlur: (e) => {
                       const normalized = normalizePhone(e.target.value);
@@ -577,9 +568,6 @@ export const CheckoutPage = () => {
                     {t('name')}: {form.getValues('name') || 'N/A'}
                   </p>
                   <p>
-                    {t('email')}: {form.getValues('email') || 'N/A'}
-                  </p>
-                  <p>
                     {t('telephone')}: {form.getValues('telephone') || 'N/A'}
                   </p>
                   <p>
@@ -618,6 +606,3 @@ export const CheckoutPage = () => {
 };
 
 // TODO: Do not create new order when updated in GUI
-
-// TODO: Verify if fields are optional
-// TODO: Remove email if not supported
