@@ -7,13 +7,14 @@ import DashboardPage from '@/pages/dashboard';
 import { NotFoundErrorPage } from '@/pages/error-pages/not-found.page.tsx';
 import { createBrowserRouter, useParams } from 'react-router';
 import AimoHomePage from './pages/aimo';
-import OrdersPage from './pages/aimo/orders';
+import AimoOrdersPage from './pages/aimo/orders';
 import AimoPickingDashboardPage from './pages/aimo/orders/picking-dashboard';
 import AimoPickingDashboardConfirmPage from './pages/aimo/orders/picking-dashboard/confirm';
 import AimoWarningsPage from './pages/aimo/warnings';
 import CommunicationPreferencesPage from './pages/customers/communication';
 import SelectAlternativesPage from './pages/customers/customer-shopping/select-alternatives';
 import GeminiPage from './pages/gemini/gemini';
+import CustomerOrdersPage from './pages/customers/customer-shopping/orders';
 
 const BUSINESS_ROUTES = [
   {
@@ -47,6 +48,10 @@ const BUSINESS_ROUTES = [
         Component: CommunicationPreferencesPage,
       },
       {
+        path: 'orders',
+        Component: CustomerOrdersPage,
+      },
+      {
         index: true,
         Component: CustomerShoppingPage,
       },
@@ -64,7 +69,7 @@ const BUSINESS_ROUTES = [
         children: [
           {
             index: true,
-            Component: OrdersPage,
+            Component: AimoOrdersPage,
           },
           {
             path: ':orderId/picking-dashboard',

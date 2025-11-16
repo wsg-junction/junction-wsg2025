@@ -7,7 +7,7 @@ import { Link } from 'react-router';
 import { Header } from '../components/Header';
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyTitle } from '@/components/ui/empty';
 
-export default function OrdersPage() {
+export default function AimoOrdersPage() {
   const { t } = useTranslation();
   const getTranslatedProductName = useProductName();
 

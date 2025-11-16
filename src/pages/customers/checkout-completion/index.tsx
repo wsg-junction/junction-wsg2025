@@ -98,7 +98,13 @@ export const CheckoutCompletionPage = ({ orderId }: CheckoutCompletionPageProps)
             <Button
               asChild
               variant={'default'}>
-              <Link to="/customer">{t('back_to_shop')}</Link>
+              <Link to="/customer">{t('continue_shopping')}</Link>
+            </Button>
+            <Button
+              asChild
+              variant={'outline'}
+              className={'ms-4'}>
+              <Link to="/customer/orders">{t('view_my_orders')}</Link>
             </Button>
           </div>
         </div>
