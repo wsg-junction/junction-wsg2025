@@ -139,7 +139,11 @@ const PlaceAutocomplete = ({ onPlaceSelect }: PlaceAutocompleteProps) => {
           />
 
           <CommandList>
-            {!isLoading && predictions.length === 0 && <CommandEmpty>No results found.</CommandEmpty>}
+            {!isLoading && predictions.length === 0 && inputValue.length === 0 ? (
+              <CommandEmpty>Start typing...</CommandEmpty>
+            ) : (
+              <CommandEmpty>No results found.</CommandEmpty>
+            )}
 
             <CommandGroup>
               {predictions.map((prediction) => (
@@ -328,6 +332,10 @@ export const CheckoutPage = () => {
           <BreadcrumbList>
             <BreadcrumbItem>
               <BreadcrumbLink href="/customer">{t('shop')}</BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbLink href="/customer/browse">{t('all_products')}</BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
