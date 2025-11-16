@@ -9,28 +9,154 @@ import {
 } from '@/components/ui/breadcrumb.tsx';
 import { Button } from '@/components/ui/button.tsx';
 import { Checkbox } from '@/components/ui/checkbox';
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from '@/components/ui/command';
 import { Input } from '@/components/ui/input.tsx';
 import { Label } from '@/components/ui/label';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Progress } from '@/components/ui/progress.tsx';
+import { Spinner } from '@/components/ui/spinner';
+import { useLocalStorage } from '@/hooks/use-local-storage';
 import { useProductName } from '@/hooks/use-product-name';
 import { firestore, messaging, vapidKey } from '@/lib/firebase';
-import type { Item, Order } from '@/pages/aimo/picking-dashboard';
+import type { Item, Order } from '@/pages/aimo/orders/picking-dashboard';
 import type { Warning } from '@/pages/aimo/warnings';
 import { Header } from '@/pages/customers/components/Header/Header.tsx';
 import { ShoppingCartList, type CartItem } from '@/pages/customers/customer-shopping';
+import { TOUR_STATE, useTour } from '@/pages/tour/TourController.tsx';
 import { productService, type Product } from '@/services/ProductService';
-import { doc, setDoc } from 'firebase/firestore';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { doc, setDoc, Timestamp } from 'firebase/firestore';
 import { getToken } from 'firebase/messaging';
 import { motion } from 'framer-motion';
-import { AlertTriangleIcon } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { PhoneNumberFormat, PhoneNumberUtil } from 'google-libphonenumber';
+import { AlertTriangleIcon, ChevronsUpDown } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
+import { Controller, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
-import { v4 } from "uuid";
+import { v4 } from 'uuid';
+import { z } from 'zod';
+import { useAutocompleteSuggestions } from './useAutocompleteSuggestions';
+
+const phoneUtil = PhoneNumberUtil.getInstance();
+
+const formSchema = (region: string) =>
+  z.object({
+    name: z.string().min(1, 'Name is required'),
+
+    email: z.string().min(1, 'Email is required').email('Invalid email address'),
+
+    telephone: z
+      .string()
+      .min(1, 'Telephone is required')
+      .refine((value) => {
+        try {
+          const number = phoneUtil.parse(value, region.split('-')[0].toUpperCase());
+          console.log('Parsed phone number:', number, phoneUtil.isValidNumber(number));
+          return phoneUtil.isValidNumber(number);
+        } catch (e) {
+          console.log(e);
+          return false;
+        }
+      }, 'Invalid phone number'),
+
+    address: z
+      .object({
+        formatted: z.string(), // normalized
+        lat: z.number(),
+        lng: z.number(),
+      })
+      .refine((addr) => !!addr.formatted, 'Please select a valid address from suggestions'),
+  });
+
+type PlaceAutocompleteProps = {
+  onPlaceSelect: (place: google.maps.places.Place | null) => void;
+  onBlur: () => void;
+};
+const PlaceAutocomplete = ({ onPlaceSelect }: PlaceAutocompleteProps) => {
+  const [open, setOpen] = useState(false);
+  const [selectedPlace, setSelectedPlace] = useState('');
+  const [inputValue, setInputValue] = useState('');
+
+  const { suggestions, resetSession, isLoading } = useAutocompleteSuggestions(inputValue);
+
+  const predictions = useMemo(
+    () => suggestions.filter((s) => s.placePrediction).map(({ placePrediction }) => placePrediction!),
+    [suggestions],
+  );
+
+  const handleSelect = async (prediction: google.maps.places.PlacePrediction) => {
+    if (!prediction) return;
+    const place = prediction.toPlace();
+
+    await place.fetchFields({
+      fields: ['viewport', 'location', 'formattedAddress', 'displayName'],
+    });
+
+    resetSession();
+    onPlaceSelect(place);
+    setInputValue('');
+    setOpen(false);
+    setSelectedPlace(prediction.text.text);
+  };
+
+  return (
+    <Popover
+      open={open}
+      onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button
+          variant="outline"
+          role="combobox"
+          aria-expanded={open}
+          className="w-full justify-between font-normal mb-1">
+          {selectedPlace ? selectedPlace : 'Select address...'}
+          <ChevronsUpDown className="opacity-50" />
+        </Button>
+      </PopoverTrigger>
+
+      <PopoverContent align="start">
+        <Command shouldFilter={false}>
+          <CommandInput
+            placeholder="Search for a place"
+            value={inputValue}
+            onValueChange={(value) => {
+              setInputValue(value);
+              setOpen(true);
+            }}
+          />
+
+          <CommandList>
+            {!isLoading && predictions.length === 0 && <CommandEmpty>No results found.</CommandEmpty>}
+
+            <CommandGroup>
+              {predictions.map((prediction) => (
+                <CommandItem
+                  key={prediction.placeId}
+                  value={prediction.placeId}
+                  onSelect={() => handleSelect(prediction)}>
+                  {prediction.text.text}
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          </CommandList>
+        </Command>
+      </PopoverContent>
+    </Popover>
+  );
+};
 
 export const CheckoutPage = () => {
   const { t } = useTranslation();
   const { i18n } = useTranslation();
+  const { fulfillStep } = useTour();
   const getTranslatedProductName = useProductName(i18n);
   const [step, setStep] = useState(1);
   const maxSteps = 3;
@@ -40,24 +166,24 @@ export const CheckoutPage = () => {
     const warnings: Warning[] = [];
     if (Math.random() < 0.2) {
       warnings.push({
-        title: "Frequent Disruptions",
-        description: "This item has been disrupted more frequently than usual.",
+        title: 'Frequent Disruptions',
+        description: 'This item has been disrupted more frequently than usual.',
       });
     }
     if (Math.random() < 0.2) {
       warnings.push({
-        title: "Unreliable Supplier",
+        title: 'Unreliable Supplier',
         description: "This supplier's reliability is poor.",
       });
     }
     if (Math.random() < 0.2) {
       warnings.push({
-        title: "Seasonality Issues",
-        description: "This item is prone to seasonal availability issues.",
+        title: 'Seasonality Issues',
+        description: 'This item is prone to seasonal availability issues.',
       });
     }
     return warnings;
-  }
+  };
 
   const [cart, setCart] = useState(() => {
     const stored = localStorage.getItem('cart');
@@ -69,46 +195,88 @@ export const CheckoutPage = () => {
   });
 
   function cartItemToItem(item: CartItem): Item {
-    const newItem = { id: item.id, ean: item.ean, names: item.names, orderedQuantity: item.quantity, pickEvent: null };
+    const newItem = {
+      id: item.id,
+      ean: item.ean,
+      names: item.names,
+      orderedQuantity: item.quantity,
+      pickEvent: null,
+    };
     return newItem;
   }
+
+  const form = useForm({
+    defaultValues: {
+      name: '',
+      email: '',
+      telephone: '',
+    },
+    resolver: zodResolver(formSchema(i18n.language)),
+    reValidateMode: 'onBlur',
+  });
 
   const [pushNotificationToken, setPushNotificationToken] = useState<string | null>(() => {
     const token = localStorage.getItem('pushNotificationToken');
     return token ? token : null;
   });
-  const next = () => setStep((s) => {
-    if (s === maxSteps) {
+  const [isEnablingPushNotifications, setIsEnablingPushNotifications] = useState(false);
+  const [myOrderIds, setMyOrderIds] = useLocalStorage<string[]>('myOrderIds', []);
+  const next = async () => {
+    if (step === 2) {
+      const isValid = await form.trigger(undefined, { shouldFocus: true });
+      if (!isValid) return;
+    }
+    if (step === maxSteps) {
       const orderId = v4();
       for (const item of cart) {
         console.log(item);
         for (const warning of item.warnings) {
-          warning.orderId = orderId;
-          warning.itemId = item.id;
-          const d = doc(firestore, "warnings", v4());
-          setDoc(d, warning);
+          const d = doc(firestore, 'warnings', v4());
+          setDoc(d, {
+            ...warning,
+            orderId: orderId,
+            itemId: item.id,
+          });
         }
       }
       const order = {
         id: orderId,
+        createdAt: Timestamp.now(),
         products: cart.map(cartItemToItem),
-        pushNotificationToken: pushNotificationToken || undefined,
+        totalPrice: cart.reduce((sum, item) => sum + item.price * item.quantity, 0),
+        pushNotificationToken: pushNotificationToken || null,
+        email: form.getValues('email'),
+        telephone: form.getValues('telephone'),
+        address: form.getValues('address'),
       } satisfies Order;
-      const d = doc(firestore, "orders", orderId);
-      setDoc(d, order);
-      navigate('/customer');
-      return;
+      const d = doc(firestore, 'orders', orderId);
+      setDoc(d, order).then(() => {
+        console.log('Order saved:', order);
+        console.log(order.id);
+        TOUR_STATE.LAST_ORDER_ID = order.id;
+        setMyOrderIds([...myOrderIds, orderId]);
+        navigate('/customer/checkout/complete/' + order.id);
+        fulfillStep('customer_checkout_place_order');
+        setCart([]);
+      });
     }
-    return Math.min(maxSteps, s + 1);
-  });
+    setStep((s) => {
+      return Math.min(maxSteps, s + 1);
+    });
+  };
   const prev = () => setStep((s) => Math.max(1, s - 1));
 
   const progressValue = (step / maxSteps) * 100;
 
-  const [email, setEmail] = useState('');
-  const [telephone, setTelephone] = useState('');
-  const [name, setName] = useState('');
-
+  const normalizePhone = (value: string) => {
+    try {
+      const parsed = phoneUtil.parse(value, i18n.language.split('-')[0].toUpperCase());
+      if (!phoneUtil.isValidNumber(parsed)) return value;
+      return phoneUtil.format(parsed, PhoneNumberFormat.E164);
+    } catch {
+      return value; // leave unchanged if parsing failed
+    }
+  };
 
   // --- fallback state: map from cartItemId -> fallbackProductId | null
   const LOCALSTORAGE_FALLBACKS_KEY = 'checkout_fallbacks_v1';
@@ -242,7 +410,7 @@ export const CheckoutPage = () => {
                   readOnly={false}
                   cart={cart}
                   onUpdateItem={onUpdateItem}
-                  setCart={() => { }}
+                  setCart={() => {}}
                 />
               </div>
             )}
@@ -257,50 +425,95 @@ export const CheckoutPage = () => {
                   </AlertDescription>
                 </Alert>
                 <Input
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
+                  {...form.register('name')}
                   placeholder={t('name')}
-                  className="mb-3"
+                  className="mb-1"
                 />
-                <Input
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder={t('email')}
-                  className="mb-3"
-                  type={'email'}
-                />
-                <Input
-                  value={telephone}
-                  onChange={(e) => setTelephone(e.target.value)}
-                  placeholder={t('telephone')}
-                  type={'tel'}
-                />
-                <div className="mt-4 flex items-start gap-3">
-                  <Checkbox
-                    id="push-notifications"
-                    checked={!!pushNotificationToken}
-                    onCheckedChange={async (checked) => {
-                      if (!checked) {
-                        setPushNotificationToken(null);
-                        return;
-                      }
+                {form.formState.errors.name && (
+                  <p className="text-red-500 text-sm mb-3">{form.formState.errors.name.message}</p>
+                )}
 
-                      try {
-                        const token = await getToken(messaging, { vapidKey });
-                        console.log('Push notification token:', token);
-                        setPushNotificationToken(token);
-                        localStorage.setItem('pushNotificationToken', token);
-                      } catch (error) {
-                        console.error('Error getting push notification token:', error);
-                      }
-                    }}
-                  />
+                <Input
+                  {...form.register('email')}
+                  placeholder={t('email')}
+                  type="email"
+                  className="mb-1"
+                />
+                {form.formState.errors.email && (
+                  <p className="text-red-500 text-sm mb-3">{form.formState.errors.email.message}</p>
+                )}
+
+                <Input
+                  {...form.register('telephone', {
+                    onBlur: (e) => {
+                      const normalized = normalizePhone(e.target.value);
+
+                      form.setValue('telephone', normalized, {
+                        shouldDirty: true,
+                        shouldTouch: true,
+                      });
+                    },
+                  })}
+                  placeholder={t('telephone')}
+                  type="tel"
+                  className="mb-1"
+                />
+                {form.formState.errors.telephone && (
+                  <p className="text-red-500 text-sm mb-3">{form.formState.errors.telephone.message}</p>
+                )}
+
+                <Controller
+                  control={form.control}
+                  name="address"
+                  render={({ field }) => (
+                    <PlaceAutocomplete
+                      onPlaceSelect={(value) => {
+                        field.onChange(
+                          value && {
+                            formatted: value.formattedAddress || value.displayName || '',
+                            lat: value.location?.lat() || 0,
+                            lng: value.location?.lng() || 0,
+                          },
+                        );
+                      }}
+                      onBlur={field.onBlur}
+                    />
+                  )}></Controller>
+                {form.formState.errors.address && (
+                  <p className="text-red-500 text-sm mb-3">{form.formState.errors.address.message}</p>
+                )}
+
+                <div className="mt-4 flex items-start gap-3">
+                  {isEnablingPushNotifications ? (
+                    <Spinner />
+                  ) : (
+                    <Checkbox
+                      id="push-notifications"
+                      checked={!!pushNotificationToken}
+                      onCheckedChange={async (checked) => {
+                        if (!checked) {
+                          setPushNotificationToken(null);
+                          return;
+                        }
+
+                        setIsEnablingPushNotifications(true);
+                        try {
+                          const token = await getToken(messaging, { vapidKey });
+                          console.log('Push notification token:', token);
+                          setPushNotificationToken(token);
+                          localStorage.setItem('pushNotificationToken', token);
+                        } catch (error) {
+                          console.error('Error getting push notification token:', error);
+                        } finally {
+                          setIsEnablingPushNotifications(false);
+                        }
+                      }}
+                    />
+                  )}
                   <Label htmlFor="push-notifications">
                     <div className="grid gap-2">
                       {t('receive_notifications')}
-                      <p className="text-muted-foreground text-sm">
-                        {t('get_notified')}
-                      </p>
+                      <p className="text-muted-foreground text-sm">{t('get_notified')}</p>
                     </div>
                   </Label>
                 </div>
@@ -310,9 +523,7 @@ export const CheckoutPage = () => {
             {step === 3 && (
               <div>
                 <h2 className="text-xl font-semibold mb-4">Fallback items</h2>
-                <p className="text-sm text-gray-600 mb-3">
-                  {t('alternative_product')}
-                </p>
+                <p className="text-sm text-gray-600 mb-3">{t('alternative_product')}</p>
                 <div className="space-y-3">
                   {cart.length === 0 && <p className="text-sm">Your cart is empty.</p>}
                   {cart.map((item, idx) => (
@@ -361,10 +572,19 @@ export const CheckoutPage = () => {
                 <p className="text-sm text-gray-600">{t('check_rder')}</p>
 
                 <div className="mt-4">
-                  <h3 className="font-medium">{t('contact_infromation')}</h3>
-                  <p>{t('name')}: {name || 'N/A'}</p>
-                  <p>{t('email')}: {email || 'N/A'}</p>
-                  <p>{t('telephone')}: {telephone || 'N/A'}</p>
+                  <h3 className="font-medium">{t('contact_information')}</h3>
+                  <p>
+                    {t('name')}: {form.getValues('name') || 'N/A'}
+                  </p>
+                  <p>
+                    {t('email')}: {form.getValues('email') || 'N/A'}
+                  </p>
+                  <p>
+                    {t('telephone')}: {form.getValues('telephone') || 'N/A'}
+                  </p>
+                  <p>
+                    {t('address')}: {form.getValues('address').formatted || 'N/A'}
+                  </p>
                 </div>
 
                 <div className="mt-4">
@@ -373,7 +593,7 @@ export const CheckoutPage = () => {
                     readOnly={true}
                     cart={cart}
                     onUpdateItem={onUpdateItem}
-                    setCart={() => { }}
+                    setCart={() => {}}
                   />
                 </div>
               </div>
@@ -387,8 +607,7 @@ export const CheckoutPage = () => {
               disabled={step === 1}>
               {t('back')}
             </Button>
-            <Button
-              onClick={next}>
+            <Button onClick={next}>
               {step === maxSteps - 1 ? t('review') : step === maxSteps ? t('done') : t('next')}
             </Button>
           </div>
@@ -397,3 +616,8 @@ export const CheckoutPage = () => {
     </div>
   );
 };
+
+// TODO: Do not create new order when updated in GUI
+
+// TODO: Verify if fields are optional
+// TODO: Remove email if not supported

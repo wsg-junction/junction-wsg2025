@@ -8,6 +8,7 @@ import { Search } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import type { CartItem } from '../customer-shopping';
 import { ProductCard } from './ProductCard/ProductCard';
+import { useLocalStorage } from '@/hooks/use-local-storage';
 
 export function SearchForAlternativeProductDialog() {
   const [isLoading, setIsLoading] = useState(true);
@@ -23,14 +24,7 @@ export function SearchForAlternativeProductDialog() {
     search('');
   }, []);
 
-  const [cart, setCart] = useState(() => {
-    const stored = localStorage.getItem('cart');
-    return stored ? (JSON.parse(stored) as CartItem[]) : [];
-  });
-
-  useEffect(() => {
-    localStorage.setItem('cart', JSON.stringify(cart));
-  }, [cart]);
+  const [cart, setCart] = useLocalStorage<CartItem[]>('cart', []);
 
   const onUpdateItem = (product: Product, quantity: number) => {
     if (quantity <= 0) {

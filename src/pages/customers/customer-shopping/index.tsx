@@ -1,5 +1,3 @@
-import { useTranslation } from 'react-i18next';
-import { Header } from '@/pages/customers/components/Header/Header.tsx';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -8,19 +6,25 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb.tsx';
-import { ProductCard } from '@/pages/customers/components/ProductCard/ProductCard.tsx';
-import { useEffect, useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button.tsx';
-import { ShoppingCart, Trash2 } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover.tsx';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select.tsx';
-import { useNavigate } from 'react-router';
-import { productService, type Product } from '@/services/ProductService';
+import { useLocalStorage } from '@/hooks/use-local-storage';
 import { useProductName } from '@/hooks/use-product-name.ts';
+import { formatPrice } from '@/lib/utils';
 import type { Warning } from '@/pages/aimo/warnings';
+import { Header } from '@/pages/customers/components/Header/Header.tsx';
+import { ProductCard } from '@/pages/customers/components/ProductCard/ProductCard.tsx';
+import { useTour } from '@/pages/tour/TourController.tsx';
+import { productService, type Product } from '@/services/ProductService';
+import { ShoppingCart, Trash2 } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router';
 
 export default function CustomerShoppingPage() {
   const { t } = useTranslation();
+  const { fulfillStep } = useTour();
 
   const [page, setPage] = useState(0);
   const [products, setProducts] = useState<Product[]>([]);
@@ -28,14 +32,7 @@ export default function CustomerShoppingPage() {
   const [isLoading, setIsLoading] = useState(false); // for initial load and page load
   const [totalProducts, setTotalProducts] = useState(0);
 
-  const [cart, setCart] = useState(() => {
-    const stored = localStorage.getItem('cart');
-    return stored ? (JSON.parse(stored) as CartItem[]) : [];
-  });
-
-  useEffect(() => {
-    localStorage.setItem('cart', JSON.stringify(cart));
-  }, [cart]);
+  const [cart, setCart] = useLocalStorage<CartItem[]>('cart', []);
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -104,7 +101,9 @@ export default function CustomerShoppingPage() {
         <div className="p-8 text-center">{t('loading_products')}</div>
       ) : (
         <>
-          <div className="px-8 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-6">
+          <div
+            className="px-8 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-6"
+            data-tour-id="select_products">
             {products.map((product) => {
               return (
                 <ProductCard
@@ -136,6 +135,10 @@ export default function CustomerShoppingPage() {
           className="fixed bottom-3 right-3"
           asChild>
           <Button
+            onClick={() => {
+              fulfillStep('customer_shop_select_products');
+            }}
+            data-tour-id="cart_button"
             className="h-[50px] w-[50px] rounded-full flex justify-center items-center"
             variant="default"
             size="lg">
@@ -179,6 +182,7 @@ export const ShoppingCartList = ({
   setCart,
 }: ShoppingCartProps) => {
   const { t, i18n } = useTranslation();
+  const { fulfillStep } = useTour();
   const getTranslatedProductName = useProductName(i18n);
   const navigate = useNavigate();
   const updateQuantity = (product: Product, quantity: number) => {
@@ -192,9 +196,6 @@ export const ShoppingCartList = ({
   return (
     <div className={'space-y-4 mt-2'}>
       {cart.map((item, index) => {
-        const { price } = item;
-        const formattedPrice = price ? price.toFixed(2) : '0.00';
-
         return (
           <div
             key={index}
@@ -203,8 +204,9 @@ export const ShoppingCartList = ({
               <p className="font-medium line-clamp-2 overflow-hidden text-ellipsis me-2">
                 {getTranslatedProductName(item)}
               </p>
-              <p className="text-sm text-muted-foreground">
-                {formattedPrice}€<span className="text-sm text-muted-foreground font-light"> / pcs</span>
+              <p className="text-sm text-muted-foreground tabular-nums">
+                {formatPrice(item.price)}
+                <span className="text-sm text-muted-foreground font-light"> / pcs</span>
               </p>
               {item.warnings.length > 0 && (
                 <div className="mt-1 space-y-1">
@@ -243,11 +245,11 @@ export const ShoppingCartList = ({
               </div>
             ) : (
               <div>
-                <p className="font-medium">Qty: {item.quantity}</p>
+                <p className="font-medium tabular-nums">Qty: {item.quantity}</p>
               </div>
             )}
 
-            <p className="w-20 text-right font-medium">{totalPrice(item).toFixed(2)}€</p>
+            <p className="w-20 text-right font-medium tabular-nums">{formatPrice(totalPrice(item))}</p>
 
             {!readOnly && (
               <Button
@@ -267,6 +269,7 @@ export const ShoppingCartList = ({
             <div className={'flex flex-row gap-2'}>
               <Button
                 onClick={() => {
+                  fulfillStep('customer_shop_checkout');
                   navigate('/customer/checkout');
                 }}
                 disabled={cart.length === 0}>
@@ -286,12 +289,7 @@ export const ShoppingCartList = ({
         <div className={'flex justify-end items-center gap-2 '}>
           <span>{t('total')}: </span>
           <span className="font-bold text-lg">
-            {cart
-              .reduce((a, b) => {
-                return a + totalPrice(b);
-              }, 0)
-              .toFixed(2)}
-            €
+            {formatPrice(cart.reduce((a, b) => a + totalPrice(b), 0))}
           </span>
         </div>
       </div>

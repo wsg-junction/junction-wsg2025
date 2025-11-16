@@ -23,6 +23,7 @@
           with pkgs;
           mkShell {
             buildInputs = [
+              firebase-tools
               nodejs
             ];
           };

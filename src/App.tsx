@@ -1,14 +1,15 @@
 import { APIProvider } from '@vis.gl/react-google-maps';
 import { Outlet } from 'react-router';
+import { useEffect, useState } from 'react';
+import TourController from '@/pages/tour/TourController.tsx';
 
 export default function App() {
-
-    return (
-        <APIProvider apiKey={'AIzaSyAfKvZy0XgyZgdCXnFbQO-3pX_gpWdbGu4'}>
-            <Outlet />
-        </APIProvider>
-    );
-    /*
+  return (
+    <APIProvider apiKey={'AIzaSyAfKvZy0XgyZgdCXnFbQO-3pX_gpWdbGu4'}>
+      <TourController />
+    </APIProvider>
+  );
+  /*
       return (
           <SidebarProvider>
               <AppSidebar />

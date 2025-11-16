@@ -5,13 +5,16 @@ import { InfoIcon, ShoppingCart, WarehouseIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button.tsx';
 import { Link, useNavigate } from 'react-router';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert.tsx';
+import { useTour } from '@/pages/tour/TourController.tsx';
 
 export default function DashboardPage() {
   const { t } = useTranslation();
-  const navigate = useNavigate();
+  const { fulfillStep } = useTour();
   const onStartTour = () => {
-    navigate('/tour');
+    localStorage.setItem('tourStep', '0');
+    window.location.reload();
   };
+
   return (
     <div>
       <Header />
@@ -35,7 +38,7 @@ export default function DashboardPage() {
           className={'mt-2'}>
           Start Tour
         </Button>
-        <Alert className="border-blue-200 bg-blue-50 text-blue-800 dark:border-blue-800 dark:bg-yellow-950/30 dark:blue [&>svg]:text-blue-600 dark:[&>svg]:text-blue-400">
+        <Alert className="border-blue-200 bg-blue-50 text-blue-800 dark:border-blue-800 dark:bg-blue-950/30 dark:text-blue-200 [&>svg]:text-blue-600 dark:[&>svg]:text-blue-400">
           <InfoIcon />
           <AlertTitle>We suggest using the Tour!</AlertTitle>
           <AlertDescription className="text-blue-700 dark:text-blue-300">
@@ -60,8 +63,11 @@ export default function DashboardPage() {
           <CardFooter>
             <Button
               asChild
+              onClick={() => {
+                fulfillStep('select_customer_app');
+              }}
               variant={'link'}>
-              <Link to="/aimo">Go to Warehouse Application</Link>
+              <Link to="/customer">Go to Customer Application</Link>
             </Button>
           </CardFooter>
         </Card>{' '}
@@ -82,8 +88,11 @@ export default function DashboardPage() {
           <CardFooter>
             <Button
               asChild
+              onClick={() => {
+                fulfillStep('select_warehouse_app');
+              }}
               variant={'link'}>
-              <Link to="/customer">Go to Customer Application</Link>
+              <Link to="/aimo">Go to Warehouse Application</Link>
             </Button>
           </CardFooter>
         </Card>
