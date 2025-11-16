@@ -96,7 +96,7 @@ export const CheckoutCompletionPage = ({ orderId }: CheckoutCompletionPageProps)
               <Button
                 asChild
                 variant={'default'}>
-                <Link to="/customer">{t('continue_shopping')}</Link>
+                <Link to="/customer/browse">{t('continue_shopping')}</Link>
               </Button>
               <Button
                 asChild

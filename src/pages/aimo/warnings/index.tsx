@@ -42,7 +42,7 @@ function BuildWarning({ orders, warnings }: { orders: Order[]; warnings: Warning
       return (
         <div
           key={order.id}
-          className="p-4 border rounded-lg bg-white shadow-sm">
+          className="p-4 border rounded-lg shadow-sm">
           <div className="text-xl font-bold mb-2">Order: {order.id}</div>
 
           {order.products
@@ -50,7 +50,7 @@ function BuildWarning({ orders, warnings }: { orders: Order[]; warnings: Warning
             .map((item) => {
               const warnings = orderWarnings.filter((it) => it.itemId === item.id);
               return (
-                <div className="mb-3 pl-4">
+                <div className="mb-3 pl-4 border-yellow-200 bg-yellow-50 text-yellow-800 dark:border-yellow-800 dark:bg-yellow-950/30 dark:text-yellow-200 [&>svg]:text-yellow-600 dark:[&>svg]:text-yellow-400">
                   <div className="text-lg font-semibold mb-1">
                     {t('product')}: {getTranslatedProductName(item)}
                   </div>
@@ -58,7 +58,7 @@ function BuildWarning({ orders, warnings }: { orders: Order[]; warnings: Warning
                     {warnings.map((w, idx) => (
                       <div
                         key={idx}
-                        className="p-3 border border-yellow-400 bg-yellow-100 rounded">
+                        className="p-3 border text-yellow-700 dark:text-yellow-300 border-yellow-400 bg-yellow-100 rounded">
                         <div className="text-md font-bold">{w.title}</div>
                         <div>{w.description}</div>
                       </div>

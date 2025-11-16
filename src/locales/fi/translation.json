@@ -63,12 +63,12 @@
   "shopping_cart": "Shopping Cart",
   "back": "Back",
   "next": "Next",
-  "done": "Done",
+  "done": "Tee tilaus",
   "review": "Review",
   "name": "Name",
   "email": "Email",
-  "telephone": "Telephone",
-  "telephone_placeholder": "Telephone (optionak)",
+  "telephone": "Puhelinnumero – tarpeen keskusteluihin Kevin kanssa",
+  "telephone_placeholder": "Puhelinnumero (optionak)",
   "order_summary": "Order Summary",
   "contact_information": "Yhteystiedot",
   "review_and_confirm": "Review & Confirm",
@@ -80,6 +80,6 @@
   "receive_notifications": "Receive push notifications",
   "automatic_contact": "Kevin voi ottaa sinuun yhteyttä automaattisesti vain, jos annat yhteystiedot!",
   "add_information": "Demo Info: Please add Information",
-  "your_cart": "Your cart",
+  "your_cart": "Ostoskori",
   "step": "Step"
 }
