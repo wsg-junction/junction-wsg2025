@@ -627,3 +627,8 @@ export const CheckoutPage = () => {
     </div>
   );
 };
+
+// TODO: Do not create new order when updated in GUI
+
+// TODO: Verify if fields are optional
+// TODO: Remove email if not supported

@@ -2,6 +2,7 @@ import { GoogleGenAI } from '@google/genai';
 import { getFirestore } from 'firebase-admin/firestore';
 import { onRequest } from 'firebase-functions/https';
 import { defineString } from 'firebase-functions/params';
+import { productService } from './replacements';
 
 // Define some parameters
 
@@ -9,13 +10,36 @@ async function handleUpdateOrder(args: {
   order_id: string;
   unavailable_product: string;
   replacement_product: string;
+  quantity: number;
 }) {
   // Example only — replace with your real logic
-  const { order_id, unavailable_product, replacement_product } = args;
-  [order_id, unavailable_product, replacement_product].at(0);
+  try {
+    const { order_id, unavailable_product, replacement_product, quantity } = args;
 
-  // TODO: Perform DB update here
-  return `Order ${order_id} updated. Replaced ${unavailable_product} with ${replacement_product}.`;
+    const db = getFirestore();
+    const orderRef = db.collection('orders').doc(order_id);
+    const orderSnap = await orderRef.get();
+    if (!orderSnap.exists) {
+      throw Error(`Order ${order_id} not found`);
+    }
+    const order = orderSnap.data();
+    const newProducts = order.products.filter((p) => p.id !== unavailable_product);
+    const newProd = productService.getProductById(replacement_product);
+    if (!newProd) {
+      throw Error(`Product ${replacement_product} not found`);
+    }
+    newProducts.push({
+      ...newProd,
+      orderedQuantity: quantity,
+      pickEvent: null,
+    });
+    await orderRef.update({
+      products: newProducts,
+    });
+    return `Order ${order_id} updated. Replaced ${unavailable_product} with ${replacement_product}.`;
+  } catch {
+    return 'Error updating order.';
+  }
 }
 
 const GOOGLE_MAPS_KEY = defineString('GOOGLE_MAPS_KEY');

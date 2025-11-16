@@ -3,6 +3,7 @@ import { getFirestore } from 'firebase-admin/firestore';
 import { onRequest } from 'firebase-functions/https';
 import { defineString } from 'firebase-functions/params';
 import { z } from 'zod';
+import { productCategoryService } from './replacements';
 
 // Define some parameters
 const VAPI_API_KEY = defineString('VAPI_API_KEY');
@@ -50,23 +51,39 @@ export const callFunction: Parameters<typeof onRequest>[0] = async (req, res) =>
       id: string;
       products: Array<{
         id: string;
-        name: string;
+        names: Array<{
+          value: string;
+          language: string;
+        }>;
         orderedQuantity: number;
         pickEvent?: { quantity: number };
       }>;
     };
 
     const missing_items = order.products
-      .map(({ id, name, orderedQuantity, pickEvent }) => {
+      .map(({ id, names, orderedQuantity, pickEvent }) => {
         const picked = pickEvent?.quantity ?? 0;
         const missing = orderedQuantity - picked;
 
         return missing > 0
-          ? { id, name, orderedQuantity, pickedQuantity: picked, missingQuantity: missing }
+          ? {
+              id,
+              name: names?.find((t) => t.language === 'en')?.value || names?.[0]?.value || '',
+              orderedQuantity,
+              pickedQuantity: picked,
+              missingQuantity: missing,
+            }
           : null;
       })
       .filter((item): item is NonNullable<typeof item> => item !== null)
-      .map((item) => ({ id: item.id, name: item.name, replacements: [] })); // TODO: Replacements
+      .map((item) => ({
+        id: item.id,
+        name: item.name,
+        replacements: productCategoryService.findSimilarProductsById(item.id, 2).map((p) => ({
+          id: p.id,
+          name: p.names?.find((t) => t.language === 'en')?.value || p.names?.[0]?.value || '',
+        })),
+      }));
 
     await vapi.calls.create({
       assistantId: '5b2b2220-7f9a-4e57-a03e-cc7d1826a392',
