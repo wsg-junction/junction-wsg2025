@@ -96,6 +96,7 @@
   "review": "Review",
   "name": "Name",
   "telephone": "Telephone",
+  "telephone_placeholder": "Telephone (optional)",
   "address": "Address",
   "contact_information": "Contact Information",
   "review_and_confirm": "Review & Confirm",

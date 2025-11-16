@@ -396,7 +396,7 @@ export const CheckoutPage = () => {
                       });
                     },
                   })}
-                  placeholder={t('telephone')}
+                  placeholder={t('telephone_placeholder')}
                   type="tel"
                   className="mb-1"
                 />
