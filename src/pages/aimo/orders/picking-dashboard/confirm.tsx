@@ -7,6 +7,14 @@ import { useLocation, useNavigate } from 'react-router';
 import type { Order } from '.';
 import { Header } from '../../components/Header';
 import { useTranslation } from 'react-i18next';
+import {
+  Breadcrumb,
+  BreadcrumbList,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbSeparator,
+  BreadcrumbPage,
+} from '@/components/ui/breadcrumb';
 
 export default function AimoPickingDashboardConfirmPage() {
   const { t } = useTranslation();
@@ -81,20 +89,49 @@ export default function AimoPickingDashboardConfirmPage() {
   return (
     <div>
       <Header />
-      <div className="flex flex-col gap-4 p-4">
-        <p>{t('aimo_picking_dashboard_confirm.description')}</p>
-        {Object.values(order.products).map((product) => (
-          <div className="p-4 flex flex-row border rounded-lg">
-            <h3 className="flex flex-2">{getTranslatedProductName(product)}</h3>
-            <p className="flex flex-1">Ordered Quantity: {product.orderedQuantity}</p>
-            <p className="flex flex-1">Picked Quantity: {product.pickEvent?.quantity ?? 0}</p>
-          </div>
-        ))}
-        <Button
-          onClick={confirm}
-          className="w-64 self-end">
-          Confirm and notify client
-        </Button>
+      <div className="hero-container p-4">
+        <Breadcrumb>
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink href="/aimo">{t('warehouse_application')}</BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbLink href="/aimo/orders">{t('warehouse_orders')}</BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbLink href={`/aimo/orders/${order.id}/picking-dashboard`}>
+                {t('warehouse_order_picking')}
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage>{t('warehouse_order_picking_confirmation_short')}</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+        <div className="hero mt-4">
+          <h1 className={'text-lg font-bold'}>{t('warehouse_order_picking_confirmation')}</h1>
+          <h3 className={'text-gray-800 dark:text-gray-400'}>
+            {t('warehouse_order_picking_confirmation_subtitle')}
+          </h3>
+        </div>
+
+        <div className="flex flex-col gap-4 mt-6">
+          {Object.values(order.products).map((product) => (
+            <div className="p-4 flex flex-row border rounded-lg">
+              <h3 className="flex flex-2">{getTranslatedProductName(product)}</h3>
+              <p className="flex flex-1">Ordered Quantity: {product.orderedQuantity}</p>
+              <p className="flex flex-1">Picked Quantity: {product.pickEvent?.quantity ?? 0}</p>
+            </div>
+          ))}
+          <Button
+            onClick={confirm}
+            className="w-64 self-end">
+            Confirm and notify client
+          </Button>
+        </div>
       </div>
     </div>
   );
