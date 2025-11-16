@@ -7,12 +7,15 @@ import { t } from 'i18next';
 import { Search } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { ProductCard } from './ProductCard/ProductCard';
+import { productCategoryService } from '@/services/ProductCategoryService';
 
 export function SearchForAlternativeProductDialog({
+  productId,
   onUpdateItem,
   getCurrentQuantity,
   onSelect,
 }: {
+  productId: string;
   onUpdateItem?: (product: Product, quantity: number) => void;
   getCurrentQuantity?: (productId: string) => number;
   onSelect?: (productId: string) => void;
@@ -21,7 +24,16 @@ export function SearchForAlternativeProductDialog({
   const [products, setProducts] = useState<Product[]>([]);
   const search = useDebouncedCallback(
     async (searchTerm: string) => {
-      setProducts(await productService.searchProducts(searchTerm));
+      const newProducts = searchTerm.length
+        ? await productService.searchProducts(searchTerm)
+        : await Promise.all([
+            productCategoryService.findSimilarProductsById(productId, 20),
+            productService.searchProducts(searchTerm),
+          ]).then(([byCategory, bySearch]) => [
+            ...byCategory,
+            ...bySearch.filter((p) => !byCategory.find((bc) => bc.id === p.id)),
+          ]);
+      setProducts(newProducts.filter((it) => it.id !== productId));
       setIsLoading(false);
     },
     { wait: 10 },

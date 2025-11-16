@@ -586,6 +586,7 @@ function SelectFallbackDialog({
           </DialogTitle>
         </DialogHeader>
         <SearchForAlternativeProductDialog
+          productId={productId}
           onSelect={(fallbackId) => {
             setFallback(fallbackId);
             ref.current?.click();
